@@ -1,0 +1,128 @@
+/* ============================================================
+   Quotient — Editorial Finance
+   Warm paper base, deep-ledger green accent, SF Pro type.
+   No gradients. No rounded-left-border containers.
+   ============================================================ */
+
+@import url('./colors_and_type.css');
+
+/* Overrides: tune the template toward an editorial finance palette */
+:root {
+  /* Keep warm paper base from template */
+  --surface:        #FAF9F5;
+  --surface-raised: #FFFFFE;   /* crisper raised for data-heavy tiles */
+  --surface-sunken: #F0EDE4;
+  --surface-deep:   #E8E4D7;
+
+  --border-subtle:  #E5E1D5;
+  --border-default: #D3CEBE;
+  --border-strong:  #B6B0A0;
+
+  --ink:            #17160F;     /* warmer, near-black */
+  --ink-secondary:  #4A4840;
+  --ink-tertiary:   #85816F;
+  --ink-quaternary: #B8B4A3;
+
+  /* Editorial finance accent: deep ledger green */
+  --accent:         #1F4D3F;
+  --accent-hover:   #163C30;
+  --accent-fg:      #FAF9F5;
+  --accent-tint:    #DFE6E0;
+
+  /* Gain/Loss: restrained, not signal lights */
+  --gain:           #2D6A4E;
+  --gain-tint:      #DDE8DF;
+  --loss:           #8A3D34;
+  --loss-tint:      #EDDAD4;
+  --warn:           #8C6A1E;
+  --warn-tint:      #EDE2CA;
+
+  /* 7-color scenario palette (same L+C, varied hue) */
+  --s1: #1F4D3F; /* green */
+  --s2: #264B6A; /* blue */
+  --s3: #6A3F5A; /* wine */
+  --s4: #73522A; /* umber */
+
+  /* Chart gridlines are almost absent */
+  --grid: #ECE8DC;
+
+  /* Type — prefer SF Pro (system) for the iOS feel */
+  --font-sans:  -apple-system, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-display: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-mono:  'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+  --font-serif: 'Source Serif 4', 'Charter', 'Iowan Old Style', Georgia, serif;
+
+  /* Density (toggleable) */
+  --density: 1;
+}
+
+[data-density='compact'] { --density: 0.82; }
+
+[data-theme='dark'] {
+  --surface:        #17160F;
+  --surface-raised: #1E1D15;
+  --surface-sunken: #121109;
+  --surface-deep:   #0B0A04;
+  --border-subtle:  #2A281F;
+  --border-default: #3C3A30;
+  --border-strong:  #55524A;
+  --ink:            #F2EFE2;
+  --ink-secondary:  #B4B0A0;
+  --ink-tertiary:   #7C7869;
+  --ink-quaternary: #55524A;
+  --accent:         #4F9E7D;
+  --accent-hover:   #66AE90;
+  --accent-fg:      #0B0A04;
+  --accent-tint:    #22322C;
+  --gain:           #6FB28D;
+  --gain-tint:      #1E2D24;
+  --loss:           #C47566;
+  --loss-tint:      #322420;
+  --warn:           #D6A758;
+  --warn-tint:      #2E2619;
+  --grid:           #26241C;
+  --s1:#4F9E7D; --s2:#6A8FB5; --s3:#B07D98; --s4:#BC976B;
+}
+
+/* Reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utilities */
+.mono, .tnum { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum','ss01'; }
+.hr { height: 1px; background: var(--border-subtle); border: 0; }
+.hr-strong { height: 1px; background: var(--border-default); border: 0; }
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+.serif { font-family: var(--font-serif); font-weight: 400; }
+.num-large {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* Design-canvas container override: keep the warm paper, no grid dots */
+.design-canvas {
+  background: #E9E4D6 !important;
+}
+
+/* iOS screen scaffolding inside each device frame */
+.ios-scroll { height: 100%; overflow: auto; }
+.ios-scroll::-webkit-scrollbar { display: none; }
+
+/* Common bits re-used in mocks */
+.row { display: flex; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.between { justify-content: space-between; }

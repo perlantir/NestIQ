@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-density="comfortable">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1600">
+  <title>Quotient — Super Mortgage Calculator</title>
+  <link rel="stylesheet" href="tokens/app.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body, #root { margin: 0; padding: 0; background: #E9E4D6; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="frames/ios-frame.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="frames/design-canvas.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Home.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Inputs.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Amortization.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Refinance.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Income.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/TCA.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Heloc.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Saved.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/BorrowerPicker.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Share.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Settings.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Onboarding.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/PDF.jsx" data-plugins="transform-react-jsx-source"></script>
+<script type="text/babel" src="screens/Foundations.jsx" data-plugins="transform-react-jsx-source"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "density": "comfortable",
+  "accent": "ledger"
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  ledger: { light: '#1F4D3F', dark: '#4F9E7D', tint: '#DFE6E0' },
+  ink:    { light: '#17160F', dark: '#F2EFE2', tint: '#E5E1D5' },
+  bronze: { light: '#73522A', dark: '#BC976B', tint: '#EDE2CA' },
+};
+
+function Phone({ dark = false, children, label, width = 390, height = 844 }) {
+  return (
+    <DCArtboard label={label} width={width} height={height} style={{ borderRadius: 48, background: dark ? '#000' : '#F2F2F7', boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: 48 }}>
+        <div style={{ position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)', width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}><IOSStatusBar dark={dark}/></div>
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>{children}</div>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60, height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', paddingBottom: 8, pointerEvents: 'none' }}>
+          <div style={{ width: 139, height: 5, borderRadius: 100, background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)' }} />
+        </div>
+      </div>
+    </DCArtboard>
+  );
+}
+
+function TweaksPanel({ state, setState }) {
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      if (e.data?.type === '__activate_edit_mode') setOpen(true);
+      if (e.data?.type === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+  if (!open) return null;
+  const persist = (patch) => {
+    const next = { ...state, ...patch };
+    setState(next);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: patch }, '*');
+  };
+  return (
+    <div style={{ position: 'fixed', right: 20, bottom: 20, width: 260, zIndex: 10000, background: '#FFFFFE', border: '1px solid #D3CEBE', borderRadius: 12, boxShadow: '0 14px 40px rgba(0,0,0,0.18)', padding: 14, fontFamily: 'var(--font-sans)', color: '#17160F' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#85816F' }}>Tweaks</div>
+        <div onClick={() => setOpen(false)} style={{ cursor: 'pointer', color: '#85816F', fontSize: 16 }}>×</div>
+      </div>
+      {[
+        { k: 'theme', options: ['light','dark','split'] },
+        { k: 'density', options: ['comfortable','compact'] },
+      ].map(({k, options}) => (
+        <div key={k} style={{ padding: '8px 0', borderTop: '1px solid #E5E1D5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: 12, textTransform: 'capitalize' }}>{k}</div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {options.map(t => (
+              <div key={t} onClick={() => persist({ [k]: t })} style={{ padding: '3px 9px', fontSize: 11, fontFamily: 'var(--font-mono)', background: state[k] === t ? '#1F4D3F' : '#F0EDE4', color: state[k] === t ? '#FAF9F5' : '#4A4840', border: '1px solid ' + (state[k] === t ? '#1F4D3F' : '#E5E1D5'), borderRadius: 5, cursor: 'pointer' }}>{t}</div>
+            ))}
+          </div>
+        </div>
+      ))}
+      <div style={{ padding: '8px 0', borderTop: '1px solid #E5E1D5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 12 }}>Accent</div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Object.keys(ACCENTS).map(a => (
+            <div key={a} onClick={() => persist({ accent: a })} style={{ width: 22, height: 22, borderRadius: 4, cursor: 'pointer', background: ACCENTS[a].light, boxShadow: state.accent === a ? '0 0 0 2px #17160F' : 'none' }}/>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [state, setState] = React.useState(TWEAKS);
+  React.useEffect(() => {
+    const a = ACCENTS[state.accent] || ACCENTS.ledger;
+    document.documentElement.style.setProperty('--accent', a.light);
+    document.documentElement.style.setProperty('--accent-tint', a.tint);
+    document.documentElement.setAttribute('data-density', state.density);
+  }, [state]);
+  const theme = state.theme === 'dark' ? { dark: true } : { dark: false };
+
+  return (
+    <>
+      <DesignCanvas>
+        <div style={{ padding: '0 60px 48px', maxWidth: 1200 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(40,30,20,0.55)' }}>Super Mortgage Calculator · full flow</div>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 56, fontWeight: 400, letterSpacing: '-0.02em', marginTop: 8, color: 'rgba(30,25,15,0.9)', lineHeight: 1.05 }}>Quotient</div>
+          <div style={{ fontSize: 15, color: 'rgba(40,30,20,0.7)', marginTop: 10, maxWidth: 680, lineHeight: 1.5 }}>
+            iOS mortgage calculator for loan officers. Editorial finance aesthetic. All 5 calculators + supporting screens + onboarding tour.
+          </div>
+        </div>
+
+        <DCSection title="Onboarding · 6-step tour" subtitle="Welcome → 5 calculators. Typographic demo per step, no illustration.">
+          {[0,1,2,3,4,5].map(i => <Phone key={i} label={`Step ${i+1}/6`} {...theme}><OnboardingStep step={i} dark={theme.dark}/></Phone>)}
+        </DCSection>
+
+        <DCSection title="Home · Saved · Settings" subtitle="Tab destinations. Editorial list metaphor throughout.">
+          <Phone label="Home · picker" {...theme}><HomeScreen dark={theme.dark}/></Phone>
+          <Phone label="Saved · scenarios" {...theme}><SavedScreen dark={theme.dark}/></Phone>
+          <Phone label="Settings" {...theme}><SettingsScreen dark={theme.dark}/></Phone>
+          <Phone label="Borrower picker · sheet" {...theme}><BorrowerPickerScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="01 · Amortization" subtitle="Inputs → results. Schedule, PITI composition, balance curve.">
+          <Phone label="Inputs" {...theme}><InputsScreen dark={theme.dark}/></Phone>
+          <Phone label="Results" {...theme}><AmortizationScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="02 · Income qualification" subtitle="Max loan, DTI dials against agency limits, qualifying income + debts.">
+          <Phone label="Income qual" {...theme}><IncomeScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="03 · Refinance comparison" subtitle="Break-even, NPV, side-by-side.">
+          <Phone label="Refi compare" {...theme}><RefinanceScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="04 · Total cost analysis" subtitle="2–4 scenarios × 5/7/10/15/30-yr horizons. Winner per row.">
+          <Phone label="TCA" {...theme}><TCAScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="05 · HELOC vs refinance" subtitle="Blended rate math + stress paths.">
+          <Phone label="HELOC vs refi" {...theme}><HelocScreen dark={theme.dark}/></Phone>
+        </DCSection>
+
+        <DCSection title="Share · PDF preview" subtitle="Paged carousel — cover / schedule / disclaimers. Recipient row up top, share actions dock at bottom.">
+          <Phone label="Share preview" {...theme}><ShareScreen dark={theme.dark}/></Phone>
+          <DCArtboard label="Actual PDF · page 1 · 8.5×11" width={816} height={1056}>
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}><PDFPreview/></div>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection title="Foundations · tokens" subtitle="Palette, type, components, principles.">
+          <DCArtboard label="Design system sheet" width={960} height={1120}><Foundations/></DCArtboard>
+        </DCSection>
+
+        <div style={{ height: 60 }}/>
+      </DesignCanvas>
+      <TweaksPanel state={state} setState={setState}/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

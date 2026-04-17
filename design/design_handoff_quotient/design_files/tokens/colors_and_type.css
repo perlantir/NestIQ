@@ -1,0 +1,193 @@
+/* ============================================================
+   Open Hipp0 — Colors & Type
+   Single source of truth for design tokens. Mirrored in
+   tailwind.config via var(--token) and into mobile via
+   packages/mobile/src/theme.
+
+   Principles: warm, quiet, literary.
+   Never pure white in light, never pure black in dark.
+   ============================================================ */
+
+/* ---- FONTS (self-hosted via @fontsource-* in prod; Google in prototypes) ---- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ---- LIGHT (default) ---- */
+:root {
+  /* Surfaces — warm paper, never pure white */
+  --surface:        #FAF9F5;
+  --surface-raised: #F5F3EC;
+  --surface-sunken: #EEEBE2;
+
+  /* Borders — barely visible, division by texture not line */
+  --border-subtle:  #E5E1D5;
+  --border-strong:  #C8C3B3;
+
+  /* Ink — warm near-black, never pure black */
+  --ink:            #1A1915;
+  --ink-secondary:  #55524A;
+  --ink-tertiary:   #8A8677;
+
+  /* Accent — Claude burnt-orange, used sparingly */
+  --accent:         #CC6B3B;
+  --accent-hover:   #B55C30;
+  --accent-fg:      #FAF9F5;
+  --accent-tint:    #F5E4D8;
+
+  /* Semantic — desaturated, paper-compatible */
+  --success:        #5B7A4F;
+  --warning:        #B8893B;
+  --danger:         #9C4A3F;
+  --info:           #4A6A7A;
+
+  /* Scrim for dialogs */
+  --scrim:          rgba(26, 25, 21, 0.35);
+
+  /* Shadows — effectively absent; only floating uses this */
+  --shadow-floating: 0 4px 20px rgba(26, 25, 21, 0.08);
+
+  /* --- TYPE FAMILIES --- */
+  --font-serif: 'Source Serif 4', Charter, 'Iowan Old Style', Georgia, serif;
+  --font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* --- TYPE SCALE (modular, not linear) --- */
+  --text-display:  48px; --lh-display: 56px; --ls-display: -0.02em;
+  --text-h1:       32px; --lh-h1:      40px; --ls-h1:      -0.01em;
+  --text-h2:       24px; --lh-h2:      32px; --ls-h2:      -0.01em;
+  --text-h3:       18px; --lh-h3:      28px; --ls-h3:       0;
+  --text-body-lg:  16px; --lh-body-lg: 26px;
+  --text-body:     15px; --lh-body:    24px;
+  --text-body-sm:  13px; --lh-body-sm: 20px;
+  --text-caption:  12px; --lh-caption: 18px; --ls-caption:  0.01em;
+  --text-code:     14px; --lh-code:    22px;
+
+  /* --- SPACING (4px grid) --- */
+  --space-0: 0;
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+
+  /* --- RADIUS --- */
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* --- MOTION --- */
+  --duration-fast: 120ms;
+  --duration:      180ms;
+  --duration-slow: 260ms;
+  --ease-out:      cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- DARK (warm near-black, not cool slate) ---- */
+[data-theme='dark'] {
+  --surface:        #1C1B18;
+  --surface-raised: #26241F;
+  --surface-sunken: #141310;
+  --border-subtle:  #2F2D27;
+  --border-strong:  #4A4740;
+  --ink:            #EDEAE0;
+  --ink-secondary:  #AAA59A;
+  --ink-tertiary:   #78746A;
+  --accent:         #E08A5F;
+  --accent-hover:   #D07A4F;
+  --accent-fg:      #1C1B18;
+  --accent-tint:    #3A2D22;
+  --success:        #7A9A6E;
+  --warning:        #D6A758;
+  --danger:         #C06A5F;
+  --info:           #6A8AA0;
+  --scrim:          rgba(0, 0, 0, 0.5);
+  --shadow-floating: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   SEMANTIC TYPE CLASSES
+   Use these rather than arbitrary font sizes. Serif for
+   "named moments" (dialog titles, empty states), sans for
+   everything functional.
+   ============================================================ */
+
+.t-display {
+  font-family: var(--font-serif);
+  font-size: var(--text-display); line-height: var(--lh-display);
+  letter-spacing: var(--ls-display); font-weight: 400;
+  color: var(--ink); text-wrap: balance;
+}
+.t-h1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1); line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1); font-weight: 400;
+  color: var(--ink); text-wrap: balance;
+}
+.t-h2 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h2); line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2); font-weight: 600;
+  color: var(--ink);
+}
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h3); line-height: var(--lh-h3);
+  font-weight: 600; color: var(--ink);
+}
+.t-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg); line-height: var(--lh-body-lg);
+  font-weight: 400; color: var(--ink);
+}
+.t-body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body); line-height: var(--lh-body);
+  font-weight: 400; color: var(--ink);
+}
+.t-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm); line-height: var(--lh-body-sm);
+  font-weight: 400; color: var(--ink);
+}
+.t-caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-caption); line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption); font-weight: 500; color: var(--ink-secondary);
+}
+.t-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-code); line-height: var(--lh-code);
+  font-weight: 400; color: var(--ink);
+  font-variant-ligatures: none;
+}
+.t-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm); line-height: var(--lh-body-sm);
+  font-weight: 500; color: var(--ink-secondary);
+}
+
+/* Prose rules for long-form content */
+.prose {
+  font-family: var(--font-sans);
+  font-size: var(--text-body); line-height: 1.6;
+  color: var(--ink);
+  max-width: 680px;
+  text-wrap: pretty;
+}
+.prose p + p { margin-top: 0.9em; }
+.prose a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: text-decoration var(--duration-fast) var(--ease-out);
+}
+.prose a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface-sunken);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* Numbers: tabular for tables + data */
+.num-tabular { font-variant-numeric: tabular-nums; }
