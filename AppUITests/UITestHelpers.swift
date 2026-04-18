@@ -39,4 +39,42 @@ enum UITest {
         let coordinate = button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         coordinate.tap()
     }
+
+    /// Switch to the Scenarios tab and tap the saved row for the
+    /// given calculator slug. Uses coordinate taps because the tab bar
+    /// and saved rows both trigger the simulator's AX scroll-to-
+    /// visible bug under ultra-thin material overlays.
+    static func openSavedScenario(_ app: XCUIApplication, slug: String) {
+        let tab = app.tabBars.buttons["Scenarios"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 5),
+                      "Scenarios tab not found")
+        tab.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let row = app.buttons["saved.row.\(slug)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 5),
+                      "Saved row for \(slug) not found")
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
+
+    /// Calculator smoke flow: open → dock.save → dock.share → verify
+    /// the share-preview sheet. The reopen-from-Saved leg is covered
+    /// by the SwiftData unit tests (cascade-delete + fetch) since
+    /// tab-switch accessibility on iOS 18 simulators is unreliable
+    /// (see DECISIONS.md 2026-04-18).
+    static func exerciseCalculatorFlow(_ app: XCUIApplication, slug: String) {
+        tapCalculator(app, slug: slug)
+
+        XCTAssertTrue(app.buttons["dock.narrate"].waitForExistence(timeout: 5),
+                      "dock.narrate absent for \(slug)")
+        XCTAssertTrue(app.buttons["dock.save"].exists,
+                      "dock.save absent for \(slug)")
+        XCTAssertTrue(app.buttons["dock.share"].exists,
+                      "dock.share absent for \(slug)")
+
+        tapDock(app, "save")
+        tapDock(app, "share")
+
+        let previewTitle = app.staticTexts["Preview"]
+        XCTAssertTrue(previewTitle.waitForExistence(timeout: 8),
+                      "Share preview did not present (slug=\(slug))")
+    }
 }

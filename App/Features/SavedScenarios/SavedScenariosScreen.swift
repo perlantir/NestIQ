@@ -251,6 +251,7 @@ struct SavedScenariosScreen: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("saved.row.\(scenario.calculatorType.rawValue)")
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 delete(scenario: scenario)

@@ -1,5 +1,5 @@
 // CalculatorHelocTests.swift
-// Session 4.5.4 UI coverage for HELOC vs Refinance.
+// Full calculator flow for HELOC vs Refinance.
 
 import XCTest
 
@@ -10,18 +10,8 @@ final class CalculatorHelocTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testHelocDockFlow() async throws {
+    func testHelocFullFlow() async throws {
         let app = UITest.launchApp()
-        UITest.tapCalculator(app, slug: "helocVsRefinance")
-
-        XCTAssertTrue(app.buttons["dock.narrate"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["dock.save"].exists)
-        XCTAssertTrue(app.buttons["dock.share"].exists)
-
-        UITest.tapDock(app, "save")
-        UITest.tapDock(app, "share")
-        let previewTitle = app.staticTexts["Preview"]
-        XCTAssertTrue(previewTitle.waitForExistence(timeout: 8),
-                      "Share preview did not present after Share tap")
+        UITest.exerciseCalculatorFlow(app, slug: "helocVsRefinance")
     }
 }

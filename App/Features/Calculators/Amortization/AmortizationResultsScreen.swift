@@ -64,9 +64,7 @@ struct AmortizationResultsScreen: View {
                 Eyebrow("01 · Amortization")
             }
         }
-        .overlay(alignment: .bottom) {
-            bottomDock
-        }
+        .safeAreaInset(edge: .bottom) { bottomDock }
         .onAppear {
             if viewModel.schedule == nil { viewModel.compute() }
         }
@@ -267,55 +265,11 @@ struct AmortizationResultsScreen: View {
     // MARK: Bottom dock
 
     private var bottomDock: some View {
-        HStack(spacing: Spacing.s8) {
-            Button { showingNarration = true } label: {
-                Text("Narrate")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { saveScenario() } label: {
-                Text(justSaved ? "Saved" : (existingScenario == nil ? "Save" : "Save"))
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { generatePDFAndShare() } label: {
-                Text("Share as PDF")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
-            .layoutPriority(1)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(
-            Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-            alignment: .top
+        CalculatorDock(
+            saveLabel: justSaved ? "Saved" : "Save",
+            onNarrate: { showingNarration = true },
+            onSave: { saveScenario() },
+            onShare: { generatePDFAndShare() }
         )
     }
 

@@ -99,6 +99,7 @@
 		EFAA088CA11632F5A09EDB6C /* SourceSerif4-SemiboldIt.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */; };
 		F2B37C926E6AC64733EE4355 /* OnboardingCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E217D33EC88DB92CC77AB03 /* OnboardingCopy.swift */; };
 		F2C8E753B9341FA9B2FE95FA /* TogglePill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */; };
+		F4D60EBD3F46067B5F5DC7FA /* CalculatorAmortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */; };
 		F6FA742417C9D80C5C72FBE9 /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19EB3913BF810BA0A9EA1AF /* ComponentGallery.swift */; };
 		F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */; };
 		F9FCEC655B802C0A6CC0F7F6 /* RateRibbonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */; };
@@ -133,6 +134,7 @@
 		0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePill.swift; sourceTree = "<group>"; };
 		099A45DD977D77B495AD52F6 /* MockRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRateService.swift; sourceTree = "<group>"; };
 		0F740E91156398C886E507D3 /* NarrationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationSheet.swift; sourceTree = "<group>"; };
+		1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorAmortTests.swift; sourceTree = "<group>"; };
 		1866228FFAF9C7A0CCC95764 /* AmortizationInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputs.swift; sourceTree = "<group>"; };
 		19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualListViews.swift; sourceTree = "<group>"; };
 		1A6B19F5A21683FA7823B3A6 /* FaceIDUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceIDUnlock.swift; sourceTree = "<group>"; };
@@ -401,6 +403,7 @@
 			isa = PBXGroup;
 			children = (
 				7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */,
+				1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */,
 				A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */,
 				9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */,
 				E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */,
@@ -745,6 +748,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */,
+				F4D60EBD3F46067B5F5DC7FA /* CalculatorAmortTests.swift in Sources */,
 				82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */,
 				C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */,
 				9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */,

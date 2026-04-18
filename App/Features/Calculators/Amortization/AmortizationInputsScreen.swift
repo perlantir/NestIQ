@@ -339,6 +339,7 @@ struct AmortizationInputsScreen: View {
                 viewModel.compute()
                 navigationActive = true
             }
+            .accessibilityIdentifier("amort.compute")
             Text("Results live-update as you adjust inputs.")
                 .textStyle(Typography.body.withSize(11))
                 .foregroundStyle(Palette.inkTertiary)
