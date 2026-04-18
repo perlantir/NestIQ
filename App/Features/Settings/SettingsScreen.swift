@@ -171,19 +171,28 @@ struct SettingsScreen: View {
             .name ?? "Custom"
     }
 
-    private var complianceSection: some View {
+    @ViewBuilder private var complianceSection: some View {
         settingsGroup(header: "Disclaimers · compliance") {
-            SettingsRow(
+            settingsNavRow(
                 label: "Per-state disclosures",
-                trailing: .value("\(profile.licensedStates.count) of \(profile.licensedStates.count)"),
-                onTap: {}
-            )
-            SettingsRow(label: "NMLS display",
-                        trailing: .value(profile.nmlsId.isEmpty ? "—" : profile.nmlsId),
-                        onTap: {})
-            SettingsRow(label: "Equal Housing language",
-                        trailing: .value("English"),
-                        onTap: {})
+                trailing: profile.licensedStates.isEmpty ? "None" : "\(profile.licensedStates.count) states"
+            ) {
+                PerStateDisclosuresPreview(profile: profile)
+            }
+            divider
+            settingsNavRow(
+                label: "NMLS display",
+                trailing: profile.nmlsDisplayFormat.display
+            ) {
+                NMLSDisplayFormatPicker(profile: profile)
+            }
+            divider
+            settingsNavRow(
+                label: "Equal Housing language",
+                trailing: profile.ehoLanguage.display
+            ) {
+                EqualHousingLanguagePicker(profile: profile)
+            }
         }
     }
 
