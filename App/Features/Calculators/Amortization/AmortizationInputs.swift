@@ -16,8 +16,63 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     var annualInsurance: Decimal
     var monthlyHOA: Decimal
     var includePMI: Bool
+    /// User-entered monthly PMI amount. Consulted when `includePMI` is
+    /// true; zeroed out for the PITI calculation when the toggle is off.
+    /// Manual-entry only in Session 5B.3 — Session 5B.5 wires the
+    /// auto-calc + dropoff path.
+    var manualMonthlyPMI: Decimal
     var extraPrincipalMonthly: Decimal
     var biweekly: Bool
+
+    // Legacy decodes (pre-5B.3) won't carry `manualMonthlyPMI`. Default
+    // to zero so prior scenario blobs still decode cleanly.
+    enum CodingKeys: String, CodingKey {
+        case loanAmount, annualRate, termYears, startDate
+        case annualTaxes, annualInsurance, monthlyHOA
+        case includePMI, manualMonthlyPMI
+        case extraPrincipalMonthly, biweekly
+    }
+
+    init(
+        loanAmount: Decimal,
+        annualRate: Double,
+        termYears: Int,
+        startDate: Date,
+        annualTaxes: Decimal,
+        annualInsurance: Decimal,
+        monthlyHOA: Decimal,
+        includePMI: Bool,
+        manualMonthlyPMI: Decimal = 0,
+        extraPrincipalMonthly: Decimal,
+        biweekly: Bool
+    ) {
+        self.loanAmount = loanAmount
+        self.annualRate = annualRate
+        self.termYears = termYears
+        self.startDate = startDate
+        self.annualTaxes = annualTaxes
+        self.annualInsurance = annualInsurance
+        self.monthlyHOA = monthlyHOA
+        self.includePMI = includePMI
+        self.manualMonthlyPMI = manualMonthlyPMI
+        self.extraPrincipalMonthly = extraPrincipalMonthly
+        self.biweekly = biweekly
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.loanAmount = try c.decode(Decimal.self, forKey: .loanAmount)
+        self.annualRate = try c.decode(Double.self, forKey: .annualRate)
+        self.termYears = try c.decode(Int.self, forKey: .termYears)
+        self.startDate = try c.decode(Date.self, forKey: .startDate)
+        self.annualTaxes = try c.decode(Decimal.self, forKey: .annualTaxes)
+        self.annualInsurance = try c.decode(Decimal.self, forKey: .annualInsurance)
+        self.monthlyHOA = try c.decode(Decimal.self, forKey: .monthlyHOA)
+        self.includePMI = try c.decode(Bool.self, forKey: .includePMI)
+        self.manualMonthlyPMI = try c.decodeIfPresent(Decimal.self, forKey: .manualMonthlyPMI) ?? 0
+        self.extraPrincipalMonthly = try c.decode(Decimal.self, forKey: .extraPrincipalMonthly)
+        self.biweekly = try c.decode(Bool.self, forKey: .biweekly)
+    }
 
     static let sampleDefault = AmortizationFormInputs(
         loanAmount: 548_000,
@@ -28,6 +83,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         annualInsurance: 1_620,
         monthlyHOA: 0,
         includePMI: false,
+        manualMonthlyPMI: 0,
         extraPrincipalMonthly: 0,
         biweekly: false
     )
@@ -54,15 +110,10 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
 
     private func monthlyPMI(loan: Loan) -> Decimal {
         guard includePMI else { return 0 }
-        let ltv = Double(truncating: (loanAmount / propertyValueGuess) as NSNumber)
-        return calculatePMI(
-            ltv: ltv,
-            creditScore: 740,
-            loanAmount: loanAmount,
-            loanType: .conventional,
-            termMonths: termYears * 12,
-            paymentType: .monthly
-        )
+        // Session 5B.3: honor the LO's manual entry. Session 5B.5 will
+        // plumb auto-calc via `calculatePMI(...)` + dropoff schedule
+        // here; the existing grid-based helper stays available for that.
+        return manualMonthlyPMI
     }
 
     func toLoan() -> Loan {

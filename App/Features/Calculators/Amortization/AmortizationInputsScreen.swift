@@ -19,6 +19,9 @@ struct AmortizationInputsScreen: View {
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
     init(
         borrower: Borrower? = nil,
         initialInputs: AmortizationFormInputs? = nil,
@@ -244,8 +247,32 @@ struct AmortizationInputsScreen: View {
                 )
             )
             divider
-            pmiRow
+            VStack(spacing: 0) {
+                pmiRow
+                if viewModel.inputs.includePMI {
+                    divider
+                    FieldRow(
+                        label: "Monthly PMI",
+                        prefix: "$",
+                        hint: "until removal at 78% LTV",
+                        decimal: Binding(
+                            get: { viewModel.inputs.manualMonthlyPMI },
+                            set: { viewModel.inputs.manualMonthlyPMI = $0 }
+                        )
+                    )
+                    .transition(pmiReveal)
+                }
+            }
+            .animation(
+                reduceMotion ? nil : Motion.defaultEaseOut,
+                value: viewModel.inputs.includePMI
+            )
         }
+    }
+
+    private var pmiReveal: AnyTransition {
+        if reduceMotion { return .opacity }
+        return .opacity.combined(with: .move(edge: .top))
     }
 
     private var taxHint: String {
