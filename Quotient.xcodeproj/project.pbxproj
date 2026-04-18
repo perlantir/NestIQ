@@ -65,6 +65,7 @@
 		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
 		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
+		7CB075D09FD3718AC0CB9E0D /* RefinanceTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB26A53698A9C30DE72EEF2F /* RefinanceTableView.swift */; };
 		81610761C185084A7E848094 /* FieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */; };
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
@@ -225,6 +226,7 @@
 		B6F41CEF19131B852D33AC2C /* ThemePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreview.swift; sourceTree = "<group>"; };
 		B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModel.swift; sourceTree = "<group>"; };
 		B782FB7D6EF280A7AC6FD31A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		BB26A53698A9C30DE72EEF2F /* RefinanceTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceTableView.swift; sourceTree = "<group>"; };
 		BBBA2FE384D413626DDAE1D4 /* Radius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Radius.swift; sourceTree = "<group>"; };
 		BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldRow.swift; sourceTree = "<group>"; };
 		BE473E21016935AB38F78564 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
@@ -493,6 +495,7 @@
 				6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */,
 				0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */,
 				9970C1F47C6727A6C8329F5F /* RefinanceScreen.swift */,
+				BB26A53698A9C30DE72EEF2F /* RefinanceTableView.swift */,
 				A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */,
 			);
 			path = Refinance;
@@ -886,6 +889,7 @@
 				C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */,
 				BD0B1AE598BF3645089DE2EC /* RefinanceInputsScreen.swift in Sources */,
 				55F7BD17FFB694D9F98D21E7 /* RefinanceScreen.swift in Sources */,
+				7CB075D09FD3718AC0CB9E0D /* RefinanceTableView.swift in Sources */,
 				920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */,
 				DCDFB1F53A2008A8AD147888 /* RootTabBar.swift in Sources */,
 				0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */,
