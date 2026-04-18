@@ -142,24 +142,33 @@ struct SettingsScreen: View {
 
     // MARK: Sections
 
-    private var brandSection: some View {
+    @ViewBuilder private var brandSection: some View {
         settingsGroup(header: "Brand · PDF export") {
-            SettingsRow(
-                label: "Accent color",
-                trailing: .value("Ledger green"),
-                onTap: {}
-            )
-            SettingsRow(
+            settingsNavRow(label: "Accent color", trailing: accentColorLabel) {
+                AccentColorPickerScreen(profile: profile)
+            }
+            divider
+            settingsNavRow(
                 label: "Logo",
-                trailing: .value(profile.companyLogoData == nil ? "Not set" : "Uploaded"),
-                onTap: {}
-            )
-            SettingsRow(
+                trailing: profile.companyLogoData == nil ? "Not set" : "Uploaded"
+            ) {
+                LogoPickerScreen(profile: profile)
+            }
+            divider
+            settingsNavRow(
                 label: "Signature block",
-                trailing: .value(profile.tagline?.isEmpty == false ? "Custom" : "Default"),
-                onTap: {}
-            )
+                trailing: profile.tagline?.isEmpty == false ? "Custom" : "Default"
+            ) {
+                SignatureBlockEditor(profile: profile)
+            }
         }
+    }
+
+    private var accentColorLabel: String {
+        let hex = profile.brandColorHex.lowercased()
+        return AccentColorPickerScreen.palette
+            .first(where: { $0.hex.lowercased() == hex })?
+            .name ?? "Custom"
     }
 
     private var complianceSection: some View {
@@ -311,6 +320,38 @@ struct SettingsScreen: View {
 
     private var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+    }
+
+    /// NavigationLink styled to match `SettingsRow` — same padding, same
+    /// label typography, trailing value + chevron, hairline divider
+    /// stitched below. Used for rows that push a detail screen rather
+    /// than opening a sheet or toggling state.
+    @ViewBuilder
+    private func settingsNavRow<Destination: View>(
+        label: String,
+        trailing: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            HStack(spacing: Spacing.s16) {
+                Text(label)
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                Text(trailing)
+                    .textStyle(Typography.body)
+                    .foregroundStyle(Palette.inkSecondary)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            .padding(.horizontal, Spacing.s16)
+            .padding(.vertical, Spacing.s12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Actions

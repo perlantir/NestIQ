@@ -81,6 +81,7 @@
 		A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */; };
 		A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */; };
 		ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */; };
+		B867A917622C9C8DD4DAD497 /* BrandDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
 		BBDD23BA9E669DE12DF02763 /* ShareBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */; };
 		BD0B1AE598BF3645089DE2EC /* RefinanceInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */; };
@@ -110,6 +111,7 @@
 		F9FCEC655B802C0A6CC0F7F6 /* RateRibbonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */; };
 		FC1CDEE93CF9F23E35101A8E /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8B3E7E27F86F9FE22CCDC0 /* SettingsRow.swift */; };
 		FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F25962FDCE571CDFE241131 /* StressPathsChart.swift */; };
+		FD7404D704B61BADF96927A5 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0DA6E84884539067F5DCEF /* ColorHex.swift */; };
 		FD9EA9ACC492F097CD5D7731 /* ComparisonGroupedBars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FE485DD2156202FF433AAF /* ComparisonGroupedBars.swift */; };
 		FE7BD9BFDD3339FC2C2CC56D /* CalculatorDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3544DE01D8235962D2B98659 /* CalculatorDock.swift */; };
 		FE9011520577F40520911C05 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A910FE79E1FB0706776507 /* AppStorage.swift */; };
@@ -188,6 +190,7 @@
 		860BC6C292C49CFEF58A6ECF /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
+		8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandDetailScreens.swift; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputsScreen.swift; sourceTree = "<group>"; };
 		9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFBuilder.swift; sourceTree = "<group>"; };
@@ -203,6 +206,7 @@
 		A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModel.swift; sourceTree = "<group>"; };
 		A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Regular.ttf"; sourceTree = "<group>"; };
 		A69DBC7B515E3DF14C85420D /* ScenarioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioCard.swift; sourceTree = "<group>"; };
+		AA0DA6E84884539067F5DCEF /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		AA4698C088D95213A6366BAE /* DataRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRow.swift; sourceTree = "<group>"; };
 		B6F41CEF19131B852D33AC2C /* ThemePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreview.swift; sourceTree = "<group>"; };
 		B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModel.swift; sourceTree = "<group>"; };
@@ -543,6 +547,7 @@
 		D2959A32F73402F2462D27DD /* Theme */ = {
 			isa = PBXGroup;
 			children = (
+				AA0DA6E84884539067F5DCEF /* ColorHex.swift */,
 				48FCE5E97C92AFF164AD551A /* Colors.swift */,
 				371105E1BFEFCBB484FEEA6F /* Motion.swift */,
 				BBBA2FE384D413626DDAE1D4 /* Radius.swift */,
@@ -577,6 +582,7 @@
 		E14F22006A436DA7A06470A0 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */,
 				6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */,
 			);
 			path = Settings;
@@ -805,11 +811,13 @@
 				591DF199503D955148834182 /* BorrowerPicker.swift in Sources */,
 				45BDCF05270984C4D7995217 /* BorrowerPill.swift in Sources */,
 				A1E124870E7BD16A19E96E0A /* BottomActionDock.swift in Sources */,
+				B867A917622C9C8DD4DAD497 /* BrandDetailScreens.swift in Sources */,
 				5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */,
 				FE7BD9BFDD3339FC2C2CC56D /* CalculatorDock.swift in Sources */,
 				C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */,
 				CD028AF8682D3C98BA8656EB /* CalculatorNewScenarioView.swift in Sources */,
 				1920B2C218E438EDB7836498 /* Card.swift in Sources */,
+				FD7404D704B61BADF96927A5 /* ColorHex.swift in Sources */,
 				48171DBA746740E34FF70A26 /* Colors.swift in Sources */,
 				FD9EA9ACC492F097CD5D7731 /* ComparisonGroupedBars.swift in Sources */,
 				F6FA742417C9D80C5C72FBE9 /* ComponentGallery.swift in Sources */,

@@ -63,7 +63,10 @@ struct HomeScreen: View {
     private var greeting: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: Spacing.s4) {
-                Eyebrow(greetingEyebrow)
+                Eyebrow(
+                    greetingEyebrow,
+                    color: Color(brandHex: profile.brandColorHex)
+                )
                 Text(greetingText)
                     .textStyle(Typography.display.withSize(28, weight: .bold))
                     .foregroundStyle(Palette.ink)

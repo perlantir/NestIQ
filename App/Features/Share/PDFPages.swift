@@ -18,6 +18,9 @@ public struct PDFCoverPage: View {
     public let heroPITI: String
     public let heroKPIs: [(label: String, value: String)]
     public let narrative: String
+    public let accentHex: String
+    public let logoData: Data?
+    public let signatureLine: String?
 
     public init(
         borrowerName: String,
@@ -31,7 +34,10 @@ public struct PDFCoverPage: View {
         loanSummary: String,
         heroPITI: String,
         heroKPIs: [(label: String, value: String)],
-        narrative: String
+        narrative: String,
+        accentHex: String = "#1F4D3F",
+        logoData: Data? = nil,
+        signatureLine: String? = nil
     ) {
         self.borrowerName = borrowerName
         self.loFullName = loFullName
@@ -45,13 +51,16 @@ public struct PDFCoverPage: View {
         self.heroPITI = heroPITI
         self.heroKPIs = heroKPIs
         self.narrative = narrative
+        self.accentHex = accentHex
+        self.logoData = logoData
+        self.signatureLine = signatureLine
     }
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
     private let inkSecondary = Color(red: 0x4A / 255, green: 0x48 / 255, blue: 0x40 / 255)
     private let inkTertiary = Color(red: 0x85 / 255, green: 0x81 / 255, blue: 0x6F / 255)
     private let border = Color(red: 0xE5 / 255, green: 0xE1 / 255, blue: 0xD5 / 255)
-    private let accent = Color(red: 0x1F / 255, green: 0x4D / 255, blue: 0x3F / 255)
+    private var accent: Color { Color(brandHex: accentHex) }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -75,9 +84,16 @@ public struct PDFCoverPage: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Quotient")
-                        .font(.custom("SourceSerif4", size: 30))
-                        .foregroundStyle(inkPrimary)
+                    if let logoData, let logo = UIImage(data: logoData) {
+                        Image(uiImage: logo)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 36)
+                    } else {
+                        Text("Quotient")
+                            .font(.custom("SourceSerif4", size: 30))
+                            .foregroundStyle(inkPrimary)
+                    }
                     Text("Mortgage analysis · prepared for you".uppercased())
                         .font(.system(size: 10.5, weight: .semibold))
                         .tracking(1.05)
@@ -97,6 +113,12 @@ public struct PDFCoverPage: View {
                     Text(loPhone)
                         .font(.system(size: 10.5))
                         .foregroundStyle(inkSecondary)
+                    if let signatureLine, !signatureLine.isEmpty {
+                        Text(signatureLine)
+                            .font(.custom("SourceSerif4-It", size: 10.5))
+                            .foregroundStyle(inkSecondary)
+                            .padding(.top, 2)
+                    }
                 }
             }
             Rectangle().fill(inkPrimary).frame(height: 2)

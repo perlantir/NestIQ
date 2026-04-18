@@ -221,7 +221,10 @@ enum PDFBuilder {
             loanSummary: payload.loanSummary,
             heroPITI: payload.heroValue,
             heroKPIs: payload.heroKPIs,
-            narrative: payload.narrative
+            narrative: payload.narrative,
+            accentHex: profile.brandColorHex,
+            logoData: profile.companyLogoData,
+            signatureLine: profile.tagline
         )
     }
 
