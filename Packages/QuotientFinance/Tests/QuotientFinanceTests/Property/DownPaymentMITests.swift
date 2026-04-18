@@ -116,6 +116,60 @@ struct DownPaymentMITests {
         #expect(m == nil)
     }
 
+    // MARK: amortize(mi:) overload
+
+    @Test("amortize(mi: nil) is byte-identical to amortize(loan:options:)")
+    func amortizeMINilIsIdentity() throws {
+        try forAll(
+            "amortize(mi: nil) identity",
+            generator: LoanGen.standardFixed,
+            count: 200,
+            shrink: LoanGen.shrink
+        ) { loan in
+            let direct = amortize(loan: loan, options: .none)
+            let overload = amortize(
+                loan: loan,
+                options: .none,
+                mi: nil,
+                appraisedValue: loan.principal * Decimal(1.25)
+            )
+            try require(
+                direct.payments == overload.payments,
+                "payments differ between amortize and amortize(mi: nil)"
+            )
+            try require(
+                direct.scheduledPeriodicPayment == overload.scheduledPeriodicPayment,
+                "scheduled payment differs"
+            )
+        }
+    }
+
+    @Test("amortize(mi:) with nonnil MI carries premium through dropoff month")
+    func amortizeMIPremiumIntegration() {
+        let loan = Loan(
+            principal: 475_000,
+            annualRate: 0.065,
+            termMonths: 360,
+            startDate: date(2026, 1, 1)
+        )
+        let appraised: Decimal = 500_000   // 95% LTV
+        let mi = MIProfile(monthlyMI: 165, startLTV: 0.95)
+        let schedule = amortize(
+            loan: loan,
+            options: .none,
+            mi: mi,
+            appraisedValue: appraised
+        )
+        // Engine should have attached PMI until the scheduled balance
+        // crosses 78% × 500_000 = 390_000. Sanity: at least one row
+        // carries the premium, and the last row carries 0.
+        let withMI = schedule.payments.filter { $0.pmi > 0 }
+        let withoutMI = schedule.payments.filter { $0.pmi == 0 }
+        #expect(!withMI.isEmpty, "expected at least one PMI-carrying row")
+        #expect(!withoutMI.isEmpty, "expected MI to drop by maturity")
+        #expect(schedule.totalPMI > 0)
+    }
+
     // MARK: ClosingCostBreakdown
 
     @Test("pointsAmount never exceeds totalClosingCosts")

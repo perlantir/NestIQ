@@ -34,6 +34,30 @@ import Foundation
 /// - Returns: Full schedule with periodic rows, the original scheduled
 ///   payment, and aggregate totals reachable via `AmortizationSchedule`'s
 ///   computed properties.
+/// Convenience overload that takes a high-level `MIProfile` + the
+/// property's appraised value and projects them onto `options.pmiSchedule`
+/// before delegating to the full `amortize(loan:options:)` entry point.
+///
+/// Behavior is identical to the existing API when `mi` is nil — the
+/// `options` value is passed through unchanged. When `mi` is non-nil,
+/// any prior `options.pmiSchedule` is overridden by
+/// `mi.asPMISchedule(appraisedValue:)`. Call sites that want full
+/// control of the engine-side PMISchedule should use the original
+/// `amortize(loan:options:)` directly.
+public func amortize(
+    loan: Loan,
+    options: AmortizationOptions = .none,
+    mi: MIProfile?,
+    appraisedValue: Decimal
+) -> AmortizationSchedule {
+    guard let mi else {
+        return amortize(loan: loan, options: options)
+    }
+    var resolved = options
+    resolved.pmiSchedule = mi.asPMISchedule(appraisedValue: appraisedValue)
+    return amortize(loan: loan, options: resolved)
+}
+
 public func amortize(loan: Loan, options: AmortizationOptions = .none) -> AmortizationSchedule {
     guard loan.principal >= 0, loan.termMonths > 0 else {
         return AmortizationSchedule(payments: [], loan: loan, options: options, scheduledPeriodicPayment: 0)
