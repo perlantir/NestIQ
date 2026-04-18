@@ -145,6 +145,9 @@ struct HelocScreen: View {
                 tenYearBlendedCard
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
+                sideBySideSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s24)
                 verdict
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
@@ -322,6 +325,83 @@ struct HelocScreen: View {
     // `StressKind` helpers on `HelocViewModel` remain available so a
     // future session can plot stress paths somewhere else without
     // re-deriving the geometry.
+
+    // MARK: Side-by-side
+
+    private var sideBySideSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            Text("Side-by-side")
+                .textStyle(Typography.section)
+                .foregroundStyle(Palette.ink)
+            Text("Same rows as the PDF landscape page; portrait-tight for in-app review.")
+                .textStyle(Typography.body.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .padding(.bottom, Spacing.s8)
+            sideBySideTable
+        }
+    }
+
+    private var sideBySideTable: some View {
+        VStack(spacing: 0) {
+            sideBySideHeader
+            ForEach(
+                Array(HelocComparisonPage.rows(for: viewModel).enumerated()),
+                id: \.offset
+            ) { idx, row in
+                sideBySideRow(row: row, zebra: idx.isMultiple(of: 2))
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.listCard)
+                .stroke(Palette.borderSubtle, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+    }
+
+    private var sideBySideHeader: some View {
+        HStack(spacing: 0) {
+            Color.clear.frame(width: 120)
+            Text("REFI")
+                .textStyle(Typography.micro.withSize(9.5, weight: .semibold))
+                .tracking(0.8)
+                .foregroundStyle(Palette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, Spacing.s8)
+            Text("HELOC")
+                .textStyle(Typography.micro.withSize(9.5, weight: .semibold))
+                .tracking(0.8)
+                .foregroundStyle(Palette.accent)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, Spacing.s8)
+        }
+        .padding(.vertical, Spacing.s8)
+        .background(Palette.surface)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+        }
+    }
+
+    private func sideBySideRow(row: HelocComparisonPage.Row, zebra: Bool) -> some View {
+        HStack(alignment: .top, spacing: 0) {
+            Text(row.label)
+                .textStyle(Typography.body.withSize(11, weight: .medium))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(width: 120, alignment: .leading)
+                .padding(.leading, Spacing.s12)
+            Text(row.refi)
+                .textStyle(Typography.num.withSize(11.5, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, Spacing.s8)
+            Text(row.heloc)
+                .textStyle(Typography.num.withSize(11.5, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, Spacing.s8)
+        }
+        .padding(.vertical, Spacing.s8)
+        .background(zebra ? Palette.surfaceRaised : Palette.surface)
+    }
 
     // MARK: Verdict
 
