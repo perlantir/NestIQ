@@ -7,6 +7,7 @@ import Foundation
 public enum FinanceError: Error, Sendable, Hashable, CustomStringConvertible {
     case solverDidNotConverge(function: String, iterations: Int)
     case invalidInput(String)
+    case invalidRecast(String)
 
     public var description: String {
         switch self {
@@ -14,6 +15,8 @@ public enum FinanceError: Error, Sendable, Hashable, CustomStringConvertible {
             return "\(fn) did not converge within \(iters) iterations"
         case let .invalidInput(msg):
             return "Invalid input: \(msg)"
+        case let .invalidRecast(msg):
+            return "Invalid recast: \(msg)"
         }
     }
 }

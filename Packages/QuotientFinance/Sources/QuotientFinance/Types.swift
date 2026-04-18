@@ -211,21 +211,108 @@ public enum PMIPaymentType: String, Sendable, Codable, Hashable, CaseIterable {
 
 // MARK: - Comparison
 
+/// One scenario feeding `compareScenarios` — a loan plus the non-P&I carrying
+/// costs needed for a true total-cost comparison at each horizon.
+///
+/// Index 0 of the `scenarios` array is treated as the **baseline** by
+/// `compareScenarios` — deltas (`monthlyPIDelta`, `lifetimeCostDelta`) are
+/// relative to it, and `breakEvenMonth` is computed vs. it.
+public struct ScenarioInput: Sendable, Hashable, Codable {
+    public let name: String
+    public let loan: Loan
+    public let closingCosts: Decimal
+    public let monthlyTaxes: Decimal
+    public let monthlyInsurance: Decimal
+    public let monthlyHOA: Decimal
+    public let options: AmortizationOptions
+
+    public init(
+        name: String,
+        loan: Loan,
+        closingCosts: Decimal = 0,
+        monthlyTaxes: Decimal = 0,
+        monthlyInsurance: Decimal = 0,
+        monthlyHOA: Decimal = 0,
+        options: AmortizationOptions = .none
+    ) {
+        self.name = name
+        self.loan = loan
+        self.closingCosts = closingCosts
+        self.monthlyTaxes = monthlyTaxes
+        self.monthlyInsurance = monthlyInsurance
+        self.monthlyHOA = monthlyHOA
+        self.options = options
+    }
+}
+
+/// Per-scenario metrics surfaced in the Refi Comparison + TCA UIs.
+///
+/// `npvAt5pct` is the present value of the scenario's all-in monthly cash
+/// outflows (P&I + PMI + extras + T+I+HOA) plus upfront closing costs,
+/// discounted at 5% annual with monthly compounding over the longest horizon
+/// supplied to `compareScenarios`. Loans are cash outflows, so `npvAt5pct` is
+/// negative; smaller magnitude is better. Callers who want a "refi NPV" —
+/// the signed savings vs. the baseline — should subtract the baseline's
+/// `npvAt5pct`.
+///
+/// `monthlyPIDelta` is the scheduled P&I minus the baseline's scheduled P&I —
+/// positive means this scenario pays more each month.
+///
+/// `lifetimeCostDelta` is `scenarioTotalCosts[i][last horizon]` minus the
+/// baseline's same cell; precomputed so callers don't re-derive it.
+///
+/// `breakEvenMonth` is `nil` for the baseline itself and for any scenario
+/// whose P&I is not strictly lower than the baseline's (no monthly savings
+/// to recoup the net upfront cost).
+public struct ScenarioMetrics: Sendable, Hashable, Codable {
+    public let payment: Decimal
+    public let totalInterest: Decimal
+    public let totalPaid: Decimal
+    public let breakEvenMonth: Int?
+    public let npvAt5pct: Decimal
+    public let monthlyPIDelta: Decimal
+    public let lifetimeCostDelta: Decimal
+
+    public init(
+        payment: Decimal,
+        totalInterest: Decimal,
+        totalPaid: Decimal,
+        breakEvenMonth: Int?,
+        npvAt5pct: Decimal,
+        monthlyPIDelta: Decimal,
+        lifetimeCostDelta: Decimal
+    ) {
+        self.payment = payment
+        self.totalInterest = totalInterest
+        self.totalPaid = totalPaid
+        self.breakEvenMonth = breakEvenMonth
+        self.npvAt5pct = npvAt5pct
+        self.monthlyPIDelta = monthlyPIDelta
+        self.lifetimeCostDelta = lifetimeCostDelta
+    }
+}
+
 /// Result of comparing several scenarios over specified horizons.
-/// Session 2 fills in the calculation; the type lives here so Session 1 tests
-/// can reference it and `compareScenarios` can be benchmarked later.
+///
+/// `scenarioMetrics` is indexed parallel to `scenarioTotalCosts` — the entry
+/// at index `i` describes the scenario that produced `scenarioTotalCosts[i]`.
+/// Defaults to an empty array so Session 1 call sites that predate the
+/// metrics addition keep compiling unchanged.
 public struct ComparisonResult: Sendable, Hashable, Codable {
     public let scenarioTotalCosts: [[Decimal]]   // [scenarioIndex][horizonIndex]
     public let winnerByHorizon: [Int]            // scenario index winning each horizon
     public let horizons: [Int]                   // in years, e.g. [5, 7, 10, 15, 30]
+    public let scenarioMetrics: [ScenarioMetrics]
 
     public init(
         scenarioTotalCosts: [[Decimal]],
         winnerByHorizon: [Int],
-        horizons: [Int]
+        horizons: [Int],
+        scenarioMetrics: [ScenarioMetrics] = []
     ) {
         self.scenarioTotalCosts = scenarioTotalCosts
         self.winnerByHorizon = winnerByHorizon
         self.horizons = horizons
+        self.scenarioMetrics = scenarioMetrics
     }
 }

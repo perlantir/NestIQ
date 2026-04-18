@@ -203,4 +203,32 @@ struct InvariantTests {
             )
         }
     }
+
+    // MARK: 8. applyRecast handler produces totalInterest <= original
+    //        whenever lumpSum > 0.
+
+    @Test("applyRecast(lumpSum>0) produces totalInterest ≤ original")
+    func applyRecastMonotonicInterest() throws {
+        try forAll(
+            "applyRecast ⇒ total interest non-increasing",
+            generator: LoanWithRecastGen.standard,
+            count: 1_000
+        ) { lr in
+            let base = amortize(loan: lr.loan)
+            let recasted: AmortizationSchedule
+            do {
+                recasted = try applyRecast(
+                    schedule: base,
+                    recastMonth: lr.recastPeriod,
+                    lumpSum: lr.lumpSum
+                )
+            } catch {
+                throw PropertyFailure(message: "applyRecast threw: \(error)")
+            }
+            try require(
+                recasted.totalInterest <= base.totalInterest,
+                "recasted totalInterest \(recasted.totalInterest) exceeded baseline \(base.totalInterest)"
+            )
+        }
+    }
 }
