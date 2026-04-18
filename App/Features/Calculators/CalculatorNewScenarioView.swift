@@ -16,7 +16,7 @@ struct CalculatorNewScenarioView: View {
         case .incomeQualification:
             IncomeQualInputsScreen(borrower: nil)
         case .refinance:
-            RefinanceScreen()
+            RefinanceInputsScreen(borrower: nil)
         case .totalCostAnalysis:
             TCAScreen()
         case .helocVsRefinance:

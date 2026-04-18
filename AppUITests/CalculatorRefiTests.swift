@@ -12,6 +12,10 @@ final class CalculatorRefiTests: XCTestCase {
 
     func testRefinanceFullFlow() async throws {
         let app = UITest.launchApp()
-        UITest.exerciseCalculatorFlow(app, slug: "refinance")
+        UITest.exerciseTwoStepCalculatorFlow(
+            app,
+            slug: "refinance",
+            computeId: "refi.compute"
+        )
     }
 }
