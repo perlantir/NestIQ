@@ -13,6 +13,10 @@ final class CalculatorIncomeTests: XCTestCase {
 
     func testIncomeQualFullFlow() async throws {
         let app = UITest.launchApp()
-        UITest.exerciseCalculatorFlow(app, slug: "incomeQualification")
+        UITest.exerciseTwoStepCalculatorFlow(
+            app,
+            slug: "incomeQualification",
+            computeId: "incomeQual.compute"
+        )
     }
 }

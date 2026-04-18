@@ -61,6 +61,7 @@
 		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
 		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
+		81610761C185084A7E848094 /* FieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */; };
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
@@ -76,6 +77,7 @@
 		A24D0BB2A052539D1B32309A /* DTIDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2290990D9F81FF13366CB427 /* DTIDial.swift */; };
 		A294032B30278ED20FBCEA40 /* IncomeQualScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */; };
 		A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */; };
+		A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */; };
 		A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */; };
 		ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
@@ -181,6 +183,7 @@
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputsScreen.swift; sourceTree = "<group>"; };
 		9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFBuilder.swift; sourceTree = "<group>"; };
 		97F168CE5ADAE01630A62C44 /* FilterChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterChip.swift; sourceTree = "<group>"; };
 		9970C1F47C6727A6C8329F5F /* RefinanceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceScreen.swift; sourceTree = "<group>"; };
@@ -199,6 +202,7 @@
 		B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModel.swift; sourceTree = "<group>"; };
 		B782FB7D6EF280A7AC6FD31A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
 		BBBA2FE384D413626DDAE1D4 /* Radius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Radius.swift; sourceTree = "<group>"; };
+		BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldRow.swift; sourceTree = "<group>"; };
 		BE473E21016935AB38F78564 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		BE63AF7554AB3115EE357DF7 /* AuthGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGate.swift; sourceTree = "<group>"; };
 		BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationDrawer.swift; sourceTree = "<group>"; };
@@ -339,6 +343,7 @@
 			isa = PBXGroup;
 			children = (
 				F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */,
+				9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */,
 				19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */,
 				C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */,
 				C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */,
@@ -481,6 +486,7 @@
 				E25E78DDA261CA8CE65A412D /* DatePill.swift */,
 				2290990D9F81FF13366CB427 /* DTIDial.swift */,
 				892FB7F7D261F926F53F6870 /* Eyebrow.swift */,
+				BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */,
 				4D1338A4AF409B28F384750A /* Fields.swift */,
 				97F168CE5ADAE01630A62C44 /* FilterChip.swift */,
 				7600230EF86B01E049D9B9A2 /* HairlineDivider.swift */,
@@ -804,6 +810,7 @@
 				D95165BA7394D52B7F7340E4 /* DatePill.swift in Sources */,
 				E679D387C757372A59304DF6 /* Eyebrow.swift in Sources */,
 				56D2D6A10F52D801FA1F8412 /* FaceIDUnlock.swift in Sources */,
+				81610761C185084A7E848094 /* FieldRow.swift in Sources */,
 				20845D217FC80E35439704CC /* Fields.swift in Sources */,
 				0DF0E7CE87E8E3234206121F /* FilterChip.swift in Sources */,
 				12B251F0DF98735D91CD06A4 /* HairlineDivider.swift in Sources */,
@@ -811,6 +818,7 @@
 				ED9A0F824482974D1EEEA77D /* HelocScreen.swift in Sources */,
 				3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */,
 				0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */,
+				A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */,
 				389E07F52C6B69E232CAEF64 /* IncomeQualListViews.swift in Sources */,
 				A294032B30278ED20FBCEA40 /* IncomeQualScreen.swift in Sources */,
 				96E42E5B6369FD34312CCAFA /* IncomeQualViewModel.swift in Sources */,

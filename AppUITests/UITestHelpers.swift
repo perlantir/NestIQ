@@ -77,4 +77,43 @@ enum UITest {
         XCTAssertTrue(previewTitle.waitForExistence(timeout: 8),
                       "Share preview did not present (slug=\(slug))")
     }
+
+    /// Two-step flow: calculator row → Inputs screen → Compute CTA →
+    /// Results screen with dock. Used by every calculator that has its
+    /// own Inputs screen (all five as of the v1 Inputs rollout).
+    static func exerciseTwoStepCalculatorFlow(
+        _ app: XCUIApplication,
+        slug: String,
+        computeId: String
+    ) {
+        tapCalculator(app, slug: slug)
+
+        // Dismiss any auto-focused keyboard so the Compute button isn't
+        // obscured — same dance as CalculatorAmortTests.
+        if app.keyboards.count > 0 {
+            app.typeText("\n")
+        }
+        let compute = app.buttons[computeId]
+        XCTAssertTrue(compute.waitForExistence(timeout: 5),
+                      "Compute CTA \(computeId) not found for \(slug)")
+        compute.tap()
+
+        let dock = app.buttons["dock.narrate"]
+        if !dock.waitForExistence(timeout: 10) {
+            print("[UITest] post-Compute tree for \(slug):\n\(app.debugDescription)")
+            XCTFail("Dock did not appear after Compute for \(slug)")
+            return
+        }
+        XCTAssertTrue(app.buttons["dock.save"].exists,
+                      "dock.save absent after compute for \(slug)")
+        XCTAssertTrue(app.buttons["dock.share"].exists,
+                      "dock.share absent after compute for \(slug)")
+
+        tapDock(app, "save")
+        tapDock(app, "share")
+
+        let previewTitle = app.staticTexts["Preview"]
+        XCTAssertTrue(previewTitle.waitForExistence(timeout: 8),
+                      "Share preview did not present (slug=\(slug))")
+    }
 }
