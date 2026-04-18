@@ -6,6 +6,8 @@
 import SwiftUI
 import Charts
 import SwiftData
+import QuotientNarration
+import QuotientPDF
 
 struct RefinanceScreen: View {
     var initialInputs: RefinanceFormInputs?
@@ -13,9 +15,14 @@ struct RefinanceScreen: View {
 
     @State private var viewModel = RefinanceViewModel()
     @State private var showingStress = false
+    @State private var showingNarration = false
+    @State private var justSaved = false
+    @State private var shareBundle: ShareBundle?
 
     @Environment(\.modelContext)
     private var modelContext
+
+    @Query private var profiles: [LenderProfile]
 
     private let scenarioColors: [Color] = [
         Palette.inkTertiary, Palette.accent, Palette.scenario2, Palette.scenario3,
@@ -66,6 +73,34 @@ struct RefinanceScreen: View {
         .onChange(of: viewModel.inputs) {
             viewModel.compute()
         }
+        .sheet(isPresented: $showingNarration) {
+            NarrationSheet(facts: narrationFacts) { _ in }
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $shareBundle) { bundle in
+            QuotientSharePreview(
+                profile: bundle.profile,
+                borrower: viewModel.borrower,
+                pdfURL: bundle.url,
+                pageCount: bundle.pageCount,
+                onDismiss: {}
+            )
+            .presentationDetents([.large])
+        }
+    }
+
+    private var narrationFacts: ScenarioFacts {
+        let savings = "$\(MoneyFormat.shared.decimalString(viewModel.monthlySavings))"
+        let be = viewModel.breakEvenMonth.map { "\($0) mo" } ?? "—"
+        return ScenarioFacts(
+            scenarioType: .refinance,
+            borrowerFirstName: viewModel.borrower?.firstName,
+            numericFacts: [savings, be],
+            fields: [
+                "monthlySavings": savings,
+                "breakEven": be,
+            ]
+        )
     }
 
     // MARK: Borrower
@@ -340,42 +375,15 @@ struct RefinanceScreen: View {
     // MARK: Dock
 
     private var bottomDock: some View {
-        HStack(spacing: Spacing.s8) {
-            Button { showingStress.toggle() } label: {
-                Text(showingStress ? "Clear stress" : "Stress test")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { saveAndShare() } label: {
-                Text("Share as PDF")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .layoutPriority(1)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-                 alignment: .top)
+        CalculatorDock(
+            saveLabel: justSaved ? "Saved" : "Save",
+            onNarrate: { showingNarration = true },
+            onSave: { saveScenario() },
+            onShare: { generatePDFAndShare() }
+        )
     }
 
-    private func saveAndShare() {
+    private func saveScenario() {
         let snap = viewModel.buildScenarioSnapshot()
         let name = viewModel.borrower?.fullName ?? "Refi comparison"
         if let existing = existingScenario {
@@ -394,6 +402,29 @@ struct RefinanceScreen: View {
             modelContext.insert(scenario)
         }
         try? modelContext.save()
+        justSaved = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
+    }
+
+    private func generatePDFAndShare() {
+        guard let profile = profiles.first else { return }
+        do {
+            let url = try PDFBuilder.buildRefinancePDF(
+                profile: profile,
+                borrower: viewModel.borrower,
+                viewModel: viewModel,
+                narrative: narrativeText
+            )
+            shareBundle = ShareBundle(
+                url: url,
+                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                profile: profile
+            )
+        } catch {
+            #if DEBUG
+            print("[RefinanceScreen] PDF gen failed: \(error)")
+            #endif
+        }
     }
 }
 
