@@ -69,6 +69,11 @@ struct SavedScenariosScreen: View {
                 initialInputs: decode(RefinanceFormInputs.self, from: s.inputsJSON),
                 existingScenario: s
             )
+        case .totalCostAnalysis:
+            TCAScreen(
+                initialInputs: decode(TCAFormInputs.self, from: s.inputsJSON),
+                existingScenario: s
+            )
         default:
             ComingSoonStub(calculator: s.calculatorType)
         }
