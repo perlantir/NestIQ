@@ -1,0 +1,59 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+timeline.xctimeline
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+Packages/*/.build/
+Packages/*/.swiftpm/
+
+# CocoaPods / Carthage (unused in Quotient, guarded anyway)
+Pods/
+Carthage/Build/
+
+# macOS
+.DS_Store
+._*
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Coverage output
+*.profdata
+*.profraw
+coverage/
+*.lcov
+
+# Muter
+muter_tmp/
+mutation-test-report/
+muter-log*.txt
+.muter-debug.log
+
+# Fastlane (future)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Build artifacts
+*.o
+*.a
+*.dylib

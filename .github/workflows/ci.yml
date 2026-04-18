@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly at 03:00 UTC — runs the slow Muter mutation suite.
+    - cron: "0 3 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build + Test (Swift 6 / iOS 18)
+    runs-on: macos-15
+    if: github.event_name != 'schedule'
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Tool versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Cache SPM artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            .build
+            Packages/**/.build
+          key: spm-${{ runner.os }}-${{ hashFiles('Packages/**/Package.swift', 'Packages/**/Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Install tooling
+        run: |
+          brew install xcodegen swiftlint xcbeautify
+          xcodegen --version
+          swiftlint --version
+          xcbeautify --version
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: SwiftLint (strict)
+        run: swiftlint --strict --reporter github-actions-logging
+
+      - name: Build app target (Debug, simulator)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Quotient.xcodeproj \
+            -scheme Quotient \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions
+
+      - name: Run QuotientFinance package tests with coverage
+        working-directory: Packages/QuotientFinance
+        run: |
+          set -o pipefail
+          swift test --enable-code-coverage 2>&1 | xcbeautify --renderer github-actions
+
+      - name: Generate + print coverage report
+        working-directory: Packages/QuotientFinance
+        run: |
+          PROF=.build/arm64-apple-macosx/debug/codecov/default.profdata
+          BIN=.build/arm64-apple-macosx/debug/QuotientFinancePackageTests.xctest/Contents/MacOS/QuotientFinancePackageTests
+          if [ ! -f "$PROF" ]; then
+            # Linux runners may use x86_64 path; macOS Apple Silicon as above.
+            PROF=$(find .build -name "default.profdata" | head -1)
+            BIN=$(find .build -name "QuotientFinancePackageTests.xctest" -type d | head -1)/Contents/MacOS/QuotientFinancePackageTests
+          fi
+          echo "===== Coverage summary ====="
+          xcrun llvm-cov report "$BIN" -instr-profile="$PROF" \
+            -ignore-filename-regex='(Tests|.build)'
+          echo ""
+          echo "===== Per-file coverage ====="
+          xcrun llvm-cov export "$BIN" -instr-profile="$PROF" \
+            -ignore-filename-regex='(Tests|.build)' -summary-only -format=text \
+            | tee coverage-summary.json
+
+      - name: Run other package placeholder tests
+        run: |
+          for pkg in QuotientCompliance QuotientPDF QuotientNarration; do
+            echo "===== $pkg ====="
+            cd "Packages/$pkg"
+            swift test 2>&1 | xcbeautify --renderer github-actions
+            cd "$GITHUB_WORKSPACE"
+          done
+
+      - name: Upload coverage report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: Packages/QuotientFinance/coverage-summary.json
+          if-no-files-found: warn
+
+  mutation-test:
+    name: Muter mutation tests (nightly)
+    runs-on: macos-15
+    if: github.event_name == 'schedule'
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install Muter
+        run: brew install muter-mutation-testing/formulae/muter
+
+      - name: Run Muter on QuotientFinance
+        working-directory: Packages/QuotientFinance
+        run: muter run --output-xcode
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: Packages/QuotientFinance/muter_*
+          if-no-files-found: warn

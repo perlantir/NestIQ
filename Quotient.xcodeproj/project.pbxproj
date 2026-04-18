@@ -1,0 +1,476 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 906E96F722FBFC9E28E526F3 /* RootView.swift */; };
+		1E2B00EB6830D2F826CBF7CF /* QuotientNarration in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA26F96351EAF95C04CA8AF /* QuotientNarration */; };
+		232CD024A74D1E6C75737CCB /* SourceSerif4-It.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 34D979C5D7DE4FB6B7BCC812 /* SourceSerif4-It.ttf */; };
+		26A2CDDF96788960561661F3 /* QuotientCompliance in Frameworks */ = {isa = PBXBuildFile; productRef = 7838361CA3FDA0B06DBAF0F1 /* QuotientCompliance */; };
+		45EDBA4287AC65E86FC29A8D /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = F025FA2D597BEFBBC4A3075F /* QuotientFinance */; };
+		53748ACC96F0319723126D2D /* SourceSerif4-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */; };
+		5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */; };
+		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
+		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
+		C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */ = {isa = PBXBuildFile; productRef = A1197D36724BA39F7185E2D9 /* QuotientPDF */; };
+		EFAA088CA11632F5A09EDB6C /* SourceSerif4-SemiboldIt.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */; };
+		F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		24A9A56018B8BBF20141BD86 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		34D979C5D7DE4FB6B7BCC812 /* SourceSerif4-It.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-It.ttf"; sourceTree = "<group>"; };
+		51FF57F0219E07755F31004E /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		64737CBA7DC296452DB91B72 /* QuotientNarration */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientNarration; path = Packages/QuotientNarration; sourceTree = SOURCE_ROOT; };
+		7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotientApp.swift; sourceTree = "<group>"; };
+		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
+		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Regular.ttf"; sourceTree = "<group>"; };
+		C0F7DDBBB3410FF824B33EF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-SemiboldIt.ttf"; sourceTree = "<group>"; };
+		D89633E5BC5BB72C10F311C0 /* QuotientCompliance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientCompliance; path = Packages/QuotientCompliance; sourceTree = SOURCE_ROOT; };
+		DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Semibold.ttf"; sourceTree = "<group>"; };
+		E0A55061CEFCACE582B54F89 /* QuotientFinance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientFinance; path = Packages/QuotientFinance; sourceTree = SOURCE_ROOT; };
+		E9494E196F0A2E455640AF19 /* Quotient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Quotient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		72C24CA41DFABA1A29AB1B86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45EDBA4287AC65E86FC29A8D /* QuotientFinance in Frameworks */,
+				26A2CDDF96788960561661F3 /* QuotientCompliance in Frameworks */,
+				C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */,
+				1E2B00EB6830D2F826CBF7CF /* QuotientNarration in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		15E476E4C61A301BB5E2BF54 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				24A9A56018B8BBF20141BD86 /* Assets.xcassets */,
+				B3662AB70ECB84AF00404B0D /* Fonts */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		29BFD3A57E1CA1FCEA04EE6F /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				D89633E5BC5BB72C10F311C0 /* QuotientCompliance */,
+				E0A55061CEFCACE582B54F89 /* QuotientFinance */,
+				64737CBA7DC296452DB91B72 /* QuotientNarration */,
+				88C2E96E5E0327331EA08EAE /* QuotientPDF */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		5BD32BF0DEDA4E48B99AF36D /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				906E96F722FBFC9E28E526F3 /* RootView.swift */,
+			);
+			path = Root;
+			sourceTree = "<group>";
+		};
+		B3662AB70ECB84AF00404B0D /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				51FF57F0219E07755F31004E /* OFL.txt */,
+				34D979C5D7DE4FB6B7BCC812 /* SourceSerif4-It.ttf */,
+				A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */,
+				DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */,
+				C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		CBCD86EF0E5E651D0CC9344A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				C0F7DDBBB3410FF824B33EF4 /* Info.plist */,
+				7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */,
+				15E476E4C61A301BB5E2BF54 /* Resources */,
+				5BD32BF0DEDA4E48B99AF36D /* Root */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D02898E00B76F25C98CAB1F6 = {
+			isa = PBXGroup;
+			children = (
+				CBCD86EF0E5E651D0CC9344A /* App */,
+				29BFD3A57E1CA1FCEA04EE6F /* Packages */,
+				DA1AD1FCEC76DBBEBC677E23 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DA1AD1FCEC76DBBEBC677E23 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E9494E196F0A2E455640AF19 /* Quotient.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9CDE6DFFF34DDDF7475337E5 /* Quotient */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A0FBA81A9F3A812D69409DA0 /* Build configuration list for PBXNativeTarget "Quotient" */;
+			buildPhases = (
+				92F0D8CA463449EEE2144CE0 /* SwiftLint */,
+				AA68859BCB92001E611FA7B5 /* Sources */,
+				B7A88525F06361A30787DA95 /* Resources */,
+				72C24CA41DFABA1A29AB1B86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Quotient;
+			packageProductDependencies = (
+				F025FA2D597BEFBBC4A3075F /* QuotientFinance */,
+				7838361CA3FDA0B06DBAF0F1 /* QuotientCompliance */,
+				A1197D36724BA39F7185E2D9 /* QuotientPDF */,
+				3AA26F96351EAF95C04CA8AF /* QuotientNarration */,
+			);
+			productName = Quotient;
+			productReference = E9494E196F0A2E455640AF19 /* Quotient.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		97A286E6F87AF726215BC500 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					9CDE6DFFF34DDDF7475337E5 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 2426F329F71B583EDD93D359 /* Build configuration list for PBXProject "Quotient" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D02898E00B76F25C98CAB1F6;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2114C723EEE3240CEED9C67F /* XCLocalSwiftPackageReference "Packages/QuotientCompliance" */,
+				49837F36960FA395C42CF949 /* XCLocalSwiftPackageReference "Packages/QuotientFinance" */,
+				79BE1E7B96E1C402412D8E1C /* XCLocalSwiftPackageReference "Packages/QuotientNarration" */,
+				083E673AD2B67477E187ED29 /* XCLocalSwiftPackageReference "Packages/QuotientPDF" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = DA1AD1FCEC76DBBEBC677E23 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9CDE6DFFF34DDDF7475337E5 /* Quotient */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B7A88525F06361A30787DA95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */,
+				90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */,
+				232CD024A74D1E6C75737CCB /* SourceSerif4-It.ttf in Resources */,
+				53748ACC96F0319723126D2D /* SourceSerif4-Regular.ttf in Resources */,
+				5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */,
+				EFAA088CA11632F5A09EDB6C /* SourceSerif4-SemiboldIt.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		92F0D8CA463449EEE2144CE0 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if command -v swiftlint >/dev/null 2>&1; then\n  swiftlint --quiet --strict\nelse\n  echo \"warning: SwiftLint not installed — install via 'brew install swiftlint'\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA68859BCB92001E611FA7B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */,
+				0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1AE82439EE785CA6E955E474 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		475935BBAA094652D6D077F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.perlantir.quotient;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EE21544A3684ACEFAFB64F97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		FBBFFD8513C4B6D31381CC60 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.perlantir.quotient;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2426F329F71B583EDD93D359 /* Build configuration list for PBXProject "Quotient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE21544A3684ACEFAFB64F97 /* Debug */,
+				1AE82439EE785CA6E955E474 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A0FBA81A9F3A812D69409DA0 /* Build configuration list for PBXNativeTarget "Quotient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FBBFFD8513C4B6D31381CC60 /* Debug */,
+				475935BBAA094652D6D077F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		083E673AD2B67477E187ED29 /* XCLocalSwiftPackageReference "Packages/QuotientPDF" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/QuotientPDF;
+		};
+		2114C723EEE3240CEED9C67F /* XCLocalSwiftPackageReference "Packages/QuotientCompliance" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/QuotientCompliance;
+		};
+		49837F36960FA395C42CF949 /* XCLocalSwiftPackageReference "Packages/QuotientFinance" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/QuotientFinance;
+		};
+		79BE1E7B96E1C402412D8E1C /* XCLocalSwiftPackageReference "Packages/QuotientNarration" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/QuotientNarration;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3AA26F96351EAF95C04CA8AF /* QuotientNarration */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = QuotientNarration;
+		};
+		7838361CA3FDA0B06DBAF0F1 /* QuotientCompliance */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = QuotientCompliance;
+		};
+		A1197D36724BA39F7185E2D9 /* QuotientPDF */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = QuotientPDF;
+		};
+		F025FA2D597BEFBBC4A3075F /* QuotientFinance */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = QuotientFinance;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 97A286E6F87AF726215BC500 /* Project object */;
+}

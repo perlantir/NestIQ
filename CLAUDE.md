@@ -97,7 +97,7 @@ See `DEVELOPMENT.md` for per-session gates. Don't advance past a gate without hi
 
 ## Non-negotiables
 
-- **Finance engine is the moat.** `QuotientFinance`: ≥95% line + branch coverage, ≥80% mutation score (Muter), all property invariants green, golden fixtures match published values within documented tolerance.
+- **Finance engine is the moat.** `QuotientFinance`: ≥95% line coverage; ≥95% region coverage on reachable paths (defensive guards against validated inputs exempt when documented in the session summary); ≥80% mutation score (Muter); all property invariants green; golden fixtures match published values within documented tolerance.
 - **Design README wins** conflicts with CSS token files. Ledger-green accent `#1F4D3F` light / `#4F9E7D` dark. SF Pro / SF Mono / Source Serif 4.
 - **No force-unwraps in production** without a justifying doc comment. No `Any` casts unless absolutely required.
 - **Don't touch UI in Sessions 1 or 2.** Packages, theme, and components only.

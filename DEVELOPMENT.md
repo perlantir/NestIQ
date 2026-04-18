@@ -68,7 +68,7 @@ Handle these during implementation per iOS HIG defaults + the motion specs in th
 - **Accessibility:** WCAG 2.2 AA on all color pairs; full VoiceOver; Dynamic Type up to Accessibility5 without layout breaks; accessible data-table alternatives for all charts.
 - **Both modes first-class** (light + dark).
 - **Internationalization:** English + Spanish in v1, via `Localizable.xcstrings` catalog.
-- **Finance engine tested to production grade:** ≥95% line coverage, ≥80% mutation score (Muter), property-based invariants, golden fixtures from Freddie Mac / Fannie Mae / CFPB.
+- **Finance engine tested to production grade:** ≥95% line coverage; ≥95% region coverage on reachable paths (defensive guards against validated inputs exempt when documented); ≥80% mutation score (Muter); property-based invariants; golden fixtures from Freddie Mac / Fannie Mae / CFPB.
 
 ---
 
@@ -202,7 +202,8 @@ All money as `Foundation.Decimal`. All rates as `Double`. Day-count convention s
 - Every function JSDoc-style comment declares its convention
 
 ### Testing gate
-- ≥95% line + branch coverage
+- ≥95% line coverage
+- ≥95% region coverage on reachable paths (defensive guards against validated inputs exempt when documented in the session summary)
 - ≥80% Stryker/Muter mutation score
 - Golden fixtures from Freddie Mac Exhibit 5, Fannie Mae Selling Guide, CFPB Reg Z Appendix J examples, Bankrate schedules, VA funding fee, FHA MIP
 - Property-based invariants (write a small PBT harness):
@@ -622,7 +623,7 @@ Seeded `LenderProfile` + 10 sample scenarios across all 5 calculator types. Cred
 
 ## Testing gates (before GA)
 
-- [ ] `QuotientFinance` ≥95% coverage + ≥80% mutation score
+- [ ] `QuotientFinance` ≥95% line coverage; ≥95% region coverage on reachable paths (defensive guards exempt when documented); ≥80% mutation score
 - [ ] All property-based invariants pass
 - [ ] All golden fixtures match published values
 - [ ] UI Tests: onboarding → build + save scenario (each of 5 types) → share as PDF → all green

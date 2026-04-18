@@ -1,0 +1,32 @@
+# Muter configuration for QuotientFinance mutation testing.
+#
+# Run nightly in CI (GitHub Actions schedule trigger). Do NOT run in normal
+# dev loop — full run on this package takes 20+ minutes on local hardware.
+#
+# Gate target: ≥80% mutation score (DEVELOPMENT.md). Below 80% means too
+# many mutated variants survive — our tests don't exercise enough
+# behavioural boundaries.
+#
+# Exclude generated sources (none currently) and the APOR data table
+# (data, not logic).
+
+executable: swift
+arguments:
+  - test
+  - -c
+  - release
+
+include:
+  - Sources/QuotientFinance/Primitives
+  - Sources/QuotientFinance/MI
+  - Sources/QuotientFinance/Amortize.swift
+  - Sources/QuotientFinance/DecimalExtensions.swift
+
+exclude:
+  - Sources/QuotientFinance/APOR/APORTable.swift  # data only
+  - Tests
+
+# Operators left at Muter's defaults (RelationalOperatorReplacement,
+# LogicalOperatorReplacement, RemoveSideEffects, TernaryOperator,
+# SwapArgumentsInCallExpression, etc.). Adjust once we see the first
+# baseline report and confirm the score profile.
