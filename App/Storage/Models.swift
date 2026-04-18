@@ -49,6 +49,40 @@ public enum DensityPreference: String, Codable, Sendable, CaseIterable {
     case comfortable, compact
 }
 
+/// How the LO's NMLS ID surfaces on the borrower-facing PDF.
+public enum NMLSDisplayFormat: String, Codable, Sendable, CaseIterable {
+    /// `NMLS #1428391` — the ID alone.
+    case idOnly
+    /// `NMLS #1428391 · nmlsconsumeraccess.org/...` — ID plus the
+    /// individual's Consumer Access deep link. Default.
+    case idAndURL
+    /// Omit the NMLS line from the PDF entirely. LOs who don't want the
+    /// footer on their borrower-facing output pick this.
+    case none
+
+    public var display: String {
+        switch self {
+        case .idOnly:  "ID only"
+        case .idAndURL: "ID + Consumer Access"
+        case .none:    "Omit"
+        }
+    }
+}
+
+/// Language the federal Equal Housing Opportunity statement renders in
+/// on borrower-facing PDFs. Distinct from the app's `preferredLanguage`
+/// so an EN-speaking LO can still issue ES statements.
+public enum EHOLanguage: String, Codable, Sendable, CaseIterable {
+    case en, es
+
+    public var display: String {
+        switch self {
+        case .en: "English"
+        case .es: "Español"
+        }
+    }
+}
+
 @Model
 public final class LenderProfile {
     @Attribute(.unique)
@@ -71,6 +105,9 @@ public final class LenderProfile {
     public var soundsEnabled: Bool
     public var densityPreferenceRaw: String
     public var appearanceRaw: String
+    public var pdfLanguage: String = "en"
+    public var nmlsDisplayFormatRaw: String = NMLSDisplayFormat.idAndURL.rawValue
+    public var ehoLanguageRaw: String = EHOLanguage.en.rawValue
     public var hasCompletedOnboarding: Bool
     public var createdAt: Date
     public var updatedAt: Date
@@ -86,6 +123,9 @@ public final class LenderProfile {
         phone: String = "",
         email: String = "",
         preferredLanguage: String = "en",
+        pdfLanguage: String = "en",
+        nmlsDisplayFormat: NMLSDisplayFormat = .idAndURL,
+        ehoLanguage: EHOLanguage = .en,
         faceIDEnabled: Bool = false,
         hapticsEnabled: Bool = true,
         soundsEnabled: Bool = false,
@@ -105,6 +145,9 @@ public final class LenderProfile {
         self.phone = phone
         self.email = email
         self.preferredLanguage = preferredLanguage
+        self.pdfLanguage = pdfLanguage
+        self.nmlsDisplayFormatRaw = nmlsDisplayFormat.rawValue
+        self.ehoLanguageRaw = ehoLanguage.rawValue
         self.faceIDEnabled = faceIDEnabled
         self.hapticsEnabled = hapticsEnabled
         self.soundsEnabled = soundsEnabled
@@ -123,6 +166,16 @@ public final class LenderProfile {
     public var density: DensityPreference {
         get { DensityPreference(rawValue: densityPreferenceRaw) ?? .comfortable }
         set { densityPreferenceRaw = newValue.rawValue }
+    }
+
+    public var nmlsDisplayFormat: NMLSDisplayFormat {
+        get { NMLSDisplayFormat(rawValue: nmlsDisplayFormatRaw) ?? .idAndURL }
+        set { nmlsDisplayFormatRaw = newValue.rawValue }
+    }
+
+    public var ehoLanguage: EHOLanguage {
+        get { EHOLanguage(rawValue: ehoLanguageRaw) ?? .en }
+        set { ehoLanguageRaw = newValue.rawValue }
     }
 
     public var fullName: String {
