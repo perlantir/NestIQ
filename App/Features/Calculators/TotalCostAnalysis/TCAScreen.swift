@@ -168,12 +168,18 @@ struct TCAScreen: View {
                     Text(String(format: "%.3f", s.rate))
                         .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.ink)
-                    Text("pts \(String(format: "%.1f", s.points))")
+                    Text("pts \(String(format: "%.2f", s.points))")
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkTertiary)
                     Text("\(s.termYears)y")
                         .textStyle(Typography.num.withSize(12))
                         .foregroundStyle(Palette.inkSecondary)
+                    Text("Mo " + monthlyPaymentDisplay(for: s, at: idx))
+                        .textStyle(Typography.num.withSize(10.5))
+                        .foregroundStyle(Palette.inkSecondary)
+                    Text("Close " + closingDisplay(for: s))
+                        .textStyle(Typography.num.withSize(10.5))
+                        .foregroundStyle(Palette.inkTertiary)
                 }
                 .padding(.horizontal, Spacing.s8)
                 .padding(.vertical, Spacing.s8)
@@ -191,6 +197,25 @@ struct TCAScreen: View {
                 .stroke(Palette.borderSubtle, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.default))
+    }
+
+    private func monthlyPaymentDisplay(for scenario: TCAScenario, at index: Int) -> String {
+        guard let metrics = viewModel.result?.scenarioMetrics,
+              index < metrics.count else { return "—" }
+        return "$\(MoneyFormat.shared.decimalString(metrics[index].payment))"
+    }
+
+    /// "Closing" display applies the Session 5B.5.3 convention: the
+    /// user-entered total already includes points. We show the combined
+    /// all-in number here with the points share as a compact hint.
+    private func closingDisplay(for scenario: TCAScenario) -> String {
+        let breakdown = ClosingCostBreakdown(
+            totalClosingCosts: scenario.closingCosts,
+            pointsPercentage: scenario.points,
+            loanAmount: viewModel.inputs.loanAmount
+        )
+        let total = MoneyFormat.shared.dollarsShort(breakdown.totalClosingCosts)
+        return total
     }
 
     // MARK: Matrix
