@@ -61,6 +61,7 @@
 		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
 		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
+		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
 		920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */; };
@@ -186,6 +187,7 @@
 		A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationBreakdownView.swift; sourceTree = "<group>"; };
 		A0C1B0601932028F30AD87A8 /* TCAInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAInputs.swift; sourceTree = "<group>"; };
 		A19EB3913BF810BA0A9EA1AF /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
+		A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorHelocTests.swift; sourceTree = "<group>"; };
 		A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModelTests.swift; sourceTree = "<group>"; };
 		A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModel.swift; sourceTree = "<group>"; };
 		A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Regular.ttf"; sourceTree = "<group>"; };
@@ -399,6 +401,7 @@
 			isa = PBXGroup;
 			children = (
 				7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */,
+				A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */,
 				9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */,
 				E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */,
 				C38C48023F20605AA323F916 /* CalculatorTCATests.swift */,
@@ -742,6 +745,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */,
+				82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */,
 				C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */,
 				9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */,
 				C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */,

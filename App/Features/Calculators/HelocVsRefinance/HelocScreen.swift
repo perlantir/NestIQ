@@ -6,6 +6,8 @@ import SwiftUI
 import Charts
 import SwiftData
 import QuotientFinance
+import QuotientNarration
+import QuotientPDF
 
 @Observable
 @MainActor
@@ -87,9 +89,14 @@ struct HelocScreen: View {
     var existingScenario: Scenario?
 
     @State private var viewModel = HelocViewModel()
+    @State private var showingNarration = false
+    @State private var justSaved = false
+    @State private var shareBundle: ShareBundle?
 
     @Environment(\.modelContext)
     private var modelContext
+
+    @Query private var profiles: [LenderProfile]
 
     var body: some View {
         ScrollView {
@@ -122,6 +129,34 @@ struct HelocScreen: View {
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
         }
+        .sheet(isPresented: $showingNarration) {
+            NarrationSheet(facts: narrationFacts) { _ in }
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $shareBundle) { bundle in
+            QuotientSharePreview(
+                profile: bundle.profile,
+                borrower: viewModel.borrower,
+                pdfURL: bundle.url,
+                pageCount: bundle.pageCount,
+                onDismiss: {}
+            )
+            .presentationDetents([.large])
+        }
+    }
+
+    private var narrationFacts: ScenarioFacts {
+        let blend = String(format: "%.2f%%", viewModel.blendedRate)
+        let refi = String(format: "%.3f%%", viewModel.inputs.refiRate)
+        return ScenarioFacts(
+            scenarioType: .helocVsRefinance,
+            borrowerFirstName: viewModel.borrower?.firstName,
+            numericFacts: [blend, refi],
+            fields: [
+                "blendedRate": blend,
+                "refiRate": refi,
+            ]
+        )
     }
 
     // MARK: Borrower
@@ -300,39 +335,33 @@ struct HelocScreen: View {
     // MARK: Dock
 
     private var bottomDock: some View {
-        HStack(spacing: Spacing.s8) {
-            Button {} label: {
-                Text("Edit paths")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { save() } label: {
-                Text("Share as PDF")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .layoutPriority(1)
+        CalculatorDock(
+            saveLabel: justSaved ? "Saved" : "Save",
+            onNarrate: { showingNarration = true },
+            onSave: { save() },
+            onShare: { generatePDFAndShare() }
+        )
+    }
+
+    private func generatePDFAndShare() {
+        guard let profile = profiles.first else { return }
+        do {
+            let url = try PDFBuilder.buildHelocPDF(
+                profile: profile,
+                borrower: viewModel.borrower,
+                viewModel: viewModel,
+                narrative: verdictCopy
+            )
+            shareBundle = ShareBundle(
+                url: url,
+                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                profile: profile
+            )
+        } catch {
+            #if DEBUG
+            print("[HelocScreen] PDF gen failed: \(error)")
+            #endif
         }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-                 alignment: .top)
     }
 
     private func save() {
@@ -358,5 +387,7 @@ struct HelocScreen: View {
             modelContext.insert(s)
         }
         try? modelContext.save()
+        justSaved = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
     }
 }
