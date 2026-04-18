@@ -35,6 +35,7 @@
 		3CA97BE097CFB72AD1DE8982 /* KPITile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00A91D51212853350CE39F8 /* KPITile.swift */; };
 		3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE473E21016935AB38F78564 /* HomeScreen.swift */; };
 		44C767529EDBC2DC74CCFB27 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514FAC8A89F4FEEE70FAB0F7 /* OnboardingStep.swift */; };
+		456044E0A90F9CDC6FE3B665 /* HelocViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */; };
 		45BDCF05270984C4D7995217 /* BorrowerPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4A4881C0CA2B982907EC15 /* BorrowerPill.swift */; };
 		45EDBA4287AC65E86FC29A8D /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = F025FA2D597BEFBBC4A3075F /* QuotientFinance */; };
 		48171DBA746740E34FF70A26 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48FCE5E97C92AFF164AD551A /* Colors.swift */; };
@@ -50,9 +51,12 @@
 		5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */; };
 		5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381BCE91A0673E2D3CBDA9E /* Buttons.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
+		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
 		6C0915635C4789C21F950B40 /* AmortizationResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */; };
+		71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */; };
 		725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B782FB7D6EF280A7AC6FD31A /* Spacing.swift */; };
+		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
 		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
@@ -72,6 +76,7 @@
 		ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
 		BD7A57941289F8ADBA75D608 /* DataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4698C088D95213A6366BAE /* DataRow.swift */; };
+		C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */; };
 		C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */; };
 		C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */; };
 		C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */ = {isa = PBXBuildFile; productRef = A1197D36724BA39F7185E2D9 /* QuotientPDF */; };
@@ -116,6 +121,7 @@
 /* Begin PBXFileReference section */
 		002F99B0FE0E436208AF140B /* AppleAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuth.swift; sourceTree = "<group>"; };
 		013EB8A3BE22C58B5BACB28C /* QuotientTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QuotientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualViewModelTests.swift; sourceTree = "<group>"; };
 		0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePill.swift; sourceTree = "<group>"; };
 		099A45DD977D77B495AD52F6 /* MockRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRateService.swift; sourceTree = "<group>"; };
 		0F740E91156398C886E507D3 /* NarrationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationSheet.swift; sourceTree = "<group>"; };
@@ -125,6 +131,7 @@
 		21294577B6542C065DE45454 /* AmortizationInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputsScreen.swift; sourceTree = "<group>"; };
 		2290990D9F81FF13366CB427 /* DTIDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTIDial.swift; sourceTree = "<group>"; };
 		24A9A56018B8BBF20141BD86 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		26567951086061287C748DAC /* PDFBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFBuilderTests.swift; sourceTree = "<group>"; };
 		2B001B321FAB543828487B6D /* CalculatorNewScenarioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorNewScenarioView.swift; sourceTree = "<group>"; };
 		2B6DDD5E48E86450B2850339 /* AmortizationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModelTests.swift; sourceTree = "<group>"; };
 		316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorListRow.swift; sourceTree = "<group>"; };
@@ -144,6 +151,7 @@
 		58E0EFC7F288F0C507A7808F /* AmortizationScheduleTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationScheduleTable.swift; sourceTree = "<group>"; };
 		5B4A4881C0CA2B982907EC15 /* BorrowerPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowerPill.swift; sourceTree = "<group>"; };
 		5D15C026D3869F6E5AF23D67 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
+		63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAViewModelTests.swift; sourceTree = "<group>"; };
 		64737CBA7DC296452DB91B72 /* QuotientNarration */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientNarration; path = Packages/QuotientNarration; sourceTree = SOURCE_ROOT; };
 		66FE485DD2156202FF433AAF /* ComparisonGroupedBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComparisonGroupedBars.swift; sourceTree = "<group>"; };
 		6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceInputs.swift; sourceTree = "<group>"; };
@@ -202,6 +210,8 @@
 		E546EE5E4455799D394A7299 /* HelocScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocScreen.swift; sourceTree = "<group>"; };
 		E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationMoneyFormat.swift; sourceTree = "<group>"; };
 		E9494E196F0A2E455640AF19 /* Quotient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Quotient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModelTests.swift; sourceTree = "<group>"; };
+		F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocViewModelTests.swift; sourceTree = "<group>"; };
 		F2E629BB721D286991CE4C26 /* StackedHorizontalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedHorizontalBar.swift; sourceTree = "<group>"; };
 		F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputs.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -284,7 +294,12 @@
 			isa = PBXGroup;
 			children = (
 				2B6DDD5E48E86450B2850339 /* AmortizationViewModelTests.swift */,
+				F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */,
+				0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */,
+				26567951086061287C748DAC /* PDFBuilderTests.swift */,
+				ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */,
 				A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */,
+				63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */,
 			);
 			path = AppTests;
 			sourceTree = "<group>";
@@ -714,7 +729,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				542E16E580CE378565599400 /* AmortizationViewModelTests.swift in Sources */,
+				456044E0A90F9CDC6FE3B665 /* HelocViewModelTests.swift in Sources */,
+				64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */,
+				730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */,
+				C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */,
 				C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */,
+				71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
