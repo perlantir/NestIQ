@@ -116,3 +116,41 @@ targets:
             echo "warning: SwiftLint not installed — install via 'brew install swiftlint'"
           fi
         basedOnDependencyAnalysis: false
+  QuotientTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: AppTests
+    dependencies:
+      - target: Quotient
+      - package: QuotientFinance
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Quotient.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Quotient"
+        INFOPLIST_FILE: ""
+        GENERATE_INFOPLIST_FILE: YES
+  QuotientUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: AppUITests
+    dependencies:
+      - target: Quotient
+    settings:
+      base:
+        TEST_TARGET_NAME: Quotient
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Quotient:
+    build:
+      targets:
+        Quotient: all
+        QuotientTests: [test]
+        QuotientUITests: [test]
+    test:
+      targets:
+        - QuotientTests
+        - QuotientUITests
