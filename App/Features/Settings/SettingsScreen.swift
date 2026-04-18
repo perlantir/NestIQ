@@ -20,6 +20,7 @@ struct SettingsScreen: View {
     @State private var showingProfileEditor = false
     @State private var showingReplayConfirmation = false
     @State private var showingFeedbackSheet = false
+    @State private var showingEraseConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -61,6 +62,16 @@ struct SettingsScreen: View {
             ) {
                 Button("Replay tour") { replayOnboarding() }
                 Button("Cancel", role: .cancel) {}
+            }
+            .alert(
+                "Erase local data?",
+                isPresented: $showingEraseConfirmation
+            ) {
+                Button("Erase", role: .destructive) { eraseData() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all saved scenarios, "
+                    + "borrowers, and preferences. Your account will remain.")
             }
         }
     }
@@ -264,7 +275,7 @@ struct SettingsScreen: View {
                         )))
             SettingsRow(label: "Erase local data",
                         trailing: .disclosure,
-                        onTap: { eraseData() })
+                        onTap: { showingEraseConfirmation = true })
         }
     }
 
@@ -285,31 +296,10 @@ struct SettingsScreen: View {
             divider
             SettingsRow(label: "Replay onboarding tour",
                         onTap: { showingReplayConfirmation = true })
-            #if DEBUG
-            divider
-            NavigationLink {
-                ComponentGallery()
-                    .navigationTitle("Component gallery")
-                    .navigationBarTitleDisplayMode(.inline)
-            } label: {
-                HStack {
-                    Text("Component gallery")
-                        .font(.system(size: 17))
-                        .foregroundStyle(Palette.ink)
-                    Spacer()
-                    Text("DEBUG")
-                        .textStyle(Typography.num.withSize(10.5))
-                        .foregroundStyle(Palette.inkTertiary)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Palette.inkTertiary)
-                }
-                .padding(.horizontal, Spacing.s16)
-                .padding(.vertical, Spacing.s12)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            #endif
+            // Component gallery removed from user-facing Settings per
+            // Session 5B.1.e. The ComponentGallery view stays in the
+            // codebase and will be rewired behind a DEBUG-only
+            // shake-gesture dev menu in a later session.
             divider
             SettingsRow(label: "Version",
                         trailing: .value(versionDisplay),
@@ -431,6 +421,9 @@ struct SettingsScreen: View {
         try? modelContext.delete(model: Scenario.self)
         try? modelContext.delete(model: Borrower.self)
         try? modelContext.save()
+        if profile.hapticsEnabled {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
     }
 }
 
