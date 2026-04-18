@@ -56,7 +56,12 @@ struct SavedScenariosScreen: View {
         case .amortization:
             AmortizationInputsScreen(
                 borrower: s.borrower,
-                initialInputs: decodeAmortization(from: s.inputsJSON),
+                initialInputs: decode(AmortizationFormInputs.self, from: s.inputsJSON),
+                existingScenario: s
+            )
+        case .incomeQualification:
+            IncomeQualScreen(
+                initialInputs: decode(IncomeQualFormInputs.self, from: s.inputsJSON),
                 existingScenario: s
             )
         default:
@@ -64,10 +69,10 @@ struct SavedScenariosScreen: View {
         }
     }
 
-    private func decodeAmortization(from data: Data) -> AmortizationFormInputs? {
+    private func decode<T: Decodable>(_ type: T.Type, from data: Data) -> T? {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try? decoder.decode(AmortizationFormInputs.self, from: data)
+        return try? decoder.decode(type, from: data)
     }
 
     // MARK: Header

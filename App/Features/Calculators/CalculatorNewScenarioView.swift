@@ -14,7 +14,7 @@ struct CalculatorNewScenarioView: View {
         case .amortization:
             AmortizationInputsScreen(borrower: nil)
         case .incomeQualification:
-            ComingSoonStub(calculator: calculator)
+            IncomeQualScreen()
         case .refinance:
             ComingSoonStub(calculator: calculator)
         case .totalCostAnalysis:
