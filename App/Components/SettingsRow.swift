@@ -53,30 +53,35 @@ public struct SettingsRow: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            Button {
-                onTap?()
-            } label: {
-                HStack(spacing: Spacing.s16) {
-                    Text(label)
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundStyle(Palette.ink)
-                    Spacer()
-                    trailingView
+            if case .toggle = trailing {
+                // Toggle rows render the pill as their own hit target — wrapping
+                // them in an outer Button swallows the toggle's tap.
+                rowContent
+            } else {
+                Button {
+                    onTap?()
+                } label: {
+                    rowContent
                 }
-                .padding(.horizontal, Spacing.s16)
-                .padding(.vertical, Spacing.s12)
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .disabled(onTap == nil)
             }
-            .buttonStyle(.plain)
-            .disabled(onTap == nil && !isInteractive)
             HairlineDivider()
                 .padding(.leading, Spacing.s16)
         }
     }
 
-    private var isInteractive: Bool {
-        if case .toggle = trailing { return true }
-        return false
+    private var rowContent: some View {
+        HStack(spacing: Spacing.s16) {
+            Text(label)
+                .font(.system(size: 17, weight: .regular))
+                .foregroundStyle(Palette.ink)
+            Spacer()
+            trailingView
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder private var trailingView: some View {
