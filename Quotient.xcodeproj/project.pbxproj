@@ -54,6 +54,7 @@
 		5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381BCE91A0673E2D3CBDA9E /* Buttons.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
 		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
+		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
 		6C0915635C4789C21F950B40 /* AmortizationResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */; };
 		71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */; };
@@ -137,6 +138,7 @@
 		0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualViewModelTests.swift; sourceTree = "<group>"; };
 		0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePill.swift; sourceTree = "<group>"; };
 		099A45DD977D77B495AD52F6 /* MockRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRateService.swift; sourceTree = "<group>"; };
+		0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocInputsScreen.swift; sourceTree = "<group>"; };
 		0F740E91156398C886E507D3 /* NarrationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationSheet.swift; sourceTree = "<group>"; };
 		0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceInputsScreen.swift; sourceTree = "<group>"; };
 		1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorAmortTests.swift; sourceTree = "<group>"; };
@@ -598,6 +600,7 @@
 			isa = PBXGroup;
 			children = (
 				D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */,
+				0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */,
 				E546EE5E4455799D394A7299 /* HelocScreen.swift */,
 			);
 			path = HelocVsRefinance;
@@ -821,6 +824,7 @@
 				0DF0E7CE87E8E3234206121F /* FilterChip.swift in Sources */,
 				12B251F0DF98735D91CD06A4 /* HairlineDivider.swift in Sources */,
 				756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */,
+				65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */,
 				ED9A0F824482974D1EEEA77D /* HelocScreen.swift in Sources */,
 				3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */,
 				0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */,

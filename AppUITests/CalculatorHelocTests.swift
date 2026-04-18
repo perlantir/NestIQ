@@ -12,6 +12,10 @@ final class CalculatorHelocTests: XCTestCase {
 
     func testHelocFullFlow() async throws {
         let app = UITest.launchApp()
-        UITest.exerciseCalculatorFlow(app, slug: "helocVsRefinance")
+        UITest.exerciseTwoStepCalculatorFlow(
+            app,
+            slug: "helocVsRefinance",
+            computeId: "heloc.compute"
+        )
     }
 }
