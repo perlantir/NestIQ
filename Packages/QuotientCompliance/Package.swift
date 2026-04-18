@@ -7,16 +7,20 @@ let package = Package(
     products: [
         .library(name: "QuotientCompliance", targets: ["QuotientCompliance"])
     ],
+    dependencies: [
+        .package(path: "../QuotientFinance")
+    ],
     targets: [
         .target(
             name: "QuotientCompliance",
+            dependencies: ["QuotientFinance"],
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny")
             ]
         ),
         .testTarget(
             name: "QuotientComplianceTests",
-            dependencies: ["QuotientCompliance"]
+            dependencies: ["QuotientCompliance", "QuotientFinance"]
         )
     ]
 )
