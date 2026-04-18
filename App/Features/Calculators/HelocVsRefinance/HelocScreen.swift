@@ -22,6 +22,41 @@ final class HelocViewModel {
 
     var blendedRate: Double { inputs.blendedRate }
 
+    /// Effective blended rate (first lien + HELOC) at the 120-month
+    /// horizon, derived from the full `simulateHelocPath` engine run
+    /// instead of the static-at-origination `blendedRate` above. Used
+    /// for the new "10-year blended" hero in the results view.
+    /// Falls back to the at-origination figure when the simulator
+    /// returns nil (shouldn't happen with the default inputs — the
+    /// draw + repay window covers 360 months — but keep the display
+    /// honest rather than crashing on an edge case).
+    var blendedRateAtTenYears: Double {
+        let firstLienLoan = Loan(
+            principal: inputs.firstLienBalance,
+            annualRate: inputs.firstLienRate / 100,
+            termMonths: inputs.firstLienRemainingYears * 12,
+            startDate: Date()
+        )
+        let product = HelocProduct(
+            creditLimit: inputs.helocAmount,
+            introRate: inputs.helocIntroRate / 100,
+            introPeriodMonths: inputs.helocIntroMonths,
+            indexType: .prime,
+            margin: 0,
+            currentFullyIndexedRate: inputs.helocFullyIndexedRate / 100,
+            drawPeriodMonths: 120,
+            repayPeriodMonths: 240,
+            minimumPaymentType: .interestOnly
+        )
+        let sim = simulateHelocPath(
+            firstLien: firstLienLoan,
+            product: product,
+            drawSchedule: HelocDrawSchedule(initialDraw: inputs.helocAmount),
+            ratePath: .flat
+        )
+        return (sim.blendedRateAtHorizon ?? inputs.blendedRate / 100) * 100
+    }
+
     func helocMonthlyPayment(shockBps: Double = 0) -> Decimal {
         // Simple IO + principal-back-at-end sim for the UI preview; the
         // full simulateHelocPath covers the repay-phase math for PDFs.
@@ -107,7 +142,7 @@ struct HelocScreen: View {
                     .padding(.bottom, Spacing.s16)
 
                 blendedRateHero
-                stressChartSection
+                tenYearBlendedCard
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
                 verdict
@@ -250,54 +285,43 @@ struct HelocScreen: View {
         }
     }
 
-    // MARK: Stress paths
+    // MARK: Ten-year blended rate card
 
-    private var stressChartSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
-            Text("Monthly payment · 10-yr stress")
-                .textStyle(Typography.section)
-                .foregroundStyle(Palette.ink)
-            Text("HELOC flexes with prime. Refi is flat but higher today.")
-                .textStyle(Typography.body.withSize(12))
-                .foregroundStyle(Palette.inkSecondary)
-                .padding(.bottom, Spacing.s12)
-            Chart {
-                ForEach(HelocViewModel.StressKind.allCases, id: \.self) { kind in
-                    ForEach(Array(viewModel.stressPath(kind: kind).enumerated()), id: \.offset) { _, pt in
-                        LineMark(
-                            x: .value("Month", pt.0),
-                            y: .value("Payment", pt.1)
-                        )
-                        .foregroundStyle(by: .value("Path", label(for: kind)))
-                        .lineStyle(StrokeStyle(lineWidth: kind == .base ? 1.8 : 1.25,
-                                               lineCap: .round))
-                        .opacity(kind == .base ? 1.0 : 0.7)
-                    }
-                }
-                let refiValue = Double(truncating: viewModel.refiMonthlyPayment() as NSNumber)
-                ForEach(0..<5, id: \.self) { _ in
-                    RuleMark(y: .value("Refi flat", refiValue))
-                        .foregroundStyle(Palette.scenario2)
-                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
-                }
+    private var tenYearBlendedCard: some View {
+        let rate = viewModel.blendedRateAtTenYears
+        return HStack(alignment: .firstTextBaseline, spacing: Spacing.s12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Eyebrow("Blended rate · 10-year horizon")
+                Text("Effective weighted rate at month 120, simulated.")
+                    .textStyle(Typography.body.withSize(11.5))
+                    .foregroundStyle(Palette.inkTertiary)
             }
-            .chartForegroundStyleScale([
-                "HELOC base": Palette.accent,
-                "+2pt shock": Palette.loss,
-                "−1pt relief": Palette.gain,
-            ])
-            .frame(height: 180)
-            .chartLegend(position: .bottom)
+            Spacer()
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(String(format: "%.2f", rate))
+                    .textStyle(Typography.num.withSize(28, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Palette.ink)
+                Text("%")
+                    .textStyle(Typography.num.withSize(13))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
         }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s16)
+        .background(Palette.surfaceRaised)
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.listCard)
+                .stroke(Palette.borderSubtle, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
     }
 
-    private func label(for kind: HelocViewModel.StressKind) -> String {
-        switch kind {
-        case .base: "HELOC base"
-        case .shock: "+2pt shock"
-        case .relief: "−1pt relief"
-        }
-    }
+    // Stress-shock chart removed from the screen per Session 5A HELOC UI
+    // refinements. The engine-side `simulateHelocPath` in QuotientFinance
+    // is untouched (property tests depend on it). The `stressPath` /
+    // `StressKind` helpers on `HelocViewModel` remain available so a
+    // future session can plot stress paths somewhere else without
+    // re-deriving the geometry.
 
     // MARK: Verdict
 

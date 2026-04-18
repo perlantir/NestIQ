@@ -213,6 +213,11 @@ struct HelocInputsScreen: View {
 
     // MARK: HELOC option
 
+    /// Assumed Prime rate — reasonable snapshot for the UI preview. The
+    /// engine doesn't care about the Prime/margin split; it reads the
+    /// already-combined `helocFullyIndexedRate` on the form input.
+    private let assumedPrime: Double = 7.50
+
     private var helocSection: some View {
         fieldGroup(header: "HELOC option · keep 1st") {
             FieldRow(
@@ -231,33 +236,50 @@ struct HelocInputsScreen: View {
                     get: { viewModel.inputs.helocIntroMonths },
                     set: { viewModel.inputs.helocIntroMonths = $0 }
                 ),
-                range: 0...60,
-                step: 6,
+                range: 1...24,
+                step: 1,
                 suffix: "mo"
             )
             divider
-            FieldRow(
-                label: "Fully-indexed rate",
-                suffix: "%",
-                hint: "after intro · margin + index",
-                decimal: Binding(
-                    get: { Decimal(viewModel.inputs.helocFullyIndexedRate) },
-                    set: { viewModel.inputs.helocFullyIndexedRate = Double(truncating: $0 as NSNumber) }
-                ),
-                fractionDigits: 3
-            )
-            divider
-            stepperRow(
-                label: "Stress shock",
-                value: Binding(
-                    get: { viewModel.inputs.stressShockBps },
-                    set: { viewModel.inputs.stressShockBps = $0 }
-                ),
-                range: 0...500,
-                step: 25,
-                suffix: "bps"
-            )
+            rateMarginRow
         }
+    }
+
+    /// "Prime + X.XX%" row. Reads and writes `helocFullyIndexedRate` so
+    /// the engine behavior stays identical; the UI just reshapes the
+    /// number as a margin over an assumed Prime value.
+    private var rateMarginRow: some View {
+        let marginBinding = Binding<Double>(
+            get: { max(0, viewModel.inputs.helocFullyIndexedRate - assumedPrime) },
+            set: { viewModel.inputs.helocFullyIndexedRate = assumedPrime + $0 }
+        )
+        return HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Rate margin")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(String(format: "Prime + %.2f%% → %.3f%% fully indexed",
+                            marginBinding.wrappedValue,
+                            viewModel.inputs.helocFullyIndexedRate))
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Spacer()
+            Stepper(
+                value: marginBinding,
+                in: 0.0...6.0,
+                step: 0.25
+            ) {
+                EmptyView()
+            }
+            .labelsHidden()
+            Text(String(format: "%.2f%%", marginBinding.wrappedValue))
+                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+                .frame(minWidth: 64, alignment: .trailing)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
     }
 
     // MARK: Compute CTA
