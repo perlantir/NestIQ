@@ -95,30 +95,85 @@ struct AmortizationBreakdownView: View {
 struct AmortizationScheduleView: View {
     let viewModel: AmortizationViewModel
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s12) {
-            Text("Schedule")
-                .textStyle(Typography.section)
-                .foregroundStyle(Palette.ink)
-            scheduleHeader
-            ForEach(sampledRows(), id: \.number) { row in
-                scheduleRow(row)
-                Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+    enum Granularity: String, Hashable, CaseIterable {
+        case yearly, monthly
+        var label: String {
+            switch self {
+            case .yearly:  return "Yearly"
+            case .monthly: return "Monthly"
             }
-            Text("Showing \(min(8, viewModel.schedule?.numberOfPayments ?? 0)) of \(viewModel.schedule?.numberOfPayments ?? 0) payments.")
-                .textStyle(Typography.body.withSize(11))
-                .foregroundStyle(Palette.inkTertiary)
-                .italic()
-                .padding(.top, Spacing.s4)
         }
     }
 
+    @State private var granularity: Granularity
+
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    init(viewModel: AmortizationViewModel) {
+        self.viewModel = viewModel
+        // Default to monthly for short terms (≤ 15 yrs); yearly otherwise —
+        // avoids dumping 360 rows on someone who just hit Compute.
+        let initial: Granularity = viewModel.inputs.termYears <= 15 ? .monthly : .yearly
+        _granularity = State(initialValue: initial)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.s12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Schedule")
+                    .textStyle(Typography.section)
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+            }
+            SegmentedControl(
+                options: Granularity.allCases,
+                selection: $granularity,
+                label: { $0.label }
+            )
+            .frame(maxWidth: 220)
+
+            Group {
+                switch granularity {
+                case .yearly:  yearlyTable
+                case .monthly: monthlyTable
+                }
+            }
+            .transaction(value: granularity) { t in
+                t.animation = reduceMotion ? nil : Motion.numberTweenEaseInOut
+            }
+
+            footerLabel
+        }
+    }
+
+    private var footerLabel: some View {
+        let count = viewModel.schedule?.numberOfPayments ?? 0
+        let years = yearlyRows.count
+        let text: String = granularity == .monthly
+            ? "Showing all \(count) payments."
+            : "Showing \(years) loan years · \(count) payments."
+        return Text(text)
+            .textStyle(Typography.body.withSize(11))
+            .foregroundStyle(Palette.inkTertiary)
+            .italic()
+            .padding(.top, Spacing.s4)
+    }
+
+    // MARK: Shared header
+
     private var scheduleHeader: some View {
-        HStack(spacing: 0) {
-            Text("#")
+        let leading = granularity == .yearly ? "YR" : "#"
+        let dateCol = granularity == .yearly ? "Year" : "Date"
+        return HStack(spacing: 0) {
+            Text(leading)
                 .textStyle(Typography.micro.withSize(10))
                 .foregroundStyle(Palette.inkTertiary)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: 36, alignment: .leading)
+            Text(dateCol.uppercased())
+                .textStyle(Typography.micro.withSize(10))
+                .foregroundStyle(Palette.inkTertiary)
+                .frame(width: 58, alignment: .leading)
             ForEach(["Pmt", "Prin", "Int", "Balance"], id: \.self) { h in
                 Text(h.uppercased())
                     .textStyle(Typography.micro.withSize(10))
@@ -135,12 +190,30 @@ struct AmortizationScheduleView: View {
         }
     }
 
-    private func scheduleRow(_ p: AmortizationPayment) -> some View {
+    // MARK: Monthly table (virtualized)
+
+    private var monthlyTable: some View {
+        VStack(spacing: 0) {
+            scheduleHeader
+            LazyVStack(spacing: 0) {
+                ForEach(viewModel.schedule?.payments ?? [], id: \.number) { p in
+                    monthlyRow(p)
+                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                }
+            }
+        }
+    }
+
+    private func monthlyRow(_ p: AmortizationPayment) -> some View {
         HStack(spacing: 0) {
             Text(String(format: "%03d", p.number))
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.inkTertiary)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: 36, alignment: .leading)
+            Text(monthLabel(p.date))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(width: 58, alignment: .leading)
             Text(MoneyFormat.shared.decimalString(p.payment))
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.ink)
@@ -161,17 +234,64 @@ struct AmortizationScheduleView: View {
         .padding(.vertical, Spacing.s8)
     }
 
-    private func sampledRows() -> [AmortizationPayment] {
-        guard let payments = viewModel.schedule?.payments, !payments.isEmpty else { return [] }
-        let count = payments.count
-        let indices: [Int] = [0, 11, 59, 119, 179, 239, 299, count - 1]
-            .map { min(max(0, $0), count - 1) }
-        var seen: Set<Int> = []
-        var out: [AmortizationPayment] = []
-        for i in indices where !seen.contains(i) {
-            seen.insert(i)
-            out.append(payments[i])
+    // MARK: Yearly table
+
+    private var yearlyRows: [YearlyScheduleRow] {
+        guard let schedule = viewModel.schedule else { return [] }
+        return yearlyAggregate(schedule: schedule)
+    }
+
+    private var yearlyTable: some View {
+        VStack(spacing: 0) {
+            scheduleHeader
+            ForEach(yearlyRows) { row in
+                yearlyRow(row)
+                Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+            }
         }
-        return out
+    }
+
+    private func yearlyRow(_ row: YearlyScheduleRow) -> some View {
+        HStack(spacing: 0) {
+            Text("\(row.year)")
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.inkTertiary)
+                .frame(width: 36, alignment: .leading)
+            Text(yearLabel(row.firstPaymentDate))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(width: 58, alignment: .leading)
+            Text(MoneyFormat.shared.decimalString(row.totalPayment))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text(MoneyFormat.shared.decimalString(row.totalPrincipal))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text(MoneyFormat.shared.decimalString(row.totalInterest))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text(MoneyFormat.shared.decimalString(row.endingBalance))
+                .textStyle(Typography.num.withSize(12))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.vertical, Spacing.s8)
+    }
+
+    // MARK: Date formatting
+
+    private func monthLabel(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "MMM ''yy"
+        return f.string(from: d)
+    }
+
+    private func yearLabel(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy"
+        return f.string(from: d)
     }
 }
