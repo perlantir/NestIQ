@@ -89,8 +89,15 @@ struct PerStateDisclosuresPreview: View {
                     expandedState = expanded ? nil : state
                 }
             } label: {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: Spacing.s8) {
+                    Text(state.rawValue)
+                        .textStyle(Typography.num.withSize(11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Palette.accent)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Palette.accentTint)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.monoChip))
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(state.displayName)
                             .textStyle(Typography.bodyLg.withSize(15, weight: .semibold))
                             .foregroundStyle(Palette.ink)
@@ -128,14 +135,19 @@ struct PerStateDisclosuresPreview: View {
         }
         HStack(spacing: Spacing.s4) {
             ForEach(Array(statuses), id: \.self) { label in
-                Text(label.uppercased())
-                    .textStyle(Typography.num.withSize(9.5, weight: .semibold))
-                    .tracking(0.6)
-                    .foregroundStyle(pending ? Palette.warn : Palette.gain)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(pending ? Palette.warn.opacity(0.12) : Palette.gain.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.monoChip))
+                HStack(spacing: 3) {
+                    Circle()
+                        .fill(pending ? Palette.warn : Palette.gain)
+                        .frame(width: 5, height: 5)
+                    Text(label.uppercased())
+                        .textStyle(Typography.num.withSize(10, weight: .semibold))
+                        .tracking(0.7)
+                        .foregroundStyle(pending ? Palette.warn : Palette.gain)
+                }
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
+                .background(pending ? Palette.warn.opacity(0.12) : Palette.gain.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.monoChip))
             }
         }
     }
@@ -149,19 +161,33 @@ struct PerStateDisclosuresPreview: View {
                         .textStyle(Typography.body.withSize(12.5))
                         .foregroundStyle(Palette.ink)
                         .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
                     Eyebrow("Español")
                         .padding(.top, Spacing.s4)
                     Text(d.textES)
                         .textStyle(Typography.body.withSize(12.5))
                         .foregroundStyle(Palette.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(d.sourceCitation)
-                        .textStyle(Typography.num.withSize(10.5))
-                        .foregroundStyle(Palette.inkTertiary)
-                        .padding(.top, Spacing.s4)
+                        .textSelection(.enabled)
+                    HStack(spacing: Spacing.s8) {
+                        Text(d.sourceCitation)
+                            .textStyle(Typography.num.withSize(10.5))
+                            .foregroundStyle(Palette.inkTertiary)
+                        Spacer()
+                        Text("Retrieved \(shortDate(d.retrievalDate))")
+                            .textStyle(Typography.num.withSize(10.5))
+                            .foregroundStyle(Palette.inkTertiary)
+                    }
+                    .padding(.top, Spacing.s4)
                 }
             }
         }
+    }
+
+    private func shortDate(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d, yyyy"
+        return f.string(from: d)
     }
 }
 
