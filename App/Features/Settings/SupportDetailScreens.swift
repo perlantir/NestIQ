@@ -44,7 +44,8 @@ struct FeedbackMailSheet: View {
             if MFMailComposeViewController.canSendMail() {
                 MailComposerRepresentable(
                     recipient: supportEmail,
-                    subject: subject
+                    subject: subject,
+                    messageBody: prefilledBody
                 )
                 .ignoresSafeArea()
             } else {
@@ -54,9 +55,31 @@ struct FeedbackMailSheet: View {
     }
 
     private var subject: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "Quotient feedback - v\(version) build \(build)"
+        "Quotient feedback — v\(appVersion) build \(appBuild)"
+    }
+
+    /// Prefilled body: diagnostics header up top so Nick can triage by
+    /// release / device, then a blank section below the `---` divider
+    /// for the user to write in.
+    private var prefilledBody: String {
+        let device = UIDevice.current
+        return """
+        App version: \(appVersion)
+        Build: \(appBuild)
+        iOS version: \(device.systemVersion)
+        Device: \(device.model)
+
+        ---
+
+        """
+    }
+
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+    }
+
+    private var appBuild: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
     }
 
     private var mailUnavailableFallback: some View {
@@ -102,11 +125,13 @@ struct FeedbackMailSheet: View {
 private struct MailComposerRepresentable: UIViewControllerRepresentable {
     let recipient: String
     let subject: String
+    let messageBody: String
 
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let vc = MFMailComposeViewController()
         vc.setToRecipients([recipient])
         vc.setSubject(subject)
+        vc.setMessageBody(messageBody, isHTML: false)
         vc.mailComposeDelegate = context.coordinator
         return vc
     }
@@ -137,24 +162,76 @@ private extension String {
 // MARK: - Help center
 
 struct HelpCenterView: View {
+    @State private var loadFailed = false
+
     var body: some View {
-        WebView(url: placeholderURL(helpCenterURLString))
-            .ignoresSafeArea(edges: .bottom)
-            .navigationTitle("Help center")
-            .navigationBarTitleDisplayMode(.inline)
+        Group {
+            if loadFailed {
+                comingSoonPlaceholder
+            } else {
+                WebView(
+                    url: placeholderURL(helpCenterURLString),
+                    onLoadFailed: { loadFailed = true }
+                )
+                .ignoresSafeArea(edges: .bottom)
+            }
+        }
+        .navigationTitle("Help center")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var comingSoonPlaceholder: some View {
+        VStack(spacing: Spacing.s12) {
+            Spacer()
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 44, weight: .light))
+                .foregroundStyle(Palette.inkTertiary)
+            Text("Help center coming soon")
+                .textStyle(Typography.bodyLg.withSize(16, weight: .semibold))
+                .foregroundStyle(Palette.ink)
+            Text("In the meantime, tap Send feedback to reach us directly.")
+                .textStyle(Typography.body.withSize(13))
+                .foregroundStyle(Palette.inkSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, Spacing.s24)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Palette.surface)
     }
 }
 
 private struct WebView: UIViewRepresentable {
     let url: URL
+    let onLoadFailed: () -> Void
 
     func makeUIView(context: Context) -> WKWebView {
         let web = WKWebView()
+        web.navigationDelegate = context.coordinator
         web.load(URLRequest(url: url))
         return web
     }
 
     func updateUIView(_: WKWebView, context _: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(onLoadFailed: onLoadFailed) }
+
+    final class Coordinator: NSObject, WKNavigationDelegate {
+        let onLoadFailed: () -> Void
+        init(onLoadFailed: @escaping () -> Void) {
+            self.onLoadFailed = onLoadFailed
+        }
+        nonisolated func webView(_: WKWebView, didFail _: WKNavigation!, withError _: any Error) {
+            Task { @MainActor in onLoadFailed() }
+        }
+        nonisolated func webView(
+            _: WKWebView,
+            didFailProvisionalNavigation _: WKNavigation!,
+            withError _: any Error
+        ) {
+            Task { @MainActor in onLoadFailed() }
+        }
+    }
 }
 
 // MARK: - Licenses & legal
