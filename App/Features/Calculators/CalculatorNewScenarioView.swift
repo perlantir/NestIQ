@@ -12,7 +12,7 @@ struct CalculatorNewScenarioView: View {
     var body: some View {
         switch calculator {
         case .amortization:
-            AmortizationInputsScreen()
+            AmortizationInputsScreen(borrower: nil)
         case .incomeQualification:
             ComingSoonStub(calculator: calculator)
         case .refinance:

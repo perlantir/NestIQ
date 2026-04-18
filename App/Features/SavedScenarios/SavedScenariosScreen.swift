@@ -19,7 +19,7 @@ struct SavedScenariosScreen: View {
 
     @State private var search: String = ""
     @State private var activeFilter: CalculatorFilter = .all
-    @State private var editingNavigation: Scenario?
+    @State private var editingScenario: Scenario?
 
     var body: some View {
         NavigationStack {
@@ -44,7 +44,30 @@ struct SavedScenariosScreen: View {
             }
             .background(Palette.surface)
             .scrollIndicators(.hidden)
+            .navigationDestination(item: $editingScenario) { s in
+                openScenarioDestination(s)
+            }
         }
+    }
+
+    @ViewBuilder
+    private func openScenarioDestination(_ s: Scenario) -> some View {
+        switch s.calculatorType {
+        case .amortization:
+            AmortizationInputsScreen(
+                borrower: s.borrower,
+                initialInputs: decodeAmortization(from: s.inputsJSON),
+                existingScenario: s
+            )
+        default:
+            ComingSoonStub(calculator: s.calculatorType)
+        }
+    }
+
+    private func decodeAmortization(from data: Data) -> AmortizationFormInputs? {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try? decoder.decode(AmortizationFormInputs.self, from: data)
     }
 
     // MARK: Header
@@ -172,7 +195,7 @@ struct SavedScenariosScreen: View {
 
     private func scenarioRow(scenario: Scenario) -> some View {
         Button {
-            editingNavigation = scenario
+            editingScenario = scenario
         } label: {
             HStack(alignment: .top, spacing: Spacing.s4) {
                 Text(scenario.calculatorType.number)
