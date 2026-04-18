@@ -1,16 +1,64 @@
 // QuotientPDF
 //
-// Placeholder for Session 1. Full implementation lands in Session 4:
-// - Cover page per design/screens/PDF.jsx (816×1056, 48pt margins)
-// - Per-calculator body pages (schedule, comparison tables, stress paths)
-// - Disclaimers appendix (state-specific from QuotientCompliance)
-// - Page-x-of-y footer in SF Mono 9.5pt
-// - Rendered via SwiftUI ImageRenderer → CGContext.pdfContext
-//   and assembled with PDFKit.PDFDocument.
+// Render SwiftUI views to PDF via ImageRenderer + CGContext.pdfContext,
+// then assemble into a PDF file. A full PDF is cover + per-calculator
+// body + disclaimers appendix.
 
 import Foundation
+import SwiftUI
+import PDFKit
 
-/// Intentionally empty for Session 1; here only so the target compiles.
-public enum QuotientPDF {
-    public static let placeholder = "session-4"
+public enum PDFRenderer {
+
+    /// US Letter in points at 72 DPI: 8.5×11 → 612×792.
+    public static let letterSize = CGSize(width: 612, height: 792)
+
+    /// Render an ordered set of SwiftUI pages to a PDF file at
+    /// `fileURL`. Each page is rendered at letter size.
+    @MainActor
+    public static func renderPDF<Page: View>(
+        pages: [Page],
+        to fileURL: URL
+    ) throws {
+        var mediaBox = CGRect(origin: .zero, size: letterSize)
+        guard let context = CGContext(fileURL as CFURL, mediaBox: &mediaBox, nil) else {
+            throw PDFRendererError.couldNotCreateContext
+        }
+
+        for page in pages {
+            context.beginPDFPage(nil)
+            let renderer = ImageRenderer(
+                content: page.frame(width: letterSize.width,
+                                    height: letterSize.height)
+            )
+            renderer.proposedSize = .init(letterSize)
+            renderer.render { _, drawer in
+                context.saveGState()
+                drawer(context)
+                context.restoreGState()
+            }
+            context.endPDFPage()
+        }
+        context.closePDF()
+    }
+
+    public enum PDFRendererError: Error, Sendable {
+        case couldNotCreateContext
+    }
+}
+
+/// Minimal PDFKit-backed inspector for unit + UI tests.
+public struct PDFInspector {
+    public let document: PDFDocument
+
+    public init?(url: URL) {
+        guard let doc = PDFDocument(url: url) else { return nil }
+        self.document = doc
+    }
+
+    public var pageCount: Int { document.pageCount }
+
+    public func text(onPage index: Int) -> String? {
+        document.page(at: index)?.string
+    }
 }

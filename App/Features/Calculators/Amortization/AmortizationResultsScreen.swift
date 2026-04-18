@@ -10,6 +10,7 @@ import SwiftData
 import QuotientFinance
 import QuotientCompliance
 import QuotientNarration
+import QuotientPDF
 
 struct AmortizationResultsScreen: View {
     @Bindable var viewModel: AmortizationViewModel
@@ -25,6 +26,10 @@ struct AmortizationResultsScreen: View {
     @State private var showingNarration = false
     @State private var justSaved: Bool = false
     @State private var saveError: String?
+    @State private var sharePDFURL: URL?
+    @State private var sharePageCount: Int = 0
+
+    @Query private var profiles: [LenderProfile]
 
     var body: some View {
         ScrollView {
@@ -71,6 +76,18 @@ struct AmortizationResultsScreen: View {
         .sheet(isPresented: $showingNarration) {
             NarrationSheet(facts: narrationFacts) { _ in }
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showingShare) {
+            if let url = sharePDFURL, let profile = profiles.first {
+                QuotientSharePreview(
+                    profile: profile,
+                    borrower: viewModel.borrower,
+                    pdfURL: url,
+                    pageCount: sharePageCount,
+                    onDismiss: {}
+                )
+                .presentationDetents([.large])
+            }
         }
     }
 
@@ -279,7 +296,7 @@ struct AmortizationResultsScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
             }
             .buttonStyle(.plain)
-            Button { showingShare = true } label: {
+            Button { generatePDFAndShare() } label: {
                 Text("Share as PDF")
                     .textStyle(Typography.bodyLg.withWeight(.semibold))
                     .foregroundStyle(Palette.accentFG)
@@ -319,6 +336,25 @@ struct AmortizationResultsScreen: View {
                 "totalInterest": interest,
             ]
         )
+    }
+
+    // MARK: PDF
+
+    private func generatePDFAndShare() {
+        guard let profile = profiles.first else { return }
+        do {
+            let url = try PDFBuilder.buildAmortizationPDF(
+                profile: profile,
+                borrower: viewModel.borrower,
+                viewModel: viewModel,
+                narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? ""
+            )
+            sharePDFURL = url
+            sharePageCount = PDFInspector(url: url)?.pageCount ?? 1
+            showingShare = true
+        } catch {
+            saveError = error.localizedDescription
+        }
     }
 
     // MARK: Save

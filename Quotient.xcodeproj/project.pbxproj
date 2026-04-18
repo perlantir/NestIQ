@@ -54,6 +54,7 @@
 		6C0915635C4789C21F950B40 /* AmortizationResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */; };
 		725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B782FB7D6EF280A7AC6FD31A /* Spacing.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
+		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
 		920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */; };
@@ -62,9 +63,11 @@
 		96E42E5B6369FD34312CCAFA /* IncomeQualViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */; };
 		9B48F5D76ADF246FA93751A6 /* SavedScenariosScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DDE3329FD65E73CE3193ED /* SavedScenariosScreen.swift */; };
 		9FFCC1471DA6DFEE73FE8F04 /* MockRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 099A45DD977D77B495AD52F6 /* MockRateService.swift */; };
+		A0918268CD8908003B12759A /* PDFPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F99BC61424AA8DF3FF82690 /* PDFPages.swift */; };
 		A1E124870E7BD16A19E96E0A /* BottomActionDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB19EEDB2AFF2A92A2514534 /* BottomActionDock.swift */; };
 		A24D0BB2A052539D1B32309A /* DTIDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2290990D9F81FF13366CB427 /* DTIDial.swift */; };
 		A294032B30278ED20FBCEA40 /* IncomeQualScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */; };
+		A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */; };
 		A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */; };
 		ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
@@ -127,6 +130,7 @@
 		316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorListRow.swift; sourceTree = "<group>"; };
 		31BA9637847BD8C6534C750E /* BalanceOverTimeChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceOverTimeChart.swift; sourceTree = "<group>"; };
 		34D979C5D7DE4FB6B7BCC812 /* SourceSerif4-It.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-It.ttf"; sourceTree = "<group>"; };
+		36C1D4825AF59A035A76E125 /* SharePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePreview.swift; sourceTree = "<group>"; };
 		371105E1BFEFCBB484FEEA6F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
 		48FCE5E97C92AFF164AD551A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonoNumber.swift; sourceTree = "<group>"; };
@@ -156,8 +160,10 @@
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFBuilder.swift; sourceTree = "<group>"; };
 		97F168CE5ADAE01630A62C44 /* FilterChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterChip.swift; sourceTree = "<group>"; };
 		9970C1F47C6727A6C8329F5F /* RefinanceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceScreen.swift; sourceTree = "<group>"; };
+		9F99BC61424AA8DF3FF82690 /* PDFPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPages.swift; sourceTree = "<group>"; };
 		A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationBreakdownView.swift; sourceTree = "<group>"; };
 		A0C1B0601932028F30AD87A8 /* TCAInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAInputs.swift; sourceTree = "<group>"; };
 		A19EB3913BF810BA0A9EA1AF /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
@@ -342,6 +348,9 @@
 		67FCE0DF1D1E5450E9D28D0F /* Share */ = {
 			isa = PBXGroup;
 			children = (
+				9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */,
+				9F99BC61424AA8DF3FF82690 /* PDFPages.swift */,
+				36C1D4825AF59A035A76E125 /* SharePreview.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -761,6 +770,8 @@
 				BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */,
 				2AF36786E0E1F3388E79D6C3 /* OnboardingMiniatures.swift in Sources */,
 				44C767529EDBC2DC74CCFB27 /* OnboardingStep.swift in Sources */,
+				A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */,
+				A0918268CD8908003B12759A /* PDFPages.swift in Sources */,
 				F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */,
 				92B227E84BA9ADD8AEB52EF0 /* Radius.swift in Sources */,
 				F9FCEC655B802C0A6CC0F7F6 /* RateRibbonCell.swift in Sources */,
@@ -774,6 +785,7 @@
 				927E89E061CFE0FC73FB276F /* SegmentedControl.swift in Sources */,
 				FC1CDEE93CF9F23E35101A8E /* SettingsRow.swift in Sources */,
 				6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */,
+				7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */,
 				725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */,
 				3A41B4E5CE7B4B39E65BEB86 /* StackedHorizontalBar.swift in Sources */,
 				FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */,
