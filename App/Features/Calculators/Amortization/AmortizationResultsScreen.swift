@@ -9,6 +9,7 @@ import Charts
 import SwiftData
 import QuotientFinance
 import QuotientCompliance
+import QuotientNarration
 
 struct AmortizationResultsScreen: View {
     @Bindable var viewModel: AmortizationViewModel
@@ -21,6 +22,7 @@ struct AmortizationResultsScreen: View {
     private var dismiss
 
     @State private var showingShare = false
+    @State private var showingNarration = false
     @State private var justSaved: Bool = false
     @State private var saveError: String?
 
@@ -65,6 +67,10 @@ struct AmortizationResultsScreen: View {
         }
         .onChange(of: viewModel.inputs) {
             if viewModel.hasComputed { viewModel.compute() }
+        }
+        .sheet(isPresented: $showingNarration) {
+            NarrationSheet(facts: narrationFacts) { _ in }
+                .presentationDetents([.medium, .large])
         }
     }
 
@@ -245,7 +251,7 @@ struct AmortizationResultsScreen: View {
 
     private var bottomDock: some View {
         HStack(spacing: Spacing.s8) {
-            Button { /* narrate — Session 4 */ } label: {
+            Button { showingNarration = true } label: {
                 Text("Narrate")
                     .textStyle(Typography.bodyLg)
                     .foregroundStyle(Palette.ink)
@@ -293,6 +299,25 @@ struct AmortizationResultsScreen: View {
         .overlay(
             Rectangle().fill(Palette.borderSubtle).frame(height: 1),
             alignment: .top
+        )
+    }
+
+    // MARK: Narration facts
+
+    private var narrationFacts: ScenarioFacts {
+        let rate = String(format: "%.3f%%", viewModel.inputs.annualRate)
+        let piti = "$\(MoneyFormat.shared.decimalString(viewModel.monthlyPITI))"
+        let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
+        return ScenarioFacts(
+            scenarioType: .amortization,
+            borrowerFirstName: viewModel.borrower?.firstName,
+            numericFacts: [piti, rate, "\(viewModel.inputs.termYears)", interest],
+            fields: [
+                "monthlyPITI": piti,
+                "rate": rate,
+                "termYears": "\(viewModel.inputs.termYears)",
+                "totalInterest": interest,
+            ]
         )
     }
 
