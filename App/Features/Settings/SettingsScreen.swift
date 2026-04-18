@@ -176,6 +176,14 @@ struct SettingsScreen: View {
             ) {
                 SignatureBlockEditor(profile: profile)
             }
+            divider
+            SettingsRow(
+                label: "Show photo on PDF",
+                trailing: .toggle(Binding(
+                    get: { profile.showPhotoOnPDF },
+                    set: { set(\.showPhotoOnPDF, $0) }
+                ))
+            )
         }
     }
 

@@ -108,6 +108,7 @@ public final class LenderProfile {
     public var pdfLanguage: String = "en"
     public var nmlsDisplayFormatRaw: String = NMLSDisplayFormat.idAndURL.rawValue
     public var ehoLanguageRaw: String = EHOLanguage.en.rawValue
+    public var showPhotoOnPDF: Bool = false
     public var hasCompletedOnboarding: Bool
     public var createdAt: Date
     public var updatedAt: Date
@@ -126,6 +127,7 @@ public final class LenderProfile {
         pdfLanguage: String = "en",
         nmlsDisplayFormat: NMLSDisplayFormat = .idAndURL,
         ehoLanguage: EHOLanguage = .en,
+        showPhotoOnPDF: Bool = false,
         faceIDEnabled: Bool = false,
         hapticsEnabled: Bool = true,
         soundsEnabled: Bool = false,
@@ -148,6 +150,7 @@ public final class LenderProfile {
         self.pdfLanguage = pdfLanguage
         self.nmlsDisplayFormatRaw = nmlsDisplayFormat.rawValue
         self.ehoLanguageRaw = ehoLanguage.rawValue
+        self.showPhotoOnPDF = showPhotoOnPDF
         self.faceIDEnabled = faceIDEnabled
         self.hapticsEnabled = hapticsEnabled
         self.soundsEnabled = soundsEnabled

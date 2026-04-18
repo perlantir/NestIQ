@@ -21,6 +21,7 @@ public struct PDFCoverPage: View {
     public let accentHex: String
     public let logoData: Data?
     public let signatureLine: String?
+    public let loPhotoData: Data?
 
     public init(
         borrowerName: String,
@@ -37,7 +38,8 @@ public struct PDFCoverPage: View {
         narrative: String,
         accentHex: String = "#1F4D3F",
         logoData: Data? = nil,
-        signatureLine: String? = nil
+        signatureLine: String? = nil,
+        loPhotoData: Data? = nil
     ) {
         self.borrowerName = borrowerName
         self.loFullName = loFullName
@@ -54,6 +56,7 @@ public struct PDFCoverPage: View {
         self.accentHex = accentHex
         self.logoData = logoData
         self.signatureLine = signatureLine
+        self.loPhotoData = loPhotoData
     }
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
@@ -100,24 +103,34 @@ public struct PDFCoverPage: View {
                         .foregroundStyle(inkTertiary)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text(loFullName)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(inkPrimary)
-                    Text("Senior Loan Officer · NMLS \(loNMLS)")
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(inkSecondary)
-                    Text("\(loCompany) · \(loEmail)")
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(inkSecondary)
-                    Text(loPhone)
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(inkSecondary)
-                    if let signatureLine, !signatureLine.isEmpty {
-                        Text(signatureLine)
-                            .font(.custom("SourceSerif4-It", size: 10.5))
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(loFullName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(inkPrimary)
+                        Text("Senior Loan Officer · NMLS \(loNMLS)")
+                            .font(.system(size: 10.5))
                             .foregroundStyle(inkSecondary)
-                            .padding(.top, 2)
+                        Text("\(loCompany) · \(loEmail)")
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(inkSecondary)
+                        Text(loPhone)
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(inkSecondary)
+                        if let signatureLine, !signatureLine.isEmpty {
+                            Text(signatureLine)
+                                .font(.custom("SourceSerif4-It", size: 10.5))
+                                .foregroundStyle(inkSecondary)
+                                .padding(.top, 2)
+                        }
+                    }
+                    if let loPhotoData, let photo = UIImage(data: loPhotoData) {
+                        Image(uiImage: photo)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(border, lineWidth: 1))
                     }
                 }
             }

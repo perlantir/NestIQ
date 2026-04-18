@@ -224,7 +224,8 @@ enum PDFBuilder {
             narrative: payload.narrative,
             accentHex: profile.brandColorHex,
             logoData: profile.companyLogoData,
-            signatureLine: profile.tagline
+            signatureLine: profile.tagline,
+            loPhotoData: profile.showPhotoOnPDF ? profile.photoData : nil
         )
     }
 
