@@ -56,6 +56,16 @@ struct HelocInputsScreen: View {
                     .padding(.top, Spacing.s8)
 
                 firstLienSection.padding(.top, Spacing.s16)
+                PropertyDownPaymentSection(
+                    config: Binding(
+                        get: { viewModel.inputs.propertyDP },
+                        set: { viewModel.inputs.propertyDP = $0 }
+                    ),
+                    externalLoanAmount: viewModel.inputs.firstLienBalance
+                        + viewModel.inputs.helocAmount,
+                    header: "Property & LTV — cash-out refi"
+                )
+                .padding(.top, Spacing.s24)
                 cashOutSection.padding(.top, Spacing.s24)
                 refiSection.padding(.top, Spacing.s24)
                 helocSection.padding(.top, Spacing.s24)

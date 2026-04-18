@@ -60,6 +60,14 @@ struct IncomeQualInputsScreen: View {
 
                 incomeSection.padding(.top, Spacing.s16)
                 loanSection.padding(.top, Spacing.s24)
+                PropertyDownPaymentSection(
+                    config: Binding(
+                        get: { viewModel.inputs.propertyDP },
+                        set: { viewModel.inputs.propertyDP = $0 }
+                    ),
+                    externalLoanAmount: viewModel.maxLoan
+                )
+                .padding(.top, Spacing.s24)
                 propertySection.padding(.top, Spacing.s24)
                 dtiSection.padding(.top, Spacing.s24)
 

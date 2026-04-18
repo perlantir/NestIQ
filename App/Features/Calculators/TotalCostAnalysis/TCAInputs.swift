@@ -39,6 +39,43 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     var monthlyHOA: Decimal
     var scenarios: [TCAScenario]
     var horizonsYears: [Int]
+    var propertyDP: PropertyDownPaymentConfig
+
+    enum CodingKeys: String, CodingKey {
+        case loanAmount, monthlyTaxes, monthlyInsurance, monthlyHOA
+        case scenarios, horizonsYears, propertyDP
+    }
+
+    init(
+        loanAmount: Decimal,
+        monthlyTaxes: Decimal,
+        monthlyInsurance: Decimal,
+        monthlyHOA: Decimal,
+        scenarios: [TCAScenario],
+        horizonsYears: [Int],
+        propertyDP: PropertyDownPaymentConfig = .empty
+    ) {
+        self.loanAmount = loanAmount
+        self.monthlyTaxes = monthlyTaxes
+        self.monthlyInsurance = monthlyInsurance
+        self.monthlyHOA = monthlyHOA
+        self.scenarios = scenarios
+        self.horizonsYears = horizonsYears
+        self.propertyDP = propertyDP
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.loanAmount = try c.decode(Decimal.self, forKey: .loanAmount)
+        self.monthlyTaxes = try c.decode(Decimal.self, forKey: .monthlyTaxes)
+        self.monthlyInsurance = try c.decode(Decimal.self, forKey: .monthlyInsurance)
+        self.monthlyHOA = try c.decode(Decimal.self, forKey: .monthlyHOA)
+        self.scenarios = try c.decode([TCAScenario].self, forKey: .scenarios)
+        self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
+        self.propertyDP = try c.decodeIfPresent(
+            PropertyDownPaymentConfig.self, forKey: .propertyDP
+        ) ?? .empty
+    }
 
     static let sampleDefault = TCAFormInputs(
         loanAmount: 548_000,

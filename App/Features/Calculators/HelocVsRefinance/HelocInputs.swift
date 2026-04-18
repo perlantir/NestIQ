@@ -15,6 +15,56 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
     var refiRate: Double                // % — alternative cash-out refi
     var refiTermYears: Int
     var stressShockBps: Int             // e.g. 200 for +2pt
+    var propertyDP: PropertyDownPaymentConfig
+
+    enum CodingKeys: String, CodingKey {
+        case firstLienBalance, firstLienRate, firstLienRemainingYears
+        case helocAmount, helocIntroRate, helocIntroMonths, helocFullyIndexedRate
+        case refiRate, refiTermYears, stressShockBps, propertyDP
+    }
+
+    init(
+        firstLienBalance: Decimal,
+        firstLienRate: Double,
+        firstLienRemainingYears: Int,
+        helocAmount: Decimal,
+        helocIntroRate: Double,
+        helocIntroMonths: Int,
+        helocFullyIndexedRate: Double,
+        refiRate: Double,
+        refiTermYears: Int,
+        stressShockBps: Int,
+        propertyDP: PropertyDownPaymentConfig = .empty
+    ) {
+        self.firstLienBalance = firstLienBalance
+        self.firstLienRate = firstLienRate
+        self.firstLienRemainingYears = firstLienRemainingYears
+        self.helocAmount = helocAmount
+        self.helocIntroRate = helocIntroRate
+        self.helocIntroMonths = helocIntroMonths
+        self.helocFullyIndexedRate = helocFullyIndexedRate
+        self.refiRate = refiRate
+        self.refiTermYears = refiTermYears
+        self.stressShockBps = stressShockBps
+        self.propertyDP = propertyDP
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.firstLienBalance = try c.decode(Decimal.self, forKey: .firstLienBalance)
+        self.firstLienRate = try c.decode(Double.self, forKey: .firstLienRate)
+        self.firstLienRemainingYears = try c.decode(Int.self, forKey: .firstLienRemainingYears)
+        self.helocAmount = try c.decode(Decimal.self, forKey: .helocAmount)
+        self.helocIntroRate = try c.decode(Double.self, forKey: .helocIntroRate)
+        self.helocIntroMonths = try c.decode(Int.self, forKey: .helocIntroMonths)
+        self.helocFullyIndexedRate = try c.decode(Double.self, forKey: .helocFullyIndexedRate)
+        self.refiRate = try c.decode(Double.self, forKey: .refiRate)
+        self.refiTermYears = try c.decode(Int.self, forKey: .refiTermYears)
+        self.stressShockBps = try c.decode(Int.self, forKey: .stressShockBps)
+        self.propertyDP = try c.decodeIfPresent(
+            PropertyDownPaymentConfig.self, forKey: .propertyDP
+        ) ?? .empty
+    }
 
     static let sampleDefault = HelocFormInputs(
         firstLienBalance: 318_000,

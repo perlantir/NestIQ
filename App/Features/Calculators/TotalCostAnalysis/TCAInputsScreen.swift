@@ -78,6 +78,14 @@ struct TCAInputsScreen: View {
                     .padding(.top, Spacing.s8)
 
                 loanSection.padding(.top, Spacing.s16)
+                PropertyDownPaymentSection(
+                    config: Binding(
+                        get: { viewModel.inputs.propertyDP },
+                        set: { viewModel.inputs.propertyDP = $0 }
+                    ),
+                    externalLoanAmount: viewModel.inputs.loanAmount
+                )
+                .padding(.top, Spacing.s24)
                 escrowSection.padding(.top, Spacing.s24)
 
                 scenarioSection

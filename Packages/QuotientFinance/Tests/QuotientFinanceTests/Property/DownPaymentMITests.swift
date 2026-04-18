@@ -20,7 +20,8 @@ struct DownPaymentMITests {
             "DP equivalence",
             generator: priceAndPercent,
             count: 500
-        ) { (price, pct) in
+        ) { tuple in
+            let (price, pct) = tuple
             let byPct = DownPayment.percentage(pct)
             let dollars = byPct.amount(purchasePrice: price)
             let byDollars = DownPayment.dollars(dollars)
@@ -178,11 +179,11 @@ struct DownPaymentMITests {
             "closing cost invariant",
             generator: closingCostTriple,
             count: 500
-        ) { (total, pct, loan) in
+        ) { triple in
             let b = ClosingCostBreakdown(
-                totalClosingCosts: total,
-                pointsPercentage: pct,
-                loanAmount: loan
+                totalClosingCosts: triple.total,
+                pointsPercentage: triple.pct,
+                loanAmount: triple.loan
             )
             try require(
                 b.pointsAmount <= b.totalClosingCosts,
@@ -209,9 +210,16 @@ private func priceAndPercent(_ rng: inout SeededPRNG) -> (Decimal, Double) {
     return (price, pct)
 }
 
-private func closingCostTriple(_ rng: inout SeededPRNG) -> (Decimal, Double, Decimal) {
+struct ClosingTriple: CustomStringConvertible {
+    let total: Decimal
+    let pct: Double
+    let loan: Decimal
+    var description: String { "total=\(total) pct=\(pct) loan=\(loan)" }
+}
+
+private func closingCostTriple(_ rng: inout SeededPRNG) -> ClosingTriple {
     let loan = Decimal(rng.int(in: 50_000...2_000_000))
     let total = Decimal(rng.int(in: 1_000...50_000))
     let pct = rng.double(in: 0.0...3.0)
-    return (total, pct, loan)
+    return ClosingTriple(total: total, pct: pct, loan: loan)
 }

@@ -69,6 +69,62 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
     var downPaymentPercent: Double   // 0.20 default
     var incomes: [IncomeSource]
     var debts: [MonthlyDebt]
+    var propertyDP: PropertyDownPaymentConfig
+
+    enum CodingKeys: String, CodingKey {
+        case loanType, creditScore, frontEndLimit, backEndLimit
+        case annualRate, termYears, annualTaxes, annualInsurance, monthlyHOA
+        case downPaymentPercent, incomes, debts, propertyDP
+    }
+
+    init(
+        loanType: String,
+        creditScore: Int,
+        frontEndLimit: Double,
+        backEndLimit: Double,
+        annualRate: Double,
+        termYears: Int,
+        annualTaxes: Decimal,
+        annualInsurance: Decimal,
+        monthlyHOA: Decimal,
+        downPaymentPercent: Double,
+        incomes: [IncomeSource],
+        debts: [MonthlyDebt],
+        propertyDP: PropertyDownPaymentConfig = .empty
+    ) {
+        self.loanType = loanType
+        self.creditScore = creditScore
+        self.frontEndLimit = frontEndLimit
+        self.backEndLimit = backEndLimit
+        self.annualRate = annualRate
+        self.termYears = termYears
+        self.annualTaxes = annualTaxes
+        self.annualInsurance = annualInsurance
+        self.monthlyHOA = monthlyHOA
+        self.downPaymentPercent = downPaymentPercent
+        self.incomes = incomes
+        self.debts = debts
+        self.propertyDP = propertyDP
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.loanType = try c.decode(String.self, forKey: .loanType)
+        self.creditScore = try c.decode(Int.self, forKey: .creditScore)
+        self.frontEndLimit = try c.decode(Double.self, forKey: .frontEndLimit)
+        self.backEndLimit = try c.decode(Double.self, forKey: .backEndLimit)
+        self.annualRate = try c.decode(Double.self, forKey: .annualRate)
+        self.termYears = try c.decode(Int.self, forKey: .termYears)
+        self.annualTaxes = try c.decode(Decimal.self, forKey: .annualTaxes)
+        self.annualInsurance = try c.decode(Decimal.self, forKey: .annualInsurance)
+        self.monthlyHOA = try c.decode(Decimal.self, forKey: .monthlyHOA)
+        self.downPaymentPercent = try c.decode(Double.self, forKey: .downPaymentPercent)
+        self.incomes = try c.decode([IncomeSource].self, forKey: .incomes)
+        self.debts = try c.decode([MonthlyDebt].self, forKey: .debts)
+        self.propertyDP = try c.decodeIfPresent(
+            PropertyDownPaymentConfig.self, forKey: .propertyDP
+        ) ?? .empty
+    }
 
     static let sampleDefault = IncomeQualFormInputs(
         loanType: LoanType.conventional.rawValue,

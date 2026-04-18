@@ -23,14 +23,14 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     var manualMonthlyPMI: Decimal
     var extraPrincipalMonthly: Decimal
     var biweekly: Bool
+    var propertyDP: PropertyDownPaymentConfig
 
-    // Legacy decodes (pre-5B.3) won't carry `manualMonthlyPMI`. Default
-    // to zero so prior scenario blobs still decode cleanly.
+    // Legacy decodes won't carry newer keys. Defaults below.
     enum CodingKeys: String, CodingKey {
         case loanAmount, annualRate, termYears, startDate
         case annualTaxes, annualInsurance, monthlyHOA
         case includePMI, manualMonthlyPMI
-        case extraPrincipalMonthly, biweekly
+        case extraPrincipalMonthly, biweekly, propertyDP
     }
 
     init(
@@ -44,7 +44,8 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         includePMI: Bool,
         manualMonthlyPMI: Decimal = 0,
         extraPrincipalMonthly: Decimal,
-        biweekly: Bool
+        biweekly: Bool,
+        propertyDP: PropertyDownPaymentConfig = .empty
     ) {
         self.loanAmount = loanAmount
         self.annualRate = annualRate
@@ -57,6 +58,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         self.manualMonthlyPMI = manualMonthlyPMI
         self.extraPrincipalMonthly = extraPrincipalMonthly
         self.biweekly = biweekly
+        self.propertyDP = propertyDP
     }
 
     init(from decoder: any Decoder) throws {
@@ -72,6 +74,9 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         self.manualMonthlyPMI = try c.decodeIfPresent(Decimal.self, forKey: .manualMonthlyPMI) ?? 0
         self.extraPrincipalMonthly = try c.decode(Decimal.self, forKey: .extraPrincipalMonthly)
         self.biweekly = try c.decode(Bool.self, forKey: .biweekly)
+        self.propertyDP = try c.decodeIfPresent(
+            PropertyDownPaymentConfig.self, forKey: .propertyDP
+        ) ?? .empty
     }
 
     static let sampleDefault = AmortizationFormInputs(
