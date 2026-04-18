@@ -1,51 +1,47 @@
 // RootView.swift
-// Session 2 placeholder root view. Session 3 replaces this with:
-//   AuthGate → Onboarding (if profile unset) → Root Tab Bar (per
-//   design/screens/Home.jsx).
+// Session 3 real root hierarchy:
+//   AuthGate → (Onboarding | RootTabBar)
 //
-// During Session 2 design QA we surface the Theme and Component galleries
-// directly so Nick can scroll them on-device alongside the Foundations.jsx
-// specimen. `#if DEBUG` — release builds still show the "engine ready" stub.
+// Auth state is owned by `AuthGate` via SwiftData; when a profile exists
+// and is unlocked we present either the 6-step onboarding tour (if the
+// profile hasn't completed it) or the main tab bar. The Settings → About
+// → "Replay tour" entry point toggles `hasCompletedOnboarding` back to
+// false from inside the settings stack.
 
 import SwiftUI
+import SwiftData
 
 struct RootView: View {
-    #if DEBUG
-    @State private var tab: Tab = .components
+    @Environment(\.modelContext)
+    private var modelContext
 
-    enum Tab: Hashable { case engine, theme, components }
-    #endif
+    @Query private var profiles: [LenderProfile]
 
     var body: some View {
-        #if DEBUG
-        TabView(selection: $tab) {
-            engineStub
-                .tabItem { Label("Engine", systemImage: "function") }
-                .tag(Tab.engine)
-            ThemePreview()
-                .tabItem { Label("Theme", systemImage: "paintpalette") }
-                .tag(Tab.theme)
-            ComponentGallery()
-                .tabItem { Label("Components", systemImage: "rectangle.3.group") }
-                .tag(Tab.components)
+        AuthGate { profile in
+            if profile.hasCompletedOnboarding {
+                RootTabBar(profile: profile)
+            } else {
+                OnboardingFlow {
+                    profile.hasCompletedOnboarding = true
+                    profile.updatedAt = Date()
+                    try? modelContext.save()
+                }
+            }
         }
-        #else
-        engineStub
-        #endif
+        .preferredColorScheme(preferredScheme)
     }
 
-    private var engineStub: some View {
-        VStack(spacing: 16) {
-            Text("Quotient")
-                .font(.largeTitle.weight(.semibold))
-            Text("Session 2 — finance handlers + compliance + theme + components")
-                .font(.callout)
-                .foregroundStyle(.secondary)
+    private var preferredScheme: ColorScheme? {
+        switch profiles.first?.appearance {
+        case .light: return .light
+        case .dark: return .dark
+        default: return nil
         }
-        .padding()
     }
 }
 
 #Preview {
     RootView()
+        .modelContainer(QuotientSchema.makeContainer(inMemory: true))
 }
