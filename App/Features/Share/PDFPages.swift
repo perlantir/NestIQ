@@ -22,6 +22,9 @@ public struct PDFCoverPage: View {
     public let logoData: Data?
     public let signatureLine: String?
     public let loPhotoData: Data?
+    public let heroLabel: String
+    public let heroValuePrefix: String
+    public let heroValueSuffix: String
 
     public init(
         borrowerName: String,
@@ -39,7 +42,10 @@ public struct PDFCoverPage: View {
         accentHex: String = "#1F4D3F",
         logoData: Data? = nil,
         signatureLine: String? = nil,
-        loPhotoData: Data? = nil
+        loPhotoData: Data? = nil,
+        heroLabel: String = "Monthly payment · PITI",
+        heroValuePrefix: String = "$",
+        heroValueSuffix: String = ""
     ) {
         self.borrowerName = borrowerName
         self.loFullName = loFullName
@@ -57,6 +63,9 @@ public struct PDFCoverPage: View {
         self.logoData = logoData
         self.signatureLine = signatureLine
         self.loPhotoData = loPhotoData
+        self.heroLabel = heroLabel
+        self.heroValuePrefix = heroValuePrefix
+        self.heroValueSuffix = heroValueSuffix
     }
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
@@ -162,17 +171,24 @@ public struct PDFCoverPage: View {
             Rectangle().fill(border).frame(height: 1)
             HStack(alignment: .top, spacing: 24) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Monthly payment · PITI".uppercased())
+                    Text(heroLabel.uppercased())
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(1.0)
                         .foregroundStyle(inkTertiary)
                     HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text("$")
-                            .font(.system(size: 14, design: .monospaced))
-                            .foregroundStyle(inkTertiary)
+                        if !heroValuePrefix.isEmpty {
+                            Text(heroValuePrefix)
+                                .font(.system(size: 14, design: .monospaced))
+                                .foregroundStyle(inkTertiary)
+                        }
                         Text(heroPITI)
                             .font(.system(size: 44, weight: .medium, design: .monospaced))
                             .foregroundStyle(inkPrimary)
+                        if !heroValueSuffix.isEmpty {
+                            Text(heroValueSuffix)
+                                .font(.system(size: 14, design: .monospaced))
+                                .foregroundStyle(inkTertiary)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

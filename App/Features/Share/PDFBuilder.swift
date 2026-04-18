@@ -21,8 +21,34 @@ enum PDFBuilder {
         let loanSummary: String               // mono-line under the "For *Name*"
         let heroLabel: String                 // "Monthly payment · PITI" etc
         let heroValue: String                 // e.g. "4,207"
+        let heroValuePrefix: String           // "$" for money, "" for rate
+        let heroValueSuffix: String           // "%" for rate, "" for money
         let heroKPIs: [(label: String, value: String)]
         let narrative: String
+
+        init(
+            calculatorSlug: String,
+            calculatorTitle: String,
+            complianceScenarioType: ScenarioType,
+            loanSummary: String,
+            heroLabel: String,
+            heroValue: String,
+            heroValuePrefix: String = "$",
+            heroValueSuffix: String = "",
+            heroKPIs: [(label: String, value: String)],
+            narrative: String
+        ) {
+            self.calculatorSlug = calculatorSlug
+            self.calculatorTitle = calculatorTitle
+            self.complianceScenarioType = complianceScenarioType
+            self.loanSummary = loanSummary
+            self.heroLabel = heroLabel
+            self.heroValue = heroValue
+            self.heroValuePrefix = heroValuePrefix
+            self.heroValueSuffix = heroValueSuffix
+            self.heroKPIs = heroKPIs
+            self.narrative = narrative
+        }
     }
 
     static func buildPDF(
@@ -189,6 +215,8 @@ enum PDFBuilder {
             loanSummary: "1st $\(firstLien) + HELOC $\(helocAmt)",
             heroLabel: "Blended rate · HELOC path",
             heroValue: blend,
+            heroValuePrefix: "",
+            heroValueSuffix: "%",
             heroKPIs: [
                 ("vs refi", "\(refi)%"),
                 ("Verdict", verdict),
@@ -225,7 +253,10 @@ enum PDFBuilder {
             accentHex: profile.brandColorHex,
             logoData: profile.companyLogoData,
             signatureLine: profile.tagline,
-            loPhotoData: profile.showPhotoOnPDF ? profile.photoData : nil
+            loPhotoData: profile.showPhotoOnPDF ? profile.photoData : nil,
+            heroLabel: payload.heroLabel,
+            heroValuePrefix: payload.heroValuePrefix,
+            heroValueSuffix: payload.heroValueSuffix
         )
     }
 
