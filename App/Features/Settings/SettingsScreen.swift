@@ -240,17 +240,19 @@ struct SettingsScreen: View {
 
     @ViewBuilder private var languageAndHapticsSection: some View {
         settingsGroup(header: "Language · haptics") {
-            SettingsRow(
+            settingsNavRow(
                 label: "App language",
-                trailing: .value(profile.preferredLanguage == "es" ? "Español" : "English"),
-                onTap: { toggleLanguage() }
-            )
+                trailing: profile.preferredLanguage == "es" ? "Español" : "English"
+            ) {
+                AppLanguagePickerScreen(profile: profile)
+            }
             divider
-            SettingsRow(
+            settingsNavRow(
                 label: "Borrower-facing PDF",
-                trailing: .value(profile.pdfLanguage == "es" ? "Español" : "English"),
-                onTap: { togglePDFLanguage() }
-            )
+                trailing: profile.pdfLanguage == "es" ? "Español" : "English"
+            ) {
+                PDFLanguagePickerScreen(profile: profile)
+            }
             divider
             SettingsRow(label: "Haptics on calculate",
                         trailing: .toggle(Binding(
@@ -395,18 +397,6 @@ struct SettingsScreen: View {
 
     private func setAppearance(_ a: AppearancePreference) {
         profile.appearance = a
-        profile.updatedAt = Date()
-        try? modelContext.save()
-    }
-
-    private func toggleLanguage() {
-        profile.preferredLanguage = profile.preferredLanguage == "es" ? "en" : "es"
-        profile.updatedAt = Date()
-        try? modelContext.save()
-    }
-
-    private func togglePDFLanguage() {
-        profile.pdfLanguage = profile.pdfLanguage == "es" ? "en" : "es"
         profile.updatedAt = Date()
         try? modelContext.save()
     }

@@ -51,6 +51,7 @@
 		55F7BD17FFB694D9F98D21E7 /* RefinanceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9970C1F47C6727A6C8329F5F /* RefinanceScreen.swift */; };
 		56D2D6A10F52D801FA1F8412 /* FaceIDUnlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6B19F5A21683FA7823B3A6 /* FaceIDUnlock.swift */; };
 		591DF199503D955148834182 /* BorrowerPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09B246AB365C10A2095FE57 /* BorrowerPicker.swift */; };
+		593C6FF305B2FC26F777FE5A /* LanguageDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */; };
 		5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */; };
 		5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381BCE91A0673E2D3CBDA9E /* Buttons.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
@@ -151,6 +152,7 @@
 		19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualListViews.swift; sourceTree = "<group>"; };
 		1A6B19F5A21683FA7823B3A6 /* FaceIDUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceIDUnlock.swift; sourceTree = "<group>"; };
 		1F63633A474B6D374D46BAD4 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageDetailScreens.swift; sourceTree = "<group>"; };
 		21294577B6542C065DE45454 /* AmortizationInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputsScreen.swift; sourceTree = "<group>"; };
 		2290990D9F81FF13366CB427 /* DTIDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTIDial.swift; sourceTree = "<group>"; };
 		24A9A56018B8BBF20141BD86 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -590,6 +592,7 @@
 			children = (
 				8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */,
 				68C37A3C9E5111C9F4BB8353 /* ComplianceDetailScreens.swift */,
+				209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */,
 				7F288789586295CD7EDEA159 /* ProfileEditor.swift */,
 				6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */,
 				B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */,
@@ -851,6 +854,7 @@
 				A294032B30278ED20FBCEA40 /* IncomeQualScreen.swift in Sources */,
 				96E42E5B6369FD34312CCAFA /* IncomeQualViewModel.swift in Sources */,
 				3CA97BE097CFB72AD1DE8982 /* KPITile.swift in Sources */,
+				593C6FF305B2FC26F777FE5A /* LanguageDetailScreens.swift in Sources */,
 				9FFCC1471DA6DFEE73FE8F04 /* MockRateService.swift in Sources */,
 				C84F0EA0D8C40CE980C83952 /* Models.swift in Sources */,
 				2E3AD6A0D7A5A8919784EF89 /* MonoNumber.swift in Sources */,
