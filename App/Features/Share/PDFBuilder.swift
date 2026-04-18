@@ -165,7 +165,17 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
-        return try buildPDF(profile: profile, borrower: borrower, payload: payload)
+        let comparison = AnyView(refinanceComparisonPage(
+            profile: profile,
+            borrower: borrower,
+            viewModel: viewModel
+        ))
+        return try buildPDF(
+            profile: profile,
+            borrower: borrower,
+            payload: payload,
+            extraPages: [(comparison, .landscape)]
+        )
     }
 
     static func buildTCAPDF(
@@ -196,7 +206,17 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
-        return try buildPDF(profile: profile, borrower: borrower, payload: payload)
+        let comparison = AnyView(tcaComparisonPage(
+            profile: profile,
+            borrower: borrower,
+            viewModel: viewModel
+        ))
+        return try buildPDF(
+            profile: profile,
+            borrower: borrower,
+            payload: payload,
+            extraPages: [(comparison, .landscape)]
+        )
     }
 
     static func buildHelocPDF(
@@ -335,7 +355,7 @@ enum PDFBuilder {
         )
     }
 
-    private static func defaultDisclaimer() -> String {
+    static func defaultDisclaimer() -> String {
         "This illustration is not a commitment to lend. Rates reflect pricing "
             + "available at the time of generation for qualifying borrowers and may "
             + "change without notice. Actual APR will vary by program, property, "
@@ -343,7 +363,7 @@ enum PDFBuilder {
             + "for final terms."
     }
 
-    private static func resolveState(borrower: Borrower?) -> USState? {
+    static func resolveState(borrower: Borrower?) -> USState? {
         guard let code = borrower?.propertyState?.uppercased() else { return nil }
         return USState(rawValue: code)
     }
