@@ -5,6 +5,8 @@
 import SwiftUI
 import SwiftData
 import QuotientFinance
+import QuotientNarration
+import QuotientPDF
 
 @Observable
 @MainActor
@@ -28,9 +30,14 @@ struct TCAScreen: View {
     var existingScenario: Scenario?
 
     @State private var viewModel = TCAViewModel()
+    @State private var showingNarration = false
+    @State private var justSaved = false
+    @State private var shareBundle: ShareBundle?
 
     @Environment(\.modelContext)
     private var modelContext
+
+    @Query private var profiles: [LenderProfile]
 
     private let scenarioColors: [Color] = [
         Palette.accent, Palette.scenario2, Palette.scenario3, Palette.scenario4,
@@ -77,6 +84,34 @@ struct TCAScreen: View {
             if viewModel.result == nil { viewModel.compute() }
         }
         .onChange(of: viewModel.inputs) { viewModel.compute() }
+        .sheet(isPresented: $showingNarration) {
+            NarrationSheet(facts: narrationFacts) { _ in }
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $shareBundle) { bundle in
+            QuotientSharePreview(
+                profile: bundle.profile,
+                borrower: viewModel.borrower,
+                pdfURL: bundle.url,
+                pageCount: bundle.pageCount,
+                onDismiss: {}
+            )
+            .presentationDetents([.large])
+        }
+    }
+
+    private var narrationFacts: ScenarioFacts {
+        let winnerIndex = viewModel.result?.winnerByHorizon.last ?? 0
+        let winnerName = viewModel.inputs.scenarios.indices.contains(winnerIndex)
+            ? viewModel.inputs.scenarios[winnerIndex].name : "—"
+        return ScenarioFacts(
+            scenarioType: .totalCostAnalysis,
+            borrowerFirstName: viewModel.borrower?.firstName,
+            numericFacts: [],
+            fields: [
+                "lifeWinner": winnerName,
+            ]
+        )
     }
 
     private var subline: String {
@@ -280,39 +315,33 @@ struct TCAScreen: View {
     // MARK: Dock
 
     private var bottomDock: some View {
-        HStack(spacing: Spacing.s8) {
-            Button {} label: {
-                Text("Add scenario")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { save() } label: {
-                Text("Share as PDF")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .layoutPriority(1)
+        CalculatorDock(
+            saveLabel: justSaved ? "Saved" : "Save",
+            onNarrate: { showingNarration = true },
+            onSave: { save() },
+            onShare: { generatePDFAndShare() }
+        )
+    }
+
+    private func generatePDFAndShare() {
+        guard let profile = profiles.first else { return }
+        do {
+            let url = try PDFBuilder.buildTCAPDF(
+                profile: profile,
+                borrower: viewModel.borrower,
+                viewModel: viewModel,
+                narrative: narrativeText
+            )
+            shareBundle = ShareBundle(
+                url: url,
+                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                profile: profile
+            )
+        } catch {
+            #if DEBUG
+            print("[TCAScreen] PDF gen failed: \(error)")
+            #endif
         }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-                 alignment: .top)
     }
 
     private func save() {
@@ -337,5 +366,7 @@ struct TCAScreen: View {
             modelContext.insert(s)
         }
         try? modelContext.save()
+        justSaved = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
     }
 }

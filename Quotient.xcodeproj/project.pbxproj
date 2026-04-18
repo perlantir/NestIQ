@@ -82,6 +82,7 @@
 		BD7A57941289F8ADBA75D608 /* DataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4698C088D95213A6366BAE /* DataRow.swift */; };
 		C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */; };
 		C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */; };
+		C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38C48023F20605AA323F916 /* CalculatorTCATests.swift */; };
 		C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */; };
 		C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */; };
 		C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */ = {isa = PBXBuildFile; productRef = A1197D36724BA39F7185E2D9 /* QuotientPDF */; };
@@ -200,6 +201,7 @@
 		BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		C09B246AB365C10A2095FE57 /* BorrowerPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowerPicker.swift; sourceTree = "<group>"; };
 		C0F7DDBBB3410FF824B33EF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C38C48023F20605AA323F916 /* CalculatorTCATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTCATests.swift; sourceTree = "<group>"; };
 		C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualScreen.swift; sourceTree = "<group>"; };
 		C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualViewModel.swift; sourceTree = "<group>"; };
 		C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-SemiboldIt.ttf"; sourceTree = "<group>"; };
@@ -399,6 +401,7 @@
 				7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */,
 				9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */,
 				E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */,
+				C38C48023F20605AA323F916 /* CalculatorTCATests.swift */,
 				E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */,
 			);
 			path = AppUITests;
@@ -741,6 +744,7 @@
 				A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */,
 				C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */,
 				9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */,
+				C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */,
 				13B526571A09FAF55F320B21 /* UITestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
