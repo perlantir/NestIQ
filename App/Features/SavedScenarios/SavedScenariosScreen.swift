@@ -64,6 +64,11 @@ struct SavedScenariosScreen: View {
                 initialInputs: decode(IncomeQualFormInputs.self, from: s.inputsJSON),
                 existingScenario: s
             )
+        case .refinance:
+            RefinanceScreen(
+                initialInputs: decode(RefinanceFormInputs.self, from: s.inputsJSON),
+                existingScenario: s
+            )
         default:
             ComingSoonStub(calculator: s.calculatorType)
         }

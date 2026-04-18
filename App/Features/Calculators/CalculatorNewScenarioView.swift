@@ -16,7 +16,7 @@ struct CalculatorNewScenarioView: View {
         case .incomeQualification:
             IncomeQualScreen()
         case .refinance:
-            ComingSoonStub(calculator: calculator)
+            RefinanceScreen()
         case .totalCostAnalysis:
             ComingSoonStub(calculator: calculator)
         case .helocVsRefinance:

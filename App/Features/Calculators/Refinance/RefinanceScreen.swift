@@ -1,0 +1,523 @@
+// RefinanceScreen.swift
+// Per design/screens/Refinance.jsx. Option tabs (Current/A/B/C) +
+// winner hero + 3-col KPI + cumulative savings chart + side-by-side
+// table + stress toggle.
+
+import SwiftUI
+import Charts
+import SwiftData
+
+struct RefinanceScreen: View {
+    var initialInputs: RefinanceFormInputs?
+    var existingScenario: Scenario?
+
+    @State private var viewModel = RefinanceViewModel()
+    @State private var showingStress = false
+
+    @Environment(\.modelContext)
+    private var modelContext
+
+    private let scenarioColors: [Color] = [
+        Palette.inkTertiary, Palette.accent, Palette.scenario2, Palette.scenario3,
+    ]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                borrowerBlock
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s8)
+                    .padding(.bottom, Spacing.s16)
+
+                optionTabs
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.bottom, 1)
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                    }
+
+                winnerHero
+                chartSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s20)
+                tableSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s20)
+                narrativeSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s20)
+
+                Spacer(minLength: 140)
+            }
+        }
+        .background(Palette.surface)
+        .scrollIndicators(.hidden)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Eyebrow("03 · Refinance")
+            }
+        }
+        .overlay(alignment: .bottom) { bottomDock }
+        .onAppear {
+            if let initialInputs { viewModel.inputs = initialInputs }
+            if viewModel.result == nil { viewModel.compute() }
+        }
+        .onChange(of: viewModel.inputs) {
+            viewModel.compute()
+        }
+    }
+
+    // MARK: Borrower
+
+    private var borrowerBlock: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Eyebrow("Borrower")
+            Text(viewModel.borrower?.fullName ?? "Untitled refi")
+                .textStyle(Typography.title.withSize(22, weight: .bold))
+                .foregroundStyle(Palette.ink)
+            Text(currentLine)
+                .textStyle(Typography.num.withSize(12.5))
+                .foregroundStyle(Palette.inkSecondary)
+        }
+    }
+
+    private var currentLine: String {
+        let cur = MoneyFormat.shared.decimalString(viewModel.inputs.currentBalance)
+        let rate = String(format: "%.3f", viewModel.inputs.currentRate)
+        return "Current: $\(cur) · \(rate)% · \(viewModel.inputs.currentRemainingYears) yr remaining"
+    }
+
+    // MARK: Option tabs
+
+    private var optionTabs: some View {
+        HStack(spacing: Spacing.s4) {
+            tab(index: 0, label: "Current")
+            ForEach(Array(viewModel.inputs.options.enumerated()), id: \.element.id) { idx, opt in
+                tab(index: idx + 1, label: "Option \(opt.label)")
+            }
+        }
+    }
+
+    private func tab(index: Int, label: String) -> some View {
+        let active = index == viewModel.selectedOptionIndex
+        let color = scenarioColors[min(index, scenarioColors.count - 1)]
+        return Button {
+            viewModel.selectedOptionIndex = index
+        } label: {
+            HStack(spacing: Spacing.s8) {
+                Rectangle().fill(color).frame(width: 7, height: 7)
+                Text(label)
+                    .textStyle(Typography.num.withSize(12, weight: active ? .semibold : .medium))
+                    .foregroundStyle(active ? Palette.ink : Palette.inkTertiary)
+                if index == 1 && index == viewModel.selectedOptionIndex {
+                    Text("BEST")
+                        .textStyle(Typography.num.withSize(9))
+                        .foregroundStyle(Palette.accent)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Palette.accentTint)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.monoChip))
+                }
+            }
+            .padding(.horizontal, Spacing.s8)
+            .padding(.vertical, Spacing.s8)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(active ? Palette.accent : Color.clear)
+                    .frame(height: 2)
+                    .offset(y: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: Winner hero
+
+    private var winnerHero: some View {
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            Eyebrow(optionHeader)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("Save")
+                    .textStyle(Typography.num.withSize(13))
+                    .foregroundStyle(Palette.inkTertiary)
+                Text("$")
+                    .textStyle(Typography.num.withSize(13))
+                    .foregroundStyle(Palette.inkTertiary)
+                Text(MoneyFormat.shared.decimalString(viewModel.monthlySavings))
+                    .textStyle(Typography.num.withSize(40, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Palette.ink)
+                Text("/mo")
+                    .textStyle(Typography.num.withSize(13))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            heroKpiRow
+                .padding(.top, Spacing.s8)
+        }
+        .padding(.horizontal, Spacing.s20)
+        .padding(.vertical, Spacing.s16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.surfaceRaised)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+        }
+    }
+
+    private var optionHeader: String {
+        let idx = viewModel.selectedOptionIndex
+        if idx == 0 {
+            return "Current · \(String(format: "%.3f", viewModel.inputs.currentRate))%"
+        }
+        guard idx - 1 < viewModel.inputs.options.count else { return "—" }
+        let opt = viewModel.inputs.options[idx - 1]
+        let closing = MoneyFormat.shared.decimalString(opt.closingCosts)
+        return "Option \(opt.label) · \(String(format: "%.3f", opt.rate))% · \(opt.termYears) yr · $\(closing) closing"
+    }
+
+    private var heroKpiRow: some View {
+        HStack(spacing: 0) {
+            kpiCell(
+                label: "Break-even",
+                value: viewModel.breakEvenMonth.map { "\($0) mo" } ?? "—",
+                sub: breakEvenDateLabel
+            )
+            kpiCell(
+                label: "Lifetime Δ",
+                value: signedLifetime,
+                sub: "saved",
+                valueColor: viewModel.lifetimeDelta >= 0 ? Palette.gain : Palette.loss,
+                leadingDivider: true
+            )
+            kpiCell(
+                label: "NPV @ 5%",
+                value: signedNPV,
+                sub: "discounted",
+                valueColor: viewModel.npvDelta >= 0 ? Palette.gain : Palette.loss,
+                leadingDivider: true
+            )
+        }
+    }
+
+    private var breakEvenDateLabel: String {
+        guard let be = viewModel.breakEvenMonth else { return "" }
+        let f = DateFormatter()
+        f.dateFormat = "MMM yyyy"
+        let date = Calendar.current.date(byAdding: .month, value: be, to: Date()) ?? Date()
+        return f.string(from: date)
+    }
+
+    private var signedLifetime: String {
+        let v = viewModel.lifetimeDelta
+        let s = v >= 0 ? "+" : "-"
+        return "\(s)$\(MoneyFormat.shared.dollarsShort(abs(v)).replacingOccurrences(of: "$", with: ""))"
+    }
+
+    private var signedNPV: String {
+        let v = viewModel.npvDelta
+        let s = v >= 0 ? "+" : "-"
+        return "\(s)$\(MoneyFormat.shared.dollarsShort(abs(v)).replacingOccurrences(of: "$", with: ""))"
+    }
+
+    private func kpiCell(
+        label: String,
+        value: String,
+        sub: String,
+        valueColor: Color = Palette.ink,
+        leadingDivider: Bool = false
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(label.uppercased())
+                .textStyle(Typography.micro.withSize(9.5))
+                .foregroundStyle(Palette.inkTertiary)
+            Text(value)
+                .textStyle(Typography.num.withSize(16, weight: .medium, design: .monospaced))
+                .foregroundStyle(valueColor)
+            Text(sub)
+                .textStyle(Typography.num.withSize(10.5))
+                .foregroundStyle(Palette.inkTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, leadingDivider ? 10 : 0)
+        .overlay(alignment: .leading) {
+            if leadingDivider {
+                Rectangle().fill(Palette.borderSubtle).frame(width: 1)
+            }
+        }
+    }
+
+    // MARK: Chart
+
+    private var chartSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.s4) {
+            Text("Cumulative savings")
+                .textStyle(Typography.section)
+                .foregroundStyle(Palette.ink)
+            Text("Net of closing costs. Intersects zero at break-even.")
+                .textStyle(Typography.body.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .padding(.bottom, Spacing.s12)
+            Chart {
+                ForEach(Array(viewModel.inputs.options.enumerated()), id: \.element.id) { idx, _ in
+                    ForEach(viewModel.cumulativeSavings(for: idx + 1, monthsCap: 60), id: \.0) { m, v in
+                        LineMark(
+                            x: .value("Month", m),
+                            y: .value("Savings", Double(truncating: v as NSNumber))
+                        )
+                        .foregroundStyle(by: .value("Option", "Option \(viewModel.inputs.options[idx].label)"))
+                        .lineStyle(StrokeStyle(
+                            lineWidth: idx + 1 == viewModel.selectedOptionIndex ? 1.8 : 1.2,
+                            lineCap: .round
+                        ))
+                        .opacity(idx + 1 == viewModel.selectedOptionIndex ? 1.0 : 0.5)
+                    }
+                }
+                RuleMark(y: .value("Zero", 0))
+                    .foregroundStyle(Palette.inkTertiary.opacity(0.6))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                if let be = viewModel.breakEvenMonth {
+                    RuleMark(x: .value("Break-even", be))
+                        .foregroundStyle(Palette.accent.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 2]))
+                    PointMark(x: .value("Break-even", be), y: .value("Savings", 0))
+                        .foregroundStyle(Palette.accent)
+                        .symbolSize(80)
+                    PointMark(x: .value("Break-even", be), y: .value("Savings", 0))
+                        .foregroundStyle(Palette.surface)
+                        .symbolSize(40)
+                }
+            }
+            .chartForegroundStyleScale([
+                "Option A": Palette.accent,
+                "Option B": Palette.scenario2,
+                "Option C": Palette.scenario3,
+            ])
+            .chartLegend(.hidden)
+            .frame(height: 190)
+        }
+    }
+
+    // MARK: Table
+
+    private var tableSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            Text("Side by side")
+                .textStyle(Typography.section)
+                .foregroundStyle(Palette.ink)
+            RefinanceTableView(viewModel: viewModel, scenarioColors: scenarioColors)
+        }
+    }
+
+    // MARK: Narrative
+
+    private var narrativeSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            Eyebrow("Narrative")
+            Text(narrativeText)
+                .textStyle(Typography.body.withSize(13.5))
+                .foregroundStyle(Palette.ink)
+                .lineSpacing(3)
+                .padding(.horizontal, Spacing.s16)
+                .padding(.vertical, Spacing.s12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Palette.surfaceRaised)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Radius.listCard)
+                        .stroke(Palette.borderSubtle, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+        }
+    }
+
+    private var narrativeText: String {
+        let name = viewModel.borrower?.firstName ?? "the borrower"
+        let savings = MoneyFormat.shared.decimalString(viewModel.monthlySavings)
+        let lifetime = MoneyFormat.shared.dollarsShort(abs(viewModel.lifetimeDelta))
+        let be = viewModel.breakEvenMonth.map { "\($0) months" } ?? "not recouped in the horizon"
+        return "The selected option saves \(name) $\(savings)/mo and an estimated \(lifetime) "
+            + "over the loan's life. Break-even: \(be)."
+    }
+
+    // MARK: Dock
+
+    private var bottomDock: some View {
+        HStack(spacing: Spacing.s8) {
+            Button { showingStress.toggle() } label: {
+                Text(showingStress ? "Clear stress" : "Stress test")
+                    .textStyle(Typography.bodyLg)
+                    .foregroundStyle(Palette.ink)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.s12)
+                    .background(Palette.surfaceRaised)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.listCard)
+                            .stroke(Palette.borderSubtle, lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+            }
+            .buttonStyle(.plain)
+            Button { saveAndShare() } label: {
+                Text("Share as PDF")
+                    .textStyle(Typography.bodyLg.withWeight(.semibold))
+                    .foregroundStyle(Palette.accentFG)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.s12)
+                    .background(Palette.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+            }
+            .buttonStyle(.plain)
+            .layoutPriority(1)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.top, Spacing.s12)
+        .padding(.bottom, Spacing.s32)
+        .background(.ultraThinMaterial)
+        .overlay(Rectangle().fill(Palette.borderSubtle).frame(height: 1),
+                 alignment: .top)
+    }
+
+    private func saveAndShare() {
+        let snap = viewModel.buildScenarioSnapshot()
+        let name = viewModel.borrower?.fullName ?? "Refi comparison"
+        if let existing = existingScenario {
+            existing.inputsJSON = snap.inputsJSON
+            existing.keyStatLine = snap.keyStat
+            existing.name = name
+            existing.updatedAt = Date()
+        } else {
+            let scenario = Scenario(
+                borrower: viewModel.borrower,
+                calculatorType: .refinance,
+                name: name,
+                inputsJSON: snap.inputsJSON,
+                keyStatLine: snap.keyStat
+            )
+            modelContext.insert(scenario)
+        }
+        try? modelContext.save()
+    }
+}
+
+// MARK: - Side-by-side table
+
+struct RefinanceTableView: View {
+    let viewModel: RefinanceViewModel
+    let scenarioColors: [Color]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(rows, id: \.label) { row in
+                HStack(spacing: 0) {
+                    Text(row.label)
+                        .textStyle(Typography.body.withSize(11, weight: .medium))
+                        .foregroundStyle(Palette.inkSecondary)
+                        .frame(width: 72, alignment: .leading)
+                    ForEach(Array(row.values.enumerated()), id: \.offset) { idx, val in
+                        let winnerIdx = row.winnerIndex ?? -1
+                        let isWin = idx == winnerIdx
+                        Text(val)
+                            .textStyle(Typography.num.withSize(12, weight: isWin ? .semibold : .regular))
+                            .foregroundStyle(colorFor(idx: idx, isWinner: isWin))
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+                .padding(.vertical, Spacing.s8)
+                Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+            }
+            HStack(spacing: 0) {
+                Color.clear.frame(width: 72)
+                ForEach(Array(headers.enumerated()), id: \.offset) { idx, h in
+                    Text(h)
+                        .textStyle(Typography.micro.withSize(9))
+                        .foregroundStyle(scenarioColors[min(idx, scenarioColors.count - 1)])
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private var headers: [String] {
+        ["Cur"] + viewModel.inputs.options.map { $0.label }
+    }
+
+    private struct Row {
+        let label: String
+        let values: [String]
+        let winnerIndex: Int?
+    }
+
+    private var rows: [Row] {
+        let opts = viewModel.inputs.options
+        return [
+            Row(label: "Rate",
+                values: [String(format: "%.3f%%", viewModel.inputs.currentRate)]
+                    + opts.map { String(format: "%.3f%%", $0.rate) },
+                winnerIndex: nil),
+            Row(label: "Term",
+                values: ["\(viewModel.inputs.currentRemainingYears) yr"]
+                    + opts.map { "\($0.termYears) yr" },
+                winnerIndex: nil),
+            Row(label: "Closing",
+                values: ["—"] + opts.map { "$\(MoneyFormat.shared.decimalString($0.closingCosts))" },
+                winnerIndex: nil),
+            paymentRow(),
+            breakEvenRow(),
+            lifetimeRow(),
+        ]
+    }
+
+    private func paymentRow() -> Row {
+        guard let result = viewModel.result else {
+            return Row(label: "Payment", values: ["—", "—", "—", "—"], winnerIndex: nil)
+        }
+        var values: [String] = []
+        var bestIdx = 0
+        var bestVal = Decimal.greatestFiniteMagnitude
+        for (i, m) in result.scenarioMetrics.enumerated() {
+            values.append("$\(MoneyFormat.shared.decimalString(m.payment))")
+            if i > 0, m.payment < bestVal { bestVal = m.payment; bestIdx = i }
+        }
+        return Row(label: "Payment", values: values, winnerIndex: bestIdx)
+    }
+
+    private func breakEvenRow() -> Row {
+        guard let result = viewModel.result else {
+            return Row(label: "Break-even", values: ["—", "—", "—", "—"], winnerIndex: nil)
+        }
+        var values: [String] = ["—"]
+        var bestIdx: Int?
+        var bestVal = Int.max
+        for (i, m) in result.scenarioMetrics.enumerated() where i > 0 {
+            if let be = m.breakEvenMonth {
+                values.append("\(be) mo")
+                if be < bestVal { bestVal = be; bestIdx = i }
+            } else {
+                values.append("—")
+            }
+        }
+        return Row(label: "Break-even", values: values, winnerIndex: bestIdx)
+    }
+
+    private func lifetimeRow() -> Row {
+        guard let result = viewModel.result, let lastH = result.horizons.last,
+              let hIdx = result.horizons.firstIndex(of: lastH) else {
+            return Row(label: "Lifetime Δ", values: ["—", "—", "—", "—"], winnerIndex: nil)
+        }
+        let current = result.scenarioTotalCosts[0][hIdx]
+        var values: [String] = ["—"]
+        var bestIdx: Int?
+        var bestVal = Decimal(0)
+        for i in 1..<result.scenarioTotalCosts.count {
+            let diff = current - result.scenarioTotalCosts[i][hIdx]
+            let short = MoneyFormat.shared.dollarsShort(abs(diff))
+            values.append((diff >= 0 ? "+" : "-") + short.replacingOccurrences(of: "$", with: "$"))
+            if diff > bestVal { bestVal = diff; bestIdx = i }
+        }
+        return Row(label: "Lifetime Δ", values: values, winnerIndex: bestIdx)
+    }
+
+    private func colorFor(idx: Int, isWinner: Bool) -> Color {
+        if idx == 0 { return Palette.inkTertiary }
+        return isWinner ? Palette.gain : Palette.ink
+    }
+}
