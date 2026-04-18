@@ -132,6 +132,11 @@ struct AmortizationResultsScreen: View {
                     .textStyle(Typography.num.withSize(13))
                     .foregroundStyle(Palette.inkTertiary)
             }
+            if let miLine = miDropoffLine {
+                Text(miLine)
+                    .textStyle(Typography.num.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+            }
             kpiRow
         }
         .padding(.horizontal, Spacing.s20)
@@ -147,13 +152,30 @@ struct AmortizationResultsScreen: View {
         )
     }
 
+    private var miDropoffLine: String? {
+        guard let period = viewModel.miDropoffPeriod else { return nil }
+        let date = viewModel.miDropoffDate
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMM yyyy"
+        let dateStr = date.map { " · \(fmt.string(from: $0))" } ?? ""
+        let total = MoneyFormat.shared.dollarsShort(viewModel.totalMIPaid)
+        return "MI drops off month \(period)\(dateStr) · \(total) total MI"
+    }
+
     private var kpiRow: some View {
-        let items: [(label: String, value: String)] = [
+        var items: [(label: String, value: String)] = [
             ("Total interest", MoneyFormat.shared.dollarsShort(viewModel.totalInterest)),
             ("Payoff", payoffShort),
             ("Total paid", MoneyFormat.shared.dollarsShort(viewModel.totalPaid)),
             ("LTV", String(format: "%.0f%%", viewModel.ltv * 100)),
         ]
+        // When MI is active, promote "Total MI paid" into the last
+        // slot; LTV is still visible on the Property & down-payment
+        // section of the Inputs screen.
+        if viewModel.miDropoffPeriod != nil {
+            items[3] = ("Total MI",
+                        MoneyFormat.shared.dollarsShort(viewModel.totalMIPaid))
+        }
         return HStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { idx, kv in
                 VStack(alignment: .leading, spacing: 3) {

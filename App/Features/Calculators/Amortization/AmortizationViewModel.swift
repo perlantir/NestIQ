@@ -55,6 +55,45 @@ final class AmortizationViewModel {
     var totalInterest: Decimal { schedule?.totalInterest ?? 0 }
     var totalPaid: Decimal { schedule?.totalPayments ?? 0 }
     var payoffDate: Date? { schedule?.payoffDate }
+
+    /// First payment period where the scheduled balance crosses the
+    /// MI-drop threshold (78% LTV by default, 80% when requested).
+    /// Derived from the Property & down-payment config when set, or
+    /// the legacy 125%-of-loan property guess otherwise. nil when MI
+    /// isn't active or never crosses.
+    var miDropoffPeriod: Int? {
+        guard inputs.includePMI, inputs.manualMonthlyPMI > 0 else { return nil }
+        let appraised = inputs.propertyDP.purchasePrice > 0
+            ? inputs.propertyDP.purchasePrice
+            : inputs.propertyValueGuess
+        return miDropoffMonth(
+            loanAmount: inputs.loanAmount,
+            appraisedValue: appraised,
+            rate: inputs.annualRate / 100,
+            termMonths: inputs.termYears * 12,
+            requestRemovalAt80: inputs.propertyDP.requestMIRemovalAt80
+        )
+    }
+
+    /// Month-level date for the dropoff period.
+    var miDropoffDate: Date? {
+        guard let period = miDropoffPeriod,
+              let payment = schedule?.payments.first(where: { $0.number == period })
+        else { return nil }
+        return payment.date
+    }
+
+    /// Total MI paid over the life of the loan up through dropoff.
+    /// Computed from the manual monthly PMI × dropoff period count
+    /// (engine-side schedule.pmi is still zero because 5B.3 doesn't
+    /// attach a PMISchedule for the manual path — Session 5B.5.5
+    /// lays the MIProfile groundwork; wiring into amortize() arrives
+    /// in a follow-up).
+    var totalMIPaid: Decimal {
+        guard inputs.includePMI, inputs.manualMonthlyPMI > 0 else { return 0 }
+        let period = miDropoffPeriod ?? (inputs.termYears * 12)
+        return inputs.manualMonthlyPMI * Decimal(period)
+    }
     var ltv: Double {
         Double(truncating: (inputs.loanAmount / inputs.propertyValueGuess) as NSNumber)
     }
