@@ -20,7 +20,7 @@ struct CalculatorNewScenarioView: View {
         case .totalCostAnalysis:
             TCAScreen()
         case .helocVsRefinance:
-            ComingSoonStub(calculator: calculator)
+            HelocScreen()
         }
     }
 }

@@ -74,8 +74,11 @@ struct SavedScenariosScreen: View {
                 initialInputs: decode(TCAFormInputs.self, from: s.inputsJSON),
                 existingScenario: s
             )
-        default:
-            ComingSoonStub(calculator: s.calculatorType)
+        case .helocVsRefinance:
+            HelocScreen(
+                initialInputs: decode(HelocFormInputs.self, from: s.inputsJSON),
+                existingScenario: s
+            )
         }
     }
 
