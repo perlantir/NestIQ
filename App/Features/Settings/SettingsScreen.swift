@@ -154,13 +154,8 @@ struct SettingsScreen: View {
                 onTap: {}
             )
             SettingsRow(
-                label: "Header layout",
-                trailing: .value("Editorial"),
-                onTap: {}
-            )
-            SettingsRow(
                 label: "Signature block",
-                trailing: .value("Default"),
+                trailing: .value(profile.tagline?.isEmpty == false ? "Custom" : "Default"),
                 onTap: {}
             )
         }
@@ -185,12 +180,6 @@ struct SettingsScreen: View {
     private var appearanceSection: some View {
         settingsGroup(header: "Appearance") {
             appearanceSegmented
-            divider
-            densitySegmented
-            divider
-            SettingsRow(label: "Text size",
-                        trailing: .value("Default"),
-                        onTap: {})
         }
     }
 
@@ -210,26 +199,6 @@ struct SettingsScreen: View {
             }
             .pickerStyle(.segmented)
             .frame(width: 180)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
-    private var densitySegmented: some View {
-        HStack(spacing: Spacing.s16) {
-            Text("Density")
-                .textStyle(Typography.bodyLg.withSize(14.5, weight: .medium))
-                .foregroundStyle(Palette.ink)
-            Spacer()
-            Picker("", selection: Binding(
-                get: { profile.density },
-                set: { setDensity($0) }
-            )) {
-                Text("Comfortable").tag(DensityPreference.comfortable)
-                Text("Compact").tag(DensityPreference.compact)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 220)
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)
@@ -265,9 +234,6 @@ struct SettingsScreen: View {
                             get: { profile.faceIDEnabled },
                             set: { set(\.faceIDEnabled, $0) }
                         )))
-            SettingsRow(label: "Export backup",
-                        trailing: .value("iCloud"),
-                        onTap: {})
             SettingsRow(label: "Erase local data",
                         trailing: .disclosure,
                         onTap: { eraseData() })
@@ -359,12 +325,6 @@ struct SettingsScreen: View {
 
     private func setAppearance(_ a: AppearancePreference) {
         profile.appearance = a
-        profile.updatedAt = Date()
-        try? modelContext.save()
-    }
-
-    private func setDensity(_ d: DensityPreference) {
-        profile.density = d
         profile.updatedAt = Date()
         try? modelContext.save()
     }
