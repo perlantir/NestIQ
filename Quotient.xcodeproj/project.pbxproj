@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011B6636497B396E36E49818 /* ProfileEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F288789586295CD7EDEA159 /* ProfileEditor.swift */; };
 		0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 906E96F722FBFC9E28E526F3 /* RootView.swift */; };
 		062024066AE2E0158F765884 /* AmortizationScheduleTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E0EFC7F288F0C507A7808F /* AmortizationScheduleTable.swift */; };
 		0CE960542B8CD9B7576FE91F /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = 90C588F1EAB9E98FE6CF8D65 /* QuotientFinance */; };
@@ -65,6 +66,7 @@
 		81610761C185084A7E848094 /* FieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */; };
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
+		8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
 		920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */; };
 		927E89E061CFE0FC73FB276F /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BEADBEAC2EA40C63E71FF7 /* SegmentedControl.swift */; };
@@ -188,6 +190,7 @@
 		78A2DD798F1884CC41D6E7D3 /* RootTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabBar.swift; sourceTree = "<group>"; };
 		7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationHappyPathTests.swift; sourceTree = "<group>"; };
 		7F25962FDCE571CDFE241131 /* StressPathsChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressPathsChart.swift; sourceTree = "<group>"; };
+		7F288789586295CD7EDEA159 /* ProfileEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditor.swift; sourceTree = "<group>"; };
 		85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateRibbonCell.swift; sourceTree = "<group>"; };
 		860BC6C292C49CFEF58A6ECF /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
@@ -210,6 +213,7 @@
 		A69DBC7B515E3DF14C85420D /* ScenarioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioCard.swift; sourceTree = "<group>"; };
 		AA0DA6E84884539067F5DCEF /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		AA4698C088D95213A6366BAE /* DataRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRow.swift; sourceTree = "<group>"; };
+		B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportDetailScreens.swift; sourceTree = "<group>"; };
 		B6F41CEF19131B852D33AC2C /* ThemePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreview.swift; sourceTree = "<group>"; };
 		B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModel.swift; sourceTree = "<group>"; };
 		B782FB7D6EF280A7AC6FD31A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
@@ -586,7 +590,9 @@
 			children = (
 				8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */,
 				68C37A3C9E5111C9F4BB8353 /* ComplianceDetailScreens.swift */,
+				7F288789586295CD7EDEA159 /* ProfileEditor.swift */,
 				6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */,
+				B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -857,6 +863,7 @@
 				44C767529EDBC2DC74CCFB27 /* OnboardingStep.swift in Sources */,
 				A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */,
 				A0918268CD8908003B12759A /* PDFPages.swift in Sources */,
+				011B6636497B396E36E49818 /* ProfileEditor.swift in Sources */,
 				F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */,
 				92B227E84BA9ADD8AEB52EF0 /* Radius.swift in Sources */,
 				F9FCEC655B802C0A6CC0F7F6 /* RateRibbonCell.swift in Sources */,
@@ -876,6 +883,7 @@
 				725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */,
 				3A41B4E5CE7B4B39E65BEB86 /* StackedHorizontalBar.swift in Sources */,
 				FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */,
+				8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */,
 				4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */,
