@@ -232,6 +232,7 @@ struct HomeScreen: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("home.calculator.\(type.rawValue)")
     }
 
     // MARK: Recent section

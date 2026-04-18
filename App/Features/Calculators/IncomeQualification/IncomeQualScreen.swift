@@ -5,6 +5,8 @@
 
 import SwiftUI
 import SwiftData
+import QuotientNarration
+import QuotientPDF
 
 struct IncomeQualScreen: View {
     var initialInputs: IncomeQualFormInputs?
@@ -13,9 +15,14 @@ struct IncomeQualScreen: View {
     @State private var viewModel = IncomeQualViewModel()
     @State private var navigateToAmortization = false
     @State private var showingBorrowerPicker = false
+    @State private var showingNarration = false
+    @State private var justSaved = false
+    @State private var shareBundle: ShareBundle?
 
     @Environment(\.modelContext)
     private var modelContext
+
+    @Query private var profiles: [LenderProfile]
 
     var body: some View {
         ScrollView {
@@ -29,9 +36,19 @@ struct IncomeQualScreen: View {
                 dtiSection
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
-                incomeSection
-                    .padding(.top, Spacing.s24)
-                debtsSection
+                IncomeListView(
+                    incomes: viewModel.inputs.incomes,
+                    total: viewModel.qualifyingIncome
+                )
+                .padding(.top, Spacing.s24)
+                DebtsListView(
+                    debts: viewModel.inputs.debts,
+                    total: viewModel.totalDebt
+                )
+                .padding(.top, Spacing.s24)
+
+                runScenarioLink
+                    .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
 
                 Spacer(minLength: 140)
@@ -58,9 +75,65 @@ struct IncomeQualScreen: View {
             }
             .presentationDetents([.large])
         }
+        .sheet(isPresented: $showingNarration) {
+            NarrationSheet(facts: narrationFacts) { _ in }
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $shareBundle) { bundle in
+            QuotientSharePreview(
+                profile: bundle.profile,
+                borrower: viewModel.borrower,
+                pdfURL: bundle.url,
+                pageCount: bundle.pageCount,
+                onDismiss: {}
+            )
+            .presentationDetents([.large])
+        }
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
         }
+    }
+
+    // MARK: Narration facts
+
+    private var narrationFacts: ScenarioFacts {
+        let maxLoan = "$\(MoneyFormat.shared.decimalString(viewModel.maxLoan))"
+        let front = String(format: "%.1f%%", viewModel.frontEndDTI * 100)
+        let back = String(format: "%.1f%%", viewModel.backEndDTIIncludingDebts * 100)
+        return ScenarioFacts(
+            scenarioType: .incomeQualification,
+            borrowerFirstName: viewModel.borrower?.firstName,
+            numericFacts: [maxLoan, front, back],
+            fields: [
+                "maxLoan": maxLoan,
+                "frontEndDTI": front,
+                "backEndDTI": back,
+            ]
+        )
+    }
+
+    private var runScenarioLink: some View {
+        Button { runScenario() } label: {
+            HStack {
+                Text("Run in Amortization")
+                    .textStyle(Typography.bodyLg.withWeight(.semibold))
+                    .foregroundStyle(Palette.accent)
+                Spacer()
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Palette.accent)
+            }
+            .padding(.horizontal, Spacing.s16)
+            .padding(.vertical, Spacing.s12)
+            .background(Palette.surfaceRaised)
+            .overlay(
+                RoundedRectangle(cornerRadius: Radius.listCard)
+                    .stroke(Palette.accent.opacity(0.4), lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("income.runScenario")
     }
 
     // MARK: Borrower
@@ -242,148 +315,23 @@ struct IncomeQualScreen: View {
         }
     }
 
-    // MARK: Income + debts
-
-    private var incomeSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Eyebrow("Qualifying income · monthly")
-                .padding(.horizontal, Spacing.s20)
-                .padding(.bottom, Spacing.s8)
-            VStack(spacing: 0) {
-                ForEach(viewModel.inputs.incomes) { item in
-                    incomeRow(item)
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
-                totalRow(label: "Total qualifying",
-                         value: viewModel.qualifyingIncome)
-            }
-            .background(Palette.surfaceRaised)
-            .overlay(
-                VStack(spacing: 0) {
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    Spacer()
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
-            )
-        }
-    }
-
-    private func incomeRow(_ item: IncomeSource) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 1) {
-                Text("\(item.label) · \(item.kind.display)")
-                    .textStyle(Typography.bodyLg.withSize(13.5, weight: .medium))
-                    .foregroundStyle(Palette.ink)
-                if item.weightPercent < 1 {
-                    Text(String(format: "%.0f%% of $%@",
-                                item.weightPercent * 100,
-                                MoneyFormat.shared.decimalString(item.monthlyAmount)))
-                        .textStyle(Typography.num.withSize(10.5))
-                        .foregroundStyle(Palette.inkTertiary)
-                }
-            }
-            Spacer()
-            Text("$\(MoneyFormat.shared.decimalString(item.qualifyingMonthly))")
-                .textStyle(Typography.num.withSize(14, weight: .medium, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
-    private var debtsSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Eyebrow("Monthly debts")
-                .padding(.horizontal, Spacing.s20)
-                .padding(.bottom, Spacing.s8)
-            VStack(spacing: 0) {
-                ForEach(viewModel.inputs.debts) { debt in
-                    debtRow(debt)
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
-                totalRow(label: "Total", value: viewModel.totalDebt)
-            }
-            .background(Palette.surfaceRaised)
-            .overlay(
-                VStack(spacing: 0) {
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    Spacer()
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
-            )
-        }
-    }
-
-    private func debtRow(_ debt: MonthlyDebt) -> some View {
-        HStack {
-            Text(debt.label)
-                .textStyle(Typography.bodyLg.withSize(13.5, weight: .medium))
-                .foregroundStyle(Palette.ink)
-            Spacer()
-            Text("$\(MoneyFormat.shared.decimalString(debt.monthlyAmount))")
-                .textStyle(Typography.num.withSize(14, weight: .medium, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
-    private func totalRow(label: String, value: Decimal) -> some View {
-        HStack {
-            Text(label)
-                .textStyle(Typography.bodyLg.withSize(13.5, weight: .semibold))
-                .foregroundStyle(Palette.ink)
-            Spacer()
-            Text("$\(MoneyFormat.shared.decimalString(value))")
-                .textStyle(Typography.num.withSize(14, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
     // MARK: Dock
 
     private var bottomDock: some View {
-        HStack(spacing: Spacing.s8) {
-            Button {} label: {
-                Text("Adjust inputs")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            Button { runScenario() } label: {
-                Text("Run scenario")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .layoutPriority(1)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-                 alignment: .top)
+        CalculatorDock(
+            saveLabel: justSaved ? "Saved" : "Save",
+            onNarrate: { showingNarration = true },
+            onSave: { saveScenario() },
+            onShare: { generatePDFAndShare() }
+        )
     }
 
     private func runScenario() {
-        // Save an IncomeQual scenario alongside prefilling the
-        // Amortization flow, so the Income-qual record shows up in Saved
-        // independent of the derived amortization scenario.
+        saveScenario()
+        navigateToAmortization = true
+    }
+
+    private func saveScenario() {
         let snap = viewModel.buildScenario()
         let name = viewModel.borrower?.fullName ?? "Income qualification"
         if let existing = existingScenario {
@@ -403,7 +351,29 @@ struct IncomeQualScreen: View {
             modelContext.insert(scenario)
         }
         try? modelContext.save()
-        navigateToAmortization = true
+        justSaved = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
+    }
+
+    private func generatePDFAndShare() {
+        guard let profile = profiles.first else { return }
+        do {
+            let url = try PDFBuilder.buildIncomeQualPDF(
+                profile: profile,
+                borrower: viewModel.borrower,
+                viewModel: viewModel,
+                narrative: ""
+            )
+            shareBundle = ShareBundle(
+                url: url,
+                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                profile: profile
+            )
+        } catch {
+            #if DEBUG
+            print("[IncomeQualScreen] PDF gen failed: \(error)")
+            #endif
+        }
     }
 }
 
