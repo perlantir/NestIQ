@@ -12,6 +12,10 @@ final class CalculatorTCATests: XCTestCase {
 
     func testTCAFullFlow() async throws {
         let app = UITest.launchApp()
-        UITest.exerciseCalculatorFlow(app, slug: "totalCostAnalysis")
+        UITest.exerciseTwoStepCalculatorFlow(
+            app,
+            slug: "totalCostAnalysis",
+            computeId: "tca.compute"
+        )
     }
 }
