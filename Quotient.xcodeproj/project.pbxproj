@@ -67,6 +67,7 @@
 		81610761C185084A7E848094 /* FieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC99653CFB8B8FD0B5921CA1 /* FieldRow.swift */; };
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
+		8992085DCDCABAC4C20C0A86 /* HelocComparisonPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D257C6D1D7B6465CF613EC9 /* HelocComparisonPage.swift */; };
 		8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
 		920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A576ECDBA9B7DB4AF05DD3B9 /* RefinanceViewModel.swift */; };
@@ -151,6 +152,7 @@
 		1866228FFAF9C7A0CCC95764 /* AmortizationInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputs.swift; sourceTree = "<group>"; };
 		19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualListViews.swift; sourceTree = "<group>"; };
 		1A6B19F5A21683FA7823B3A6 /* FaceIDUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceIDUnlock.swift; sourceTree = "<group>"; };
+		1D257C6D1D7B6465CF613EC9 /* HelocComparisonPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocComparisonPage.swift; sourceTree = "<group>"; };
 		1F63633A474B6D374D46BAD4 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageDetailScreens.swift; sourceTree = "<group>"; };
 		21294577B6542C065DE45454 /* AmortizationInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputsScreen.swift; sourceTree = "<group>"; };
@@ -405,6 +407,7 @@
 		67FCE0DF1D1E5450E9D28D0F /* Share */ = {
 			isa = PBXGroup;
 			children = (
+				1D257C6D1D7B6465CF613EC9 /* HelocComparisonPage.swift */,
 				9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */,
 				9F99BC61424AA8DF3FF82690 /* PDFPages.swift */,
 				659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */,
@@ -844,6 +847,7 @@
 				20845D217FC80E35439704CC /* Fields.swift in Sources */,
 				0DF0E7CE87E8E3234206121F /* FilterChip.swift in Sources */,
 				12B251F0DF98735D91CD06A4 /* HairlineDivider.swift in Sources */,
+				8992085DCDCABAC4C20C0A86 /* HelocComparisonPage.swift in Sources */,
 				756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */,
 				65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */,
 				ED9A0F824482974D1EEEA77D /* HelocScreen.swift in Sources */,

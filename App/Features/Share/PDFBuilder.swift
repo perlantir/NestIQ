@@ -54,7 +54,8 @@ enum PDFBuilder {
     static func buildPDF(
         profile: LenderProfile,
         borrower: Borrower?,
-        payload: Payload
+        payload: Payload,
+        extraPages: [(AnyView, PDFRenderer.Orientation)] = []
     ) throws -> URL {
         let url = temporaryURL(for: payload.calculatorSlug)
         let cover = AnyView(coverPage(profile: profile, borrower: borrower, payload: payload))
@@ -65,7 +66,10 @@ enum PDFBuilder {
                 scenarioType: payload.complianceScenarioType
             )
         )
-        try PDFRenderer.renderPDF(pages: [cover, disclaimers], to: url)
+        var pages: [(AnyView, PDFRenderer.Orientation)] = [(cover, .portrait)]
+        pages.append(contentsOf: extraPages)
+        pages.append((disclaimers, .portrait))
+        try PDFRenderer.renderMixed(pages: pages, to: url)
         return url
     }
 
@@ -224,7 +228,52 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
-        return try buildPDF(profile: profile, borrower: borrower, payload: payload)
+        let comparison = AnyView(helocComparisonPage(
+            profile: profile,
+            borrower: borrower,
+            viewModel: viewModel
+        ))
+        return try buildPDF(
+            profile: profile,
+            borrower: borrower,
+            payload: payload,
+            extraPages: [(comparison, .landscape)]
+        )
+    }
+
+    private static func helocComparisonPage(
+        profile: LenderProfile,
+        borrower: Borrower?,
+        viewModel: HelocViewModel
+    ) -> some View {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        let generated = formatter.string(from: Date())
+        let rows = HelocComparisonPage.rows(for: viewModel)
+        let state = resolveState(borrower: borrower)
+        let disclosures = requiredDisclosures(
+            for: .helocVsRefinance,
+            propertyState: state ?? .CA
+        )
+        let disclaimer = disclosures.first?.textEN ?? defaultDisclaimer()
+        let ehoStatement = equalHousingOpportunityStatement(locale: Locale(identifier: "en_US"))
+        let nmlsLine: String = {
+            switch profile.nmlsDisplayFormat {
+            case .idOnly: return "NMLS \(profile.nmlsId)"
+            case .idAndURL: return "NMLS \(profile.nmlsId) · nmlsconsumeraccess.org"
+            case .none: return ""
+            }
+        }()
+        return HelocComparisonPage(
+            borrowerName: borrower?.fullName ?? "Client",
+            generatedDate: generated,
+            loFullName: profile.fullName.isEmpty ? "Loan Officer" : profile.fullName,
+            loNMLSLine: nmlsLine,
+            rows: rows,
+            disclaimer: disclaimer,
+            ehoStatement: ehoStatement,
+            accentHex: profile.brandColorHex
+        )
     }
 
     // MARK: Page composition
