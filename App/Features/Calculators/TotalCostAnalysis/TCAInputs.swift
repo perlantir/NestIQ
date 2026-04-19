@@ -29,10 +29,14 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
     /// Purchase-mode Property & DP (purchase price, DP %, DP $, LTV).
     /// Left at .empty in refinance mode.
     var propertyDP: PropertyDownPaymentConfig
+    /// Refinance-mode only: remaining other-debts balance + monthly
+    /// payment after this scenario's cash-out consolidates some/all
+    /// of the borrower's current other debts. nil in purchase mode.
+    var otherDebts: OtherDebts?
 
     enum CodingKeys: String, CodingKey {
         case id, label, name, rate, termYears, points, closingCosts
-        case loanAmount, monthlyMI, propertyDP
+        case loanAmount, monthlyMI, propertyDP, otherDebts
     }
 
     init(
@@ -45,7 +49,8 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         closingCosts: Decimal = 0,
         loanAmount: Decimal = 0,
         monthlyMI: Decimal = 0,
-        propertyDP: PropertyDownPaymentConfig = .empty
+        propertyDP: PropertyDownPaymentConfig = .empty,
+        otherDebts: OtherDebts? = nil
     ) {
         self.id = id
         self.label = label
@@ -57,6 +62,7 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         self.loanAmount = loanAmount
         self.monthlyMI = monthlyMI
         self.propertyDP = propertyDP
+        self.otherDebts = otherDebts
     }
 
     init(from decoder: any Decoder) throws {
@@ -73,6 +79,7 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         self.propertyDP = try c.decodeIfPresent(
             PropertyDownPaymentConfig.self, forKey: .propertyDP
         ) ?? .empty
+        self.otherDebts = try c.decodeIfPresent(OtherDebts.self, forKey: .otherDebts)
     }
 }
 
@@ -90,11 +97,16 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     var monthlyHOA: Decimal
     var scenarios: [TCAScenario]
     var horizonsYears: [Int]
+    /// Refinance-mode only: aggregate of every non-mortgage debt the
+    /// borrower carries today (credit cards, auto, student, etc.). Per
+    /// scenario, `TCAScenario.otherDebts` is what remains after the
+    /// scenario's cash-out consolidates some/all of this.
+    var currentOtherDebts: OtherDebts?
 
     enum CodingKeys: String, CodingKey {
         case mode, loanAmount, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
-        case scenarios, horizonsYears
+        case scenarios, horizonsYears, currentOtherDebts
     }
 
     init(
@@ -105,7 +117,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         monthlyInsurance: Decimal,
         monthlyHOA: Decimal,
         scenarios: [TCAScenario],
-        horizonsYears: [Int]
+        horizonsYears: [Int],
+        currentOtherDebts: OtherDebts? = nil
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -115,6 +128,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.monthlyHOA = monthlyHOA
         self.scenarios = scenarios
         self.horizonsYears = horizonsYears
+        self.currentOtherDebts = currentOtherDebts
     }
 
     init(from decoder: any Decoder) throws {
@@ -127,6 +141,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.monthlyHOA = try c.decode(Decimal.self, forKey: .monthlyHOA)
         self.scenarios = try c.decode([TCAScenario].self, forKey: .scenarios)
         self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
+        self.currentOtherDebts = try c.decodeIfPresent(OtherDebts.self, forKey: .currentOtherDebts)
     }
 
     /// Effective principal for the given scenario under the active

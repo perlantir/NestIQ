@@ -196,6 +196,14 @@ struct TCAScreen: View {
                     Text("Mo " + monthlyPaymentDisplay(for: s, at: idx))
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkSecondary)
+                    if let impact = monthlyImpactDisplay(for: s, at: idx) {
+                        Text("Mo total " + impact.total)
+                            .textStyle(Typography.num.withSize(10.5, weight: .semibold))
+                            .foregroundStyle(Palette.ink)
+                        Text(impact.delta)
+                            .textStyle(Typography.num.withSize(10))
+                            .foregroundStyle(impact.isSavings ? Palette.gain : Palette.loss)
+                    }
                     Text("Close " + closingDisplay(for: s))
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkTertiary)
@@ -220,6 +228,47 @@ struct TCAScreen: View {
 
     private func loanAmountDisplay(for scenario: TCAScenario) -> String {
         MoneyFormat.shared.dollarsShort(viewModel.inputs.effectiveLoanAmount(for: scenario))
+    }
+
+    private struct MonthlyImpact {
+        let total: String
+        let delta: String
+        let isSavings: Bool
+    }
+
+    /// Refinance mode + debts-set only: PITI + scenario debts remaining
+    /// monthly payment, plus signed Δ vs. current (PITI already paid
+    /// by the borrower today isn't known here, so we compare against
+    /// the "current" row which the compareScenarios engine computes as
+    /// scenario index 0 in refi mode — but TCA doesn't carry a distinct
+    /// "current" PITI. So the Δ is scenario-vs-scenario-A when
+    /// currentOtherDebts is set; it's the debt-service-only savings
+    /// otherwise.)
+    private func monthlyImpactDisplay(for scenario: TCAScenario, at index: Int)
+        -> MonthlyImpact?
+    {
+        guard viewModel.inputs.mode == .refinance else { return nil }
+        guard let metrics = viewModel.result?.scenarioMetrics,
+              index < metrics.count else { return nil }
+        let debts = scenario.otherDebts ?? viewModel.inputs.currentOtherDebts
+        guard let debts, !debts.isZero else { return nil }
+        let total = metrics[index].payment + debts.monthlyPayment
+        let currentDebts = viewModel.inputs.currentOtherDebts?.monthlyPayment ?? 0
+        let currentBaseline = metrics[0].payment + currentDebts
+        let savings = currentBaseline - total
+        let deltaStr: String
+        if savings > 0 {
+            deltaStr = "Saves \(MoneyFormat.shared.currency(savings))/mo vs current"
+        } else if savings < 0 {
+            deltaStr = "Costs \(MoneyFormat.shared.currency(abs(savings)))/mo more"
+        } else {
+            deltaStr = "Matches current monthly"
+        }
+        return MonthlyImpact(
+            total: MoneyFormat.shared.currency(total),
+            delta: deltaStr,
+            isSavings: savings >= 0
+        )
     }
 
     private func ltvDisplay(for scenario: TCAScenario) -> String? {

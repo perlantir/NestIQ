@@ -12,7 +12,7 @@ struct TCAInputsScreen: View {
     let borrower: Borrower?
     var existingScenario: Scenario?
 
-    @State private var viewModel: TCAViewModel
+    @State var viewModel: TCAViewModel
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
@@ -92,6 +92,10 @@ struct TCAInputsScreen: View {
                 scenarioSection
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
+
+                if viewModel.inputs.mode == .refinance {
+                    currentDebtsSection.padding(.top, Spacing.s24)
+                }
 
                 horizonSection
                     .padding(.horizontal, Spacing.s20)
@@ -346,6 +350,10 @@ struct TCAInputsScreen: View {
                     set: { viewModel.inputs.scenarios[index].closingCosts = $0 }
                 )
             )
+            if viewModel.inputs.mode == .refinance {
+                divider
+                scenarioDebtsRows(index: index)
+            }
         }
         .background(Palette.surfaceRaised)
         .overlay(
@@ -353,68 +361,6 @@ struct TCAInputsScreen: View {
                 .stroke(Palette.borderSubtle, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-    }
-
-    private func purchaseDPSection(index: Int) -> some View {
-        PropertyDownPaymentSection(
-            config: Binding(
-                get: { viewModel.inputs.scenarios[index].propertyDP },
-                set: { viewModel.inputs.scenarios[index].propertyDP = $0 }
-            ),
-            externalLoanAmount: viewModel.inputs.loanAmount,
-            header: "Property & DP — scenario \(viewModel.inputs.scenarios[index].label)"
-        )
-    }
-
-    private func refiLoanSection(index: Int) -> some View {
-        VStack(spacing: 0) {
-            FieldRow(
-                label: "Loan amount",
-                prefix: "$",
-                hint: loanHint(index: index),
-                decimal: Binding(
-                    get: { viewModel.inputs.scenarios[index].loanAmount },
-                    set: { viewModel.inputs.scenarios[index].loanAmount = $0 }
-                )
-            )
-            divider
-            ltvRow(index: index)
-        }
-    }
-
-    private func loanHint(index: Int) -> String {
-        viewModel.inputs.scenarios[index].loanAmount > 0
-            ? "overrides default"
-            : "leave 0 to use default"
-    }
-
-    private func ltvRow(index: Int) -> some View {
-        let lt = viewModel.inputs.ltv(for: viewModel.inputs.scenarios[index])
-        let hv = viewModel.inputs.homeValue
-        return HStack {
-            VStack(alignment: .leading, spacing: 1) {
-                Text("LTV")
-                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
-                    .foregroundStyle(Palette.ink)
-                Text(hv > 0 ? "vs home value above" : "enter home value for live LTV")
-                    .textStyle(Typography.num.withSize(11))
-                    .foregroundStyle(Palette.inkTertiary)
-            }
-            Spacer()
-            Text(hv > 0 ? String(format: "%.1f%%", lt * 100) : "—")
-                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
-                .foregroundStyle(lt > 0.80 ? Palette.warn : Palette.ink)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
-    private func miHint(index: Int) -> String {
-        let lt = viewModel.inputs.ltv(for: viewModel.inputs.scenarios[index])
-        guard lt > 0 else { return "optional" }
-        return lt > 0.80
-            ? String(format: "LTV %.1f%% — MI typical", lt * 100)
-            : String(format: "LTV %.1f%% — no MI typical", lt * 100)
     }
 
     // MARK: Horizon chips

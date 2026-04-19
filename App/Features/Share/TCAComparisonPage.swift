@@ -103,6 +103,14 @@ struct TCAComparisonPage: View {
                     Text("Mo " + pmt)
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(inkSecondary)
+                    if let impact = pdfMonthlyImpact(for: s, at: idx) {
+                        Text("Mo total " + impact.total)
+                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                            .foregroundStyle(inkPrimary)
+                        Text(impact.delta)
+                            .font(.system(size: 9.5, design: .monospaced))
+                            .foregroundStyle(inkSecondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
@@ -195,6 +203,34 @@ struct TCAComparisonPage: View {
         let d = Double(truncating: value as NSNumber)
         if d >= 1_000_000 { return String(format: "$%.2fM", d / 1_000_000) }
         return String(format: "$%.0fk", d / 1_000)
+    }
+
+    private struct PDFMonthlyImpact {
+        let total: String
+        let delta: String
+    }
+
+    private func pdfMonthlyImpact(for scenario: TCAScenario, at index: Int)
+        -> PDFMonthlyImpact?
+    {
+        guard viewModel.inputs.mode == .refinance else { return nil }
+        guard let metrics = viewModel.result?.scenarioMetrics,
+              index < metrics.count else { return nil }
+        let debts = scenario.otherDebts ?? viewModel.inputs.currentOtherDebts
+        guard let debts, !debts.isZero else { return nil }
+        let total = metrics[index].payment + debts.monthlyPayment
+        let currentDebts = viewModel.inputs.currentOtherDebts?.monthlyPayment ?? 0
+        let baseline = metrics[0].payment + currentDebts
+        let savings = baseline - total
+        let deltaStr: String
+        if savings > 0 {
+            deltaStr = "Saves \(MoneyFormat.shared.currency(savings))/mo"
+        } else if savings < 0 {
+            deltaStr = "Costs \(MoneyFormat.shared.currency(abs(savings)))/mo more"
+        } else {
+            deltaStr = "Matches current monthly"
+        }
+        return PDFMonthlyImpact(total: MoneyFormat.shared.currency(total), delta: deltaStr)
     }
 
     private var footer: some View {
