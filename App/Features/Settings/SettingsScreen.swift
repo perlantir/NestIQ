@@ -357,7 +357,7 @@ struct SettingsScreen: View {
     }
 
     private var footer: some View {
-        Text("NestIQ — made in Portland, OR")
+        Text("NestIQ · Powered by Perlantir")
             .font(.custom(Typography.serifFamily + "-It", size: 11))
             .foregroundStyle(Palette.inkTertiary)
             .frame(maxWidth: .infinity)
