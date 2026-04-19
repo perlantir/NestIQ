@@ -109,11 +109,16 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// mode ignores this. Default: true (matches 5E.5 behavior so saved
     /// scenarios don't regress).
     var includeDebts: Bool
+    /// Number of scenarios the LO wants to compare (2, 3, or 4).
+    /// Default is 2. Kept in sync with `scenarios.count` when the user
+    /// changes the selector on the Inputs screen. Mirrors Refi 5F.3.
+    var scenarioCount: Int
 
     enum CodingKeys: String, CodingKey {
         case mode, loanAmount, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
         case scenarios, horizonsYears, currentOtherDebts, includeDebts
+        case scenarioCount
     }
 
     init(
@@ -126,7 +131,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         scenarios: [TCAScenario],
         horizonsYears: [Int],
         currentOtherDebts: OtherDebts? = nil,
-        includeDebts: Bool = true
+        includeDebts: Bool = true,
+        scenarioCount: Int? = nil
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -138,6 +144,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.horizonsYears = horizonsYears
         self.currentOtherDebts = currentOtherDebts
         self.includeDebts = includeDebts
+        self.scenarioCount = scenarioCount ?? scenarios.count
     }
 
     init(from decoder: any Decoder) throws {
@@ -152,6 +159,44 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
         self.currentOtherDebts = try c.decodeIfPresent(OtherDebts.self, forKey: .currentOtherDebts)
         self.includeDebts = try c.decodeIfPresent(Bool.self, forKey: .includeDebts) ?? true
+        self.scenarioCount = try c.decodeIfPresent(Int.self, forKey: .scenarioCount)
+            ?? self.scenarios.count
+    }
+
+    /// Blank scenario with the term defaulted to 30 yr and every other
+    /// numeric field at 0. Mirrors the Refi 5F.3 blank-slate pattern —
+    /// LOs fill in just the fields that matter per scenario.
+    static func blankScenario(label: String, name: String? = nil) -> TCAScenario {
+        TCAScenario(
+            label: label,
+            name: name ?? "Scenario \(label)",
+            rate: 0,
+            termYears: 30,
+            points: 0,
+            closingCosts: 0,
+            loanAmount: 0,
+            monthlyMI: 0
+        )
+    }
+
+    /// Grow or shrink `scenarios` to match `newCount`. Preserves any
+    /// existing entries (by position) when shrinking; appends blanks
+    /// labeled A/B/C/D when growing. Normalizes labels so they always
+    /// read A..{count} top-to-bottom.
+    mutating func resizeScenarios(to newCount: Int) {
+        let clamped = max(2, min(newCount, 4))
+        let labels = ["A", "B", "C", "D"]
+        if scenarios.count < clamped {
+            for i in scenarios.count..<clamped {
+                scenarios.append(Self.blankScenario(label: labels[i]))
+            }
+        } else if scenarios.count > clamped {
+            scenarios = Array(scenarios.prefix(clamped))
+        }
+        for (idx, lbl) in labels.prefix(scenarios.count).enumerated() {
+            scenarios[idx].label = lbl
+        }
+        scenarioCount = clamped
     }
 
     /// Effective principal for the given scenario under the active

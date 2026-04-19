@@ -31,43 +31,23 @@ struct TCAInputsScreen: View {
         _selectedBorrower = State(initialValue: borrower)
     }
 
+    /// Fresh-launch inputs — blank-slate per 5H.4 spec. Two scenarios
+    /// (A/B) with term=30, every other numeric field zero. The LO fills
+    /// in only what's needed and resizes to 3 or 4 if they want more
+    /// comparisons. Saved scenarios bypass this and load their own values.
     private static let defaultInputs = TCAFormInputs(
         mode: .refinance,
-        loanAmount: 548_000,
-        homeValue: 710_000,
-        monthlyTaxes: 542,
-        monthlyInsurance: 135,
+        loanAmount: 0,
+        homeValue: 0,
+        monthlyTaxes: 0,
+        monthlyInsurance: 0,
         monthlyHOA: 0,
         scenarios: [
-            TCAScenario(
-                label: "A",
-                name: "Conv 30",
-                rate: 6.750,
-                termYears: 30
-            ),
-            TCAScenario(
-                label: "B",
-                name: "Conv 15",
-                rate: 5.875,
-                termYears: 15
-            ),
-            TCAScenario(
-                label: "C",
-                name: "FHA 30",
-                rate: 6.375,
-                termYears: 30,
-                points: 0.5
-            ),
-            TCAScenario(
-                label: "D",
-                name: "Buydown",
-                rate: 4.750,
-                termYears: 30,
-                points: 2.75,
-                closingCosts: 15_100
-            ),
+            TCAFormInputs.blankScenario(label: "A", name: "Scenario A"),
+            TCAFormInputs.blankScenario(label: "B", name: "Scenario B"),
         ],
-        horizonsYears: [5, 7, 10, 15, 30]
+        horizonsYears: [5, 7, 10, 15, 30],
+        scenarioCount: 2
     )
 
     private let horizonChoices = [5, 7, 10, 15, 30]
@@ -265,6 +245,7 @@ struct TCAInputsScreen: View {
     private var scenarioSection: some View {
         VStack(alignment: .leading, spacing: Spacing.s12) {
             Eyebrow("Scenarios")
+            scenarioCountSelector
             SegmentedControl(
                 options: Array(viewModel.inputs.scenarios.indices),
                 selection: $activeTab,
@@ -272,6 +253,24 @@ struct TCAInputsScreen: View {
             )
             scenarioCard(index: clampedTab)
         }
+    }
+
+    private var scenarioCountSelector: some View {
+        Picker("Scenarios", selection: Binding(
+            get: { viewModel.inputs.scenarioCount },
+            set: { newValue in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.inputs.resizeScenarios(to: newValue)
+                    activeTab = min(activeTab, viewModel.inputs.scenarios.count - 1)
+                }
+            }
+        )) {
+            Text("2").tag(2)
+            Text("3").tag(3)
+            Text("4").tag(4)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("tca.scenarioCount")
     }
 
     private var clampedTab: Int {
