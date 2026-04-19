@@ -8,16 +8,23 @@ import SwiftUI
 // MARK: - Welcome
 
 struct WelcomeMiniature: View {
+    private var versionLine: String {
+        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+        return "v\(short) · build \(build)"
+    }
+
     var body: some View {
         VStack(spacing: Spacing.s8) {
-            Text("Q")
-                .font(.custom(Typography.serifFamily, size: 72))
-                .foregroundStyle(Palette.ink)
-            Text("QUOTIENT")
+            Image("Monogram-Accent")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 72, height: 72)
+            Text("NESTIQ")
                 .textStyle(Typography.eyebrow)
                 .foregroundStyle(Palette.inkTertiary)
                 .tracking(11 * 0.14)
-            Text("v 1.2.4")
+            Text(versionLine)
                 .textStyle(Typography.num)
                 .foregroundStyle(Palette.inkTertiary)
         }

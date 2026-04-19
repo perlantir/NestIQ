@@ -5,7 +5,7 @@
 
 enum OnboardingCopy {
     static let welcome = """
-Five calculators, built for loan officers who care about how the numbers \
+Six calculators, built for loan officers who care about how the numbers \
 read on paper. Swipe to see what's inside.
 """
 

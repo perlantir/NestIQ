@@ -84,7 +84,7 @@ struct OnboardingFlow: View {
             .frame(maxWidth: .infinity)
             stepContent(
                 eyebrow: "Welcome",
-                title: "NestIQ.",
+                title: "",
                 paragraph: OnboardingCopy.welcome
             ) { WelcomeMiniature() }
         case .amortization:
@@ -132,10 +132,12 @@ struct OnboardingFlow: View {
                 Text(eyebrow.uppercased())
                     .textStyle(Typography.eyebrow)
                     .foregroundStyle(Palette.accent)
-                Text(title)
-                    .font(.custom(Typography.serifFamily, size: 32))
-                    .foregroundStyle(Palette.ink)
-                    .tracking(32 * -0.02)
+                if !title.isEmpty {
+                    Text(title)
+                        .font(.custom(Typography.serifFamily, size: 32))
+                        .foregroundStyle(Palette.ink)
+                        .tracking(32 * -0.02)
+                }
                 Text(paragraph)
                     .textStyle(Typography.bodyLg)
                     .foregroundStyle(Palette.inkSecondary)
