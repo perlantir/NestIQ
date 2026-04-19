@@ -59,7 +59,7 @@ struct AuthGate<Content: View>: View {
                     Text("NestIQ")
                         .textStyle(Typography.eyebrow)
                         .foregroundStyle(Palette.inkTertiary)
-                    Text("Five calculators, built for loan officers.")
+                    Text("Six calculators, built for loan officers.")
                         .textStyle(Typography.body)
                         .foregroundStyle(Palette.inkSecondary)
                         .multilineTextAlignment(.center)
