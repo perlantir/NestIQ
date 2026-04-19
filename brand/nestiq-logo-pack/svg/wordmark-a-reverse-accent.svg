@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 140" width="540" height="140"><defs></defs><rect width="540" height="140" fill="#1F4D3F"></rect><text x="0" y="110" class="serif" font-size="120" letter-spacing="-2.4" fill="#FAF9F5">Nest</text><text x="320" y="110" class="serif-i" font-size="120" letter-spacing="-2.4" fill="#FAF9F5">IQ</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" width="480" height="140">
+<defs></defs>
+<rect width="480" height="140" fill="#1F4D3F"></rect>
+<text x="0" y="112" font-size="120" letter-spacing="-2.4">
+  <tspan class="serif" fill="#FAF9F5">Nest</tspan><tspan class="serif-i" fill="#FAF9F5" dx="6">IQ</tspan>
+</text>
+</svg>
