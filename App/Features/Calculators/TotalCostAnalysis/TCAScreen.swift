@@ -57,7 +57,7 @@ struct TCAScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s16)
 
-                scenarioSpecGrid
+                alignedScenarioSpecs
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s24)
 
@@ -165,6 +165,15 @@ struct TCAScreen: View {
     }
 
     // MARK: Scenario spec grid
+
+    /// Wraps `scenarioSpecGrid` with a 52-pt leading gutter so the top
+    /// cards align column-for-column with the horizon matrix rows below.
+    private var alignedScenarioSpecs: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Color.clear.frame(width: 52)
+            scenarioSpecGrid
+        }
+    }
 
     private var scenarioSpecGrid: some View {
         LazyVGrid(
