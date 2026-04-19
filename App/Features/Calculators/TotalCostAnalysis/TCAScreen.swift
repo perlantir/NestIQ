@@ -142,15 +142,19 @@ struct TCAScreen: View {
     // MARK: Legend
 
     private var legendChips: some View {
+        // Single-letter chips (A / B / C / D) with a 7pt color dot. The
+        // full product name ("Conv 30", "FHA 30", etc.) still renders in
+        // the scenario spec grid below — chips in 4-across used to wrap
+        // mid-label when both pieces shared the chip.
         HStack(spacing: Spacing.s8) {
             ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
                 HStack(spacing: Spacing.s4) {
                     Rectangle().fill(scenarioColors[min(idx, 3)]).frame(width: 7, height: 7)
-                    Text("\(s.label) · \(s.name)")
-                        .textStyle(Typography.num.withSize(11))
-                        .foregroundStyle(Palette.inkSecondary)
+                    Text(s.label.uppercased())
+                        .textStyle(Typography.num.withSize(11, weight: .semibold))
+                        .foregroundStyle(Palette.ink)
                 }
-                .padding(.horizontal, Spacing.s8)
+                .padding(.horizontal, Spacing.s12)
                 .padding(.vertical, 5)
                 .overlay(Capsule().stroke(Palette.borderSubtle, lineWidth: 1))
                 .clipShape(Capsule())

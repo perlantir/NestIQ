@@ -80,7 +80,7 @@ extension TCAInputsScreen {
     func scenarioDebtsRows(index: Int) -> some View {
         VStack(spacing: 0) {
             FieldRow(
-                label: "Debts remaining · balance",
+                label: "Remaining debt balance",
                 prefix: "$",
                 hint: "after this option's cash-out consolidates some/all",
                 decimal: Binding(
@@ -98,7 +98,7 @@ extension TCAInputsScreen {
             )
             divider
             FieldRow(
-                label: "Debts remaining · monthly",
+                label: "Remaining debt monthly",
                 prefix: "$",
                 decimal: Binding(
                     get: { viewModel.inputs.scenarios[index].otherDebts?.monthlyPayment ?? 0 },
