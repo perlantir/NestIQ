@@ -35,18 +35,22 @@ struct HelocInputsScreen: View {
         _selectedBorrower = State(initialValue: borrower)
     }
 
+    /// Fresh-launch inputs — blank-slate per 5H.5 spec. Term fields
+    /// default to 30 yr (standard starting point); every other numeric
+    /// field is 0. Saved scenarios bypass this and load their own
+    /// values unchanged.
     private static let defaultInputs = HelocFormInputs(
-        firstLienBalance: 318_000,
-        firstLienRate: 3.125,
-        firstLienRemainingYears: 22,
-        helocAmount: 80_000,
-        helocIntroRate: 6.990,
-        helocIntroMonths: 12,
-        helocFullyIndexedRate: 8.750,
-        refiRate: 6.125,
+        firstLienBalance: 0,
+        firstLienRate: 0,
+        firstLienRemainingYears: 30,
+        helocAmount: 0,
+        helocIntroRate: 0,
+        helocIntroMonths: 0,
+        helocFullyIndexedRate: 0,
+        refiRate: 0,
         refiTermYears: 30,
         refiMonthlyMI: 0,
-        homeValue: 560_000,
+        homeValue: 0,
         stressShockBps: 200
     )
 
