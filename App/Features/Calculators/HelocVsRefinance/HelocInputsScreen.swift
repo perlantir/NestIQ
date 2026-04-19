@@ -45,6 +45,8 @@ struct HelocInputsScreen: View {
         helocFullyIndexedRate: 8.750,
         refiRate: 6.125,
         refiTermYears: 30,
+        refiMonthlyMI: 0,
+        homeValue: 560_000,
         stressShockBps: 200
     )
 
@@ -56,16 +58,7 @@ struct HelocInputsScreen: View {
                     .padding(.top, Spacing.s8)
 
                 firstLienSection.padding(.top, Spacing.s16)
-                PropertyDownPaymentSection(
-                    config: Binding(
-                        get: { viewModel.inputs.propertyDP },
-                        set: { viewModel.inputs.propertyDP = $0 }
-                    ),
-                    externalLoanAmount: viewModel.inputs.firstLienBalance
-                        + viewModel.inputs.helocAmount,
-                    header: "Property & LTV — cash-out refi"
-                )
-                .padding(.top, Spacing.s24)
+                propertyValueSection.padding(.top, Spacing.s24)
                 cashOutSection.padding(.top, Spacing.s24)
                 refiSection.padding(.top, Spacing.s24)
                 helocSection.padding(.top, Spacing.s24)
@@ -179,6 +172,55 @@ struct HelocInputsScreen: View {
         }
     }
 
+    // MARK: Property value + LTV / CLTV
+
+    private var propertyValueSection: some View {
+        fieldGroup(header: "Property") {
+            FieldRow(
+                label: "Current home value",
+                prefix: "$",
+                hint: "drives LTV / CLTV below",
+                decimal: Binding(
+                    get: { viewModel.inputs.homeValue },
+                    set: { viewModel.inputs.homeValue = $0 }
+                )
+            )
+            divider
+            ltvRow(
+                label: "LTV · 1st lien",
+                value: viewModel.inputs.firstLienLTV,
+                sub: "first lien ÷ home value"
+            )
+            divider
+            ltvRow(
+                label: "CLTV",
+                value: viewModel.inputs.cltv,
+                sub: "(first lien + HELOC) ÷ home value"
+            )
+        }
+    }
+
+    private func ltvRow(label: String, value: Double, sub: String) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label)
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(sub)
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Spacer()
+            Text(viewModel.inputs.homeValue > 0
+                 ? String(format: "%.1f%%", value * 100)
+                 : "—")
+                .textStyle(Typography.num.withSize(18, weight: .medium, design: .monospaced))
+                .foregroundStyle(value > 0.80 ? Palette.warn : Palette.ink)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+    }
+
     // MARK: Cash-out target
 
     private var cashOutSection: some View {
@@ -218,7 +260,27 @@ struct HelocInputsScreen: View {
                 range: 5...40,
                 suffix: "yr"
             )
+            divider
+            FieldRow(
+                label: "Monthly MI",
+                prefix: "$",
+                hint: refiMIHint,
+                decimal: Binding(
+                    get: { viewModel.inputs.refiMonthlyMI },
+                    set: { viewModel.inputs.refiMonthlyMI = $0 }
+                )
+            )
         }
+    }
+
+    private var refiMIHint: String {
+        let ltv = viewModel.inputs.refiLTV
+        guard viewModel.inputs.homeValue > 0 else {
+            return "enter if required at your LTV"
+        }
+        return ltv > 0.80
+            ? String(format: "refi LTV %.1f%% — MI typical", ltv * 100)
+            : String(format: "refi LTV %.1f%% — no MI typical", ltv * 100)
     }
 
     // MARK: HELOC option

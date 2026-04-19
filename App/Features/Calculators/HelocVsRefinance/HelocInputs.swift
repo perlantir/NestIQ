@@ -14,13 +14,18 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
     var helocFullyIndexedRate: Double   // %
     var refiRate: Double                // % — alternative cash-out refi
     var refiTermYears: Int
+    /// Monthly MI on the cash-out refi option. HELOCs are second-lien
+    /// and don't carry PMI, so there is no HELOC-side MI field.
+    var refiMonthlyMI: Decimal
+    /// Appraised value. LTV (1st lien only) and CLTV (1st + HELOC)
+    /// render against this.
+    var homeValue: Decimal
     var stressShockBps: Int             // e.g. 200 for +2pt
-    var propertyDP: PropertyDownPaymentConfig
 
     enum CodingKeys: String, CodingKey {
         case firstLienBalance, firstLienRate, firstLienRemainingYears
         case helocAmount, helocIntroRate, helocIntroMonths, helocFullyIndexedRate
-        case refiRate, refiTermYears, stressShockBps, propertyDP
+        case refiRate, refiTermYears, refiMonthlyMI, homeValue, stressShockBps
     }
 
     init(
@@ -33,8 +38,9 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         helocFullyIndexedRate: Double,
         refiRate: Double,
         refiTermYears: Int,
-        stressShockBps: Int,
-        propertyDP: PropertyDownPaymentConfig = .empty
+        refiMonthlyMI: Decimal = 0,
+        homeValue: Decimal = 0,
+        stressShockBps: Int
     ) {
         self.firstLienBalance = firstLienBalance
         self.firstLienRate = firstLienRate
@@ -45,8 +51,9 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         self.helocFullyIndexedRate = helocFullyIndexedRate
         self.refiRate = refiRate
         self.refiTermYears = refiTermYears
+        self.refiMonthlyMI = refiMonthlyMI
+        self.homeValue = homeValue
         self.stressShockBps = stressShockBps
-        self.propertyDP = propertyDP
     }
 
     init(from decoder: any Decoder) throws {
@@ -60,10 +67,9 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         self.helocFullyIndexedRate = try c.decode(Double.self, forKey: .helocFullyIndexedRate)
         self.refiRate = try c.decode(Double.self, forKey: .refiRate)
         self.refiTermYears = try c.decode(Int.self, forKey: .refiTermYears)
+        self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
+        self.homeValue = try c.decodeIfPresent(Decimal.self, forKey: .homeValue) ?? 0
         self.stressShockBps = try c.decode(Int.self, forKey: .stressShockBps)
-        self.propertyDP = try c.decodeIfPresent(
-            PropertyDownPaymentConfig.self, forKey: .propertyDP
-        ) ?? .empty
     }
 
     static let sampleDefault = HelocFormInputs(
@@ -76,8 +82,27 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         helocFullyIndexedRate: 8.750,
         refiRate: 6.125,
         refiTermYears: 30,
+        refiMonthlyMI: 0,
+        homeValue: 560_000,
         stressShockBps: 200
     )
+
+    /// LTV of the first lien alone against homeValue. 0 when homeValue
+    /// isn't set.
+    var firstLienLTV: Double {
+        guard homeValue > 0 else { return 0 }
+        return Double(truncating: (firstLienBalance / homeValue) as NSNumber)
+    }
+
+    /// Combined LTV — (first lien + HELOC draw) / homeValue.
+    var cltv: Double {
+        guard homeValue > 0 else { return 0 }
+        return Double(truncating: (totalCapital / homeValue) as NSNumber)
+    }
+
+    /// Cash-out refi LTV = (first lien + HELOC draw) / homeValue.
+    /// Same numerator as CLTV since the refi rolls both into one loan.
+    var refiLTV: Double { cltv }
 
     var blendedRate: Double {
         let tranches = [

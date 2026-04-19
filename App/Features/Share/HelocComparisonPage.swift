@@ -185,7 +185,7 @@ extension HelocComparisonPage {
         let fullIdx = String(format: "%.3f%%", inputs.helocFullyIndexedRate)
         let primeMargin = max(0, inputs.helocFullyIndexedRate - 7.50)
         let marginDisplay = String(format: "Prime + %.2f%%", primeMargin)
-        return [
+        var rows: [Row] = [
             Row(label: "Loan amount / Credit limit",
                 refi: cashOut,
                 heloc: helocAmt),
@@ -213,15 +213,42 @@ extension HelocComparisonPage {
             Row(label: "Blended rate · 10 years",
                 refi: refiRate,
                 heloc: blended10y),
-            Row(label: "Closing costs",
-                refi: "Typical $5k – $15k",
-                heloc: "Typically lower"),
-            Row(label: "Points",
-                refi: "0.00",
-                heloc: "—"),
-            Row(label: "Flexibility",
-                refi: "Fixed commitment",
-                heloc: "Flexible draw / repay"),
         ]
+        if inputs.homeValue > 0 {
+            rows.append(Row(
+                label: "LTV · new loan",
+                refi: String(format: "%.1f%%", inputs.refiLTV * 100),
+                heloc: String(format: "%.1f%%", inputs.firstLienLTV * 100)
+            ))
+            rows.append(Row(
+                label: "CLTV · total",
+                refi: String(format: "%.1f%%", inputs.refiLTV * 100),
+                heloc: String(format: "%.1f%%", inputs.cltv * 100)
+            ))
+        }
+        let refiMI = inputs.refiMonthlyMI > 0
+            ? MoneyFormat.shared.currency(inputs.refiMonthlyMI)
+            : "—"
+        rows.append(Row(
+            label: "Monthly MI",
+            refi: refiMI,
+            heloc: "N/A"
+        ))
+        rows.append(Row(
+            label: "Closing costs",
+            refi: "Typical $5k – $15k",
+            heloc: "Typically lower"
+        ))
+        rows.append(Row(
+            label: "Points",
+            refi: "0.00",
+            heloc: "—"
+        ))
+        rows.append(Row(
+            label: "Flexibility",
+            refi: "Fixed commitment",
+            heloc: "Flexible draw / repay"
+        ))
+        return rows
     }
 }
