@@ -28,6 +28,32 @@ final class SwiftDataModelTests: XCTestCase {
         XCTAssertEqual(fetched.first?.initials, "NM")
     }
 
+    /// Session 5I.3: the Settings upper-right hero was rendering
+    /// initials even after a photo was uploaded. Root-cause analysis
+    /// confirmed the save path itself was correct (ProfileEditor writes
+    /// `photoData` on MainActor then calls `modelContext.save()`); the
+    /// bug was purely in the hero's render path. This test pins the
+    /// round-trip so a future regression in persistence can't go
+    /// unnoticed either.
+    func testProfilePhotoUploadAndPersist() throws {
+        let ctx = makeContext()
+        let profile = LenderProfile(appleUserID: "apple.photo.1", firstName: "Nick")
+        let bytes = Data([0xFF, 0xD8, 0xFF, 0xE0] + Array(repeating: UInt8(0x42), count: 256))
+        profile.photoData = bytes
+        profile.showPhotoOnPDF = true
+        ctx.insert(profile)
+        try ctx.save()
+
+        let fetched = try ctx.fetch(FetchDescriptor<LenderProfile>()).first
+        XCTAssertEqual(fetched?.photoData, bytes)
+        XCTAssertEqual(fetched?.showPhotoOnPDF, true)
+
+        fetched?.photoData = nil
+        try ctx.save()
+        let cleared = try ctx.fetch(FetchDescriptor<LenderProfile>()).first
+        XCTAssertNil(cleared?.photoData)
+    }
+
     func testProfileAppearanceRoundTrip() throws {
         let ctx = makeContext()
         let profile = LenderProfile(appleUserID: "apple.2")

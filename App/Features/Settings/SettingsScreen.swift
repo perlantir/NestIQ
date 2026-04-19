@@ -9,6 +9,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 import QuotientCompliance
 
 struct SettingsScreen: View {
@@ -91,15 +92,9 @@ struct SettingsScreen: View {
 
     private var profileHero: some View {
         HStack(spacing: Spacing.s12) {
-            Circle()
-                .fill(Palette.surfaceSunken)
-                .overlay(Circle().stroke(Palette.borderSubtle, lineWidth: 1))
-                .overlay(
-                    Text(profile.initials.isEmpty ? "NM" : profile.initials)
-                        .font(.custom(Typography.serifFamily, size: 20))
-                        .foregroundStyle(Palette.inkSecondary)
-                )
+            profileAvatar
                 .frame(width: 58, height: 58)
+                .accessibilityIdentifier("settings.profile.avatar")
             VStack(alignment: .leading, spacing: 2) {
                 Text(profile.fullName.isEmpty ? "Add your name" : profile.fullName)
                     .textStyle(Typography.bodyLg.withSize(15, weight: .semibold))
@@ -130,6 +125,29 @@ struct SettingsScreen: View {
                 Rectangle().fill(Palette.borderSubtle).frame(height: 1)
             }
         )
+    }
+
+    /// Upper-right / hero profile avatar. Renders the uploaded photo if
+    /// any, falling back to an initials monogram. Prior to 5I.3 the hero
+    /// always rendered initials — photoData was saved by ProfileEditor
+    /// but never consumed here.
+    @ViewBuilder private var profileAvatar: some View {
+        if let data = profile.photoData, let image = UIImage(data: data) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Palette.borderSubtle, lineWidth: 1))
+        } else {
+            Circle()
+                .fill(Palette.surfaceSunken)
+                .overlay(Circle().stroke(Palette.borderSubtle, lineWidth: 1))
+                .overlay(
+                    Text(profile.initials.isEmpty ? "NM" : profile.initials)
+                        .font(.custom(Typography.serifFamily, size: 20))
+                        .foregroundStyle(Palette.inkSecondary)
+                )
+        }
     }
 
     private var profileSubline: String {
