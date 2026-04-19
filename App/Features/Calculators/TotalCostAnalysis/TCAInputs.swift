@@ -4,6 +4,14 @@
 import Foundation
 import QuotientFinance
 
+/// Purchase comparison (15yr vs 30yr on the same house) vs. refinance
+/// comparison (option A vs B on the same existing home). Drives per-
+/// scenario field visibility.
+enum TCAMode: String, Codable, Hashable, Sendable {
+    case purchase
+    case refinance
+}
+
 struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
     var id: UUID
     var label: String       // "A", "B", …
@@ -12,6 +20,20 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
     var termYears: Int
     var points: Double
     var closingCosts: Decimal
+    /// Refinance-mode loan amount. When 0, engine falls back to the
+    /// form-level loanAmount (backward-compat for scenarios saved
+    /// before per-scenario loan amounts were supported).
+    var loanAmount: Decimal
+    /// User-entered monthly MI — both modes consume this.
+    var monthlyMI: Decimal
+    /// Purchase-mode Property & DP (purchase price, DP %, DP $, LTV).
+    /// Left at .empty in refinance mode.
+    var propertyDP: PropertyDownPaymentConfig
+
+    enum CodingKeys: String, CodingKey {
+        case id, label, name, rate, termYears, points, closingCosts
+        case loanAmount, monthlyMI, propertyDP
+    }
 
     init(
         id: UUID = UUID(),
@@ -20,7 +42,10 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         rate: Double,
         termYears: Int,
         points: Double = 0,
-        closingCosts: Decimal = 0
+        closingCosts: Decimal = 0,
+        loanAmount: Decimal = 0,
+        monthlyMI: Decimal = 0,
+        propertyDP: PropertyDownPaymentConfig = .empty
     ) {
         self.id = id
         self.label = label
@@ -29,56 +54,111 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         self.termYears = termYears
         self.points = points
         self.closingCosts = closingCosts
-    }
-}
-
-struct TCAFormInputs: Codable, Hashable, Sendable {
-    var loanAmount: Decimal
-    var monthlyTaxes: Decimal
-    var monthlyInsurance: Decimal
-    var monthlyHOA: Decimal
-    var scenarios: [TCAScenario]
-    var horizonsYears: [Int]
-    var propertyDP: PropertyDownPaymentConfig
-
-    enum CodingKeys: String, CodingKey {
-        case loanAmount, monthlyTaxes, monthlyInsurance, monthlyHOA
-        case scenarios, horizonsYears, propertyDP
-    }
-
-    init(
-        loanAmount: Decimal,
-        monthlyTaxes: Decimal,
-        monthlyInsurance: Decimal,
-        monthlyHOA: Decimal,
-        scenarios: [TCAScenario],
-        horizonsYears: [Int],
-        propertyDP: PropertyDownPaymentConfig = .empty
-    ) {
         self.loanAmount = loanAmount
-        self.monthlyTaxes = monthlyTaxes
-        self.monthlyInsurance = monthlyInsurance
-        self.monthlyHOA = monthlyHOA
-        self.scenarios = scenarios
-        self.horizonsYears = horizonsYears
+        self.monthlyMI = monthlyMI
         self.propertyDP = propertyDP
     }
 
     init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try c.decode(UUID.self, forKey: .id)
+        self.label = try c.decode(String.self, forKey: .label)
+        self.name = try c.decode(String.self, forKey: .name)
+        self.rate = try c.decode(Double.self, forKey: .rate)
+        self.termYears = try c.decode(Int.self, forKey: .termYears)
+        self.points = try c.decode(Double.self, forKey: .points)
+        self.closingCosts = try c.decode(Decimal.self, forKey: .closingCosts)
+        self.loanAmount = try c.decodeIfPresent(Decimal.self, forKey: .loanAmount) ?? 0
+        self.monthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .monthlyMI) ?? 0
+        self.propertyDP = try c.decodeIfPresent(
+            PropertyDownPaymentConfig.self, forKey: .propertyDP
+        ) ?? .empty
+    }
+}
+
+struct TCAFormInputs: Codable, Hashable, Sendable {
+    var mode: TCAMode
+    /// Refinance-mode fallback loan amount. Scenarios that set their
+    /// own `loanAmount` override this; scenarios at 0 use it.
+    var loanAmount: Decimal
+    /// Refinance-mode home value — shared LTV denominator across
+    /// scenarios. Purchase mode ignores this (LTV comes from each
+    /// scenario's propertyDP.purchasePrice).
+    var homeValue: Decimal
+    var monthlyTaxes: Decimal
+    var monthlyInsurance: Decimal
+    var monthlyHOA: Decimal
+    var scenarios: [TCAScenario]
+    var horizonsYears: [Int]
+
+    enum CodingKeys: String, CodingKey {
+        case mode, loanAmount, homeValue
+        case monthlyTaxes, monthlyInsurance, monthlyHOA
+        case scenarios, horizonsYears
+    }
+
+    init(
+        mode: TCAMode = .refinance,
+        loanAmount: Decimal,
+        homeValue: Decimal = 0,
+        monthlyTaxes: Decimal,
+        monthlyInsurance: Decimal,
+        monthlyHOA: Decimal,
+        scenarios: [TCAScenario],
+        horizonsYears: [Int]
+    ) {
+        self.mode = mode
+        self.loanAmount = loanAmount
+        self.homeValue = homeValue
+        self.monthlyTaxes = monthlyTaxes
+        self.monthlyInsurance = monthlyInsurance
+        self.monthlyHOA = monthlyHOA
+        self.scenarios = scenarios
+        self.horizonsYears = horizonsYears
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.mode = try c.decodeIfPresent(TCAMode.self, forKey: .mode) ?? .refinance
         self.loanAmount = try c.decode(Decimal.self, forKey: .loanAmount)
+        self.homeValue = try c.decodeIfPresent(Decimal.self, forKey: .homeValue) ?? 0
         self.monthlyTaxes = try c.decode(Decimal.self, forKey: .monthlyTaxes)
         self.monthlyInsurance = try c.decode(Decimal.self, forKey: .monthlyInsurance)
         self.monthlyHOA = try c.decode(Decimal.self, forKey: .monthlyHOA)
         self.scenarios = try c.decode([TCAScenario].self, forKey: .scenarios)
         self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
-        self.propertyDP = try c.decodeIfPresent(
-            PropertyDownPaymentConfig.self, forKey: .propertyDP
-        ) ?? .empty
+    }
+
+    /// Effective principal for the given scenario under the active
+    /// mode. Purchase: price − DP (derivedLoanAmount), falling back
+    /// to form.loanAmount when the scenario's DP isn't set up.
+    /// Refinance: scenario.loanAmount if > 0, else form.loanAmount.
+    func effectiveLoanAmount(for scenario: TCAScenario) -> Decimal {
+        switch mode {
+        case .purchase:
+            let derived = scenario.propertyDP.derivedLoanAmount
+            return derived > 0 ? derived : loanAmount
+        case .refinance:
+            return scenario.loanAmount > 0 ? scenario.loanAmount : loanAmount
+        }
+    }
+
+    /// LTV per scenario against the active mode's denominator.
+    func ltv(for scenario: TCAScenario) -> Double {
+        switch mode {
+        case .purchase:
+            return scenario.propertyDP.ltv(loanAmount: effectiveLoanAmount(for: scenario))
+        case .refinance:
+            guard homeValue > 0 else { return 0 }
+            return Double(truncating:
+                (effectiveLoanAmount(for: scenario) / homeValue) as NSNumber)
+        }
     }
 
     static let sampleDefault = TCAFormInputs(
+        mode: .refinance,
         loanAmount: 548_000,
+        homeValue: 710_000,
         monthlyTaxes: 542,
         monthlyInsurance: 135,
         monthlyHOA: 0,
@@ -116,11 +196,12 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
 
     func scenarioInputs() -> [ScenarioInput] {
         scenarios.map { s in
-            let pointsCost = loanAmount * Decimal(s.points) / 100
+            let principal = effectiveLoanAmount(for: s)
+            let pointsCost = principal * Decimal(s.points) / 100
             return ScenarioInput(
                 name: s.label,
                 loan: Loan(
-                    principal: loanAmount,
+                    principal: principal,
                     annualRate: s.rate / 100,
                     termMonths: s.termYears * 12,
                     startDate: Date()

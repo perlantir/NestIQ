@@ -68,8 +68,12 @@ struct TCAComparisonPage: View {
             ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
                 let metrics = viewModel.result?.scenarioMetrics
                 let pmt = metrics.flatMap {
-                    idx < $0.count ? "$\(MoneyFormat.shared.decimalString($0[idx].payment))" : "—"
+                    idx < $0.count ? MoneyFormat.shared.currency($0[idx].payment) : "—"
                 } ?? "—"
+                let loan = MoneyFormat.shared.dollarsShort(
+                    viewModel.inputs.effectiveLoanAmount(for: s)
+                )
+                let ltv = viewModel.inputs.ltv(for: s)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(s.label.uppercased() + " · " + s.name)
                         .font(.system(size: 10.5, weight: .semibold))
@@ -78,6 +82,19 @@ struct TCAComparisonPage: View {
                     Text(String(format: "%.3f%% · %d yr", s.rate, s.termYears))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(inkPrimary)
+                    Text("Loan \(loan)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(inkSecondary)
+                    if ltv > 0 {
+                        Text(String(format: "LTV %.1f%%", ltv * 100))
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(inkSecondary)
+                    }
+                    if s.monthlyMI > 0 {
+                        Text("MI " + MoneyFormat.shared.currency(s.monthlyMI) + "/mo")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(inkSecondary)
+                    }
                     Text(String(format: "pts %.2f · close $%@",
                                 s.points,
                                 MoneyFormat.shared.decimalString(s.closingCosts)))

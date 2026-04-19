@@ -32,7 +32,9 @@ struct TCAInputsScreen: View {
     }
 
     private static let defaultInputs = TCAFormInputs(
+        mode: .refinance,
         loanAmount: 548_000,
+        homeValue: 710_000,
         monthlyTaxes: 542,
         monthlyInsurance: 135,
         monthlyHOA: 0,
@@ -77,15 +79,14 @@ struct TCAInputsScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s8)
 
-                loanSection.padding(.top, Spacing.s16)
-                PropertyDownPaymentSection(
-                    config: Binding(
-                        get: { viewModel.inputs.propertyDP },
-                        set: { viewModel.inputs.propertyDP = $0 }
-                    ),
-                    externalLoanAmount: viewModel.inputs.loanAmount
-                )
-                .padding(.top, Spacing.s24)
+                modeToggle
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s16)
+
+                if viewModel.inputs.mode == .refinance {
+                    loanSection.padding(.top, Spacing.s16)
+                    homeValueSection.padding(.top, Spacing.s24)
+                }
                 escrowSection.padding(.top, Spacing.s24)
 
                 scenarioSection
@@ -170,16 +171,47 @@ struct TCAInputsScreen: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: Loan
+    // MARK: Mode toggle
+
+    private var modeToggle: some View {
+        Picker("Mode", selection: Binding(
+            get: { viewModel.inputs.mode },
+            set: { viewModel.inputs.mode = $0 }
+        )) {
+            Text("Purchase").tag(TCAMode.purchase)
+            Text("Refinance").tag(TCAMode.refinance)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("tca.modeToggle")
+    }
+
+    // MARK: Loan (refinance-mode fallback)
 
     private var loanSection: some View {
-        fieldGroup(header: "Loan") {
+        fieldGroup(header: "Loan amount · refinance default") {
             FieldRow(
-                label: "Loan amount",
+                label: "Default loan amount",
                 prefix: "$",
+                hint: "scenarios can override below",
                 decimal: Binding(
                     get: { viewModel.inputs.loanAmount },
                     set: { viewModel.inputs.loanAmount = $0 }
+                )
+            )
+        }
+    }
+
+    // MARK: Home value (refinance mode — shared LTV denominator)
+
+    private var homeValueSection: some View {
+        fieldGroup(header: "Property") {
+            FieldRow(
+                label: "Current home value",
+                prefix: "$",
+                hint: "shared LTV denominator for all scenarios",
+                decimal: Binding(
+                    get: { viewModel.inputs.homeValue },
+                    set: { viewModel.inputs.homeValue = $0 }
                 )
             )
         }
@@ -258,6 +290,14 @@ struct TCAInputsScreen: View {
             .padding(.top, Spacing.s12)
             .padding(.bottom, Spacing.s4)
 
+            if viewModel.inputs.mode == .purchase {
+                purchaseDPSection(index: index)
+                divider
+            } else {
+                refiLoanSection(index: index)
+                divider
+            }
+
             FieldRow(
                 label: "Rate",
                 suffix: "%",
@@ -289,6 +329,16 @@ struct TCAInputsScreen: View {
             )
             divider
             FieldRow(
+                label: "Monthly MI",
+                prefix: "$",
+                hint: miHint(index: index),
+                decimal: Binding(
+                    get: { viewModel.inputs.scenarios[index].monthlyMI },
+                    set: { viewModel.inputs.scenarios[index].monthlyMI = $0 }
+                )
+            )
+            divider
+            FieldRow(
                 label: "Closing costs",
                 prefix: "$",
                 decimal: Binding(
@@ -303,6 +353,68 @@ struct TCAInputsScreen: View {
                 .stroke(Palette.borderSubtle, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+    }
+
+    private func purchaseDPSection(index: Int) -> some View {
+        PropertyDownPaymentSection(
+            config: Binding(
+                get: { viewModel.inputs.scenarios[index].propertyDP },
+                set: { viewModel.inputs.scenarios[index].propertyDP = $0 }
+            ),
+            externalLoanAmount: viewModel.inputs.loanAmount,
+            header: "Property & DP — scenario \(viewModel.inputs.scenarios[index].label)"
+        )
+    }
+
+    private func refiLoanSection(index: Int) -> some View {
+        VStack(spacing: 0) {
+            FieldRow(
+                label: "Loan amount",
+                prefix: "$",
+                hint: loanHint(index: index),
+                decimal: Binding(
+                    get: { viewModel.inputs.scenarios[index].loanAmount },
+                    set: { viewModel.inputs.scenarios[index].loanAmount = $0 }
+                )
+            )
+            divider
+            ltvRow(index: index)
+        }
+    }
+
+    private func loanHint(index: Int) -> String {
+        viewModel.inputs.scenarios[index].loanAmount > 0
+            ? "overrides default"
+            : "leave 0 to use default"
+    }
+
+    private func ltvRow(index: Int) -> some View {
+        let lt = viewModel.inputs.ltv(for: viewModel.inputs.scenarios[index])
+        let hv = viewModel.inputs.homeValue
+        return HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("LTV")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(hv > 0 ? "vs home value above" : "enter home value for live LTV")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Spacer()
+            Text(hv > 0 ? String(format: "%.1f%%", lt * 100) : "—")
+                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
+                .foregroundStyle(lt > 0.80 ? Palette.warn : Palette.ink)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+    }
+
+    private func miHint(index: Int) -> String {
+        let lt = viewModel.inputs.ltv(for: viewModel.inputs.scenarios[index])
+        guard lt > 0 else { return "optional" }
+        return lt > 0.80
+            ? String(format: "LTV %.1f%% — MI typical", lt * 100)
+            : String(format: "LTV %.1f%% — no MI typical", lt * 100)
     }
 
     // MARK: Horizon chips
@@ -322,7 +434,27 @@ struct TCAInputsScreen: View {
         }
     }
 
-    private func horizonChip(years: Int) -> some View {
+    // MARK: Compute CTA
+
+    private var computeCTA: some View {
+        VStack(spacing: Spacing.s8) {
+            PrimaryButton("Compute total cost analysis") {
+                navigationActive = true
+            }
+            .accessibilityIdentifier("tca.compute")
+            Text("Winner per horizon and narrative on the next screen.")
+                .textStyle(Typography.body.withSize(11))
+                .foregroundStyle(Palette.inkTertiary)
+                .italic()
+        }
+    }
+
+}
+
+// MARK: - Horizon chip + toggle
+
+extension TCAInputsScreen {
+    func horizonChip(years: Int) -> some View {
         let isOn = viewModel.inputs.horizonsYears.contains(years)
         return Button {
             toggleHorizon(years)
@@ -349,7 +481,7 @@ struct TCAInputsScreen: View {
         .buttonStyle(.plain)
     }
 
-    private func toggleHorizon(_ years: Int) {
+    func toggleHorizon(_ years: Int) {
         var set = Set(viewModel.inputs.horizonsYears)
         if set.contains(years) {
             // Keep at least one horizon selected so the comparison has
@@ -360,25 +492,12 @@ struct TCAInputsScreen: View {
         }
         viewModel.inputs.horizonsYears = set.sorted()
     }
+}
 
-    // MARK: Compute CTA
+// MARK: - Shared helpers
 
-    private var computeCTA: some View {
-        VStack(spacing: Spacing.s8) {
-            PrimaryButton("Compute total cost analysis") {
-                navigationActive = true
-            }
-            .accessibilityIdentifier("tca.compute")
-            Text("Winner per horizon and narrative on the next screen.")
-                .textStyle(Typography.body.withSize(11))
-                .foregroundStyle(Palette.inkTertiary)
-                .italic()
-        }
-    }
-
-    // MARK: Shared
-
-    private func stepperRow(
+extension TCAInputsScreen {
+    func stepperRow(
         label: String,
         value: Binding<Int>,
         range: ClosedRange<Int>,
@@ -402,7 +521,7 @@ struct TCAInputsScreen: View {
     }
 
     @ViewBuilder
-    private func fieldGroup<Content: View>(
+    func fieldGroup<Content: View>(
         header: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -422,7 +541,7 @@ struct TCAInputsScreen: View {
         }
     }
 
-    private var divider: some View {
+    var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 }

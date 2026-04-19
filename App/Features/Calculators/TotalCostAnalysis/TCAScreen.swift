@@ -115,8 +115,14 @@ struct TCAScreen: View {
     }
 
     private var subline: String {
-        let amt = MoneyFormat.shared.decimalString(viewModel.inputs.loanAmount)
-        return "Loan $\(amt) · \(viewModel.inputs.scenarios.count) scenarios"
+        let count = viewModel.inputs.scenarios.count
+        switch viewModel.inputs.mode {
+        case .purchase:
+            return "Purchase · \(count) scenarios"
+        case .refinance:
+            let amt = MoneyFormat.shared.decimalString(viewModel.inputs.loanAmount)
+            return "Refi · default loan $\(amt) · \(count) scenarios"
+        }
     }
 
     // MARK: Borrower
@@ -174,6 +180,19 @@ struct TCAScreen: View {
                     Text("\(s.termYears)y")
                         .textStyle(Typography.num.withSize(12))
                         .foregroundStyle(Palette.inkSecondary)
+                    Text("Loan " + loanAmountDisplay(for: s))
+                        .textStyle(Typography.num.withSize(10.5))
+                        .foregroundStyle(Palette.inkSecondary)
+                    if let ltvText = ltvDisplay(for: s) {
+                        Text("LTV " + ltvText)
+                            .textStyle(Typography.num.withSize(10.5))
+                            .foregroundStyle(Palette.inkTertiary)
+                    }
+                    if s.monthlyMI > 0 {
+                        Text("MI $\(MoneyFormat.shared.decimalString(s.monthlyMI))/mo")
+                            .textStyle(Typography.num.withSize(10.5))
+                            .foregroundStyle(Palette.inkTertiary)
+                    }
                     Text("Mo " + monthlyPaymentDisplay(for: s, at: idx))
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkSecondary)
@@ -199,6 +218,16 @@ struct TCAScreen: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.default))
     }
 
+    private func loanAmountDisplay(for scenario: TCAScenario) -> String {
+        MoneyFormat.shared.dollarsShort(viewModel.inputs.effectiveLoanAmount(for: scenario))
+    }
+
+    private func ltvDisplay(for scenario: TCAScenario) -> String? {
+        let lt = viewModel.inputs.ltv(for: scenario)
+        guard lt > 0 else { return nil }
+        return String(format: "%.1f%%", lt * 100)
+    }
+
     private func monthlyPaymentDisplay(for scenario: TCAScenario, at index: Int) -> String {
         guard let metrics = viewModel.result?.scenarioMetrics,
               index < metrics.count else { return "—" }
@@ -212,7 +241,7 @@ struct TCAScreen: View {
         let breakdown = ClosingCostBreakdown(
             totalClosingCosts: scenario.closingCosts,
             pointsPercentage: scenario.points,
-            loanAmount: viewModel.inputs.loanAmount
+            loanAmount: viewModel.inputs.effectiveLoanAmount(for: scenario)
         )
         let total = MoneyFormat.shared.dollarsShort(breakdown.totalClosingCosts)
         return total
