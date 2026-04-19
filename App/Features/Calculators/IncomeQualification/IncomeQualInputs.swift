@@ -88,8 +88,10 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
     var currentLoanBalance: Decimal
     /// Refinance-mode optional monthly MI on the current loan.
     var refiMonthlyMI: Decimal
-    /// Required months of cash reserves. LO-adjustable 0-12. Default is
+    /// Required months of cash reserves. LO-adjustable 0-36. Default is
     /// 2 months — reasonable starting point for conventional loans.
+    /// Jumbo, investor property, and self-employed programs may require
+    /// up to 24-36 months, so the stepper now spans the full range.
     /// Surfaced on the Results view as "Reserves: $X (N months × PITI)"
     /// using the max qualifying PITI as the month.
     var reservesMonths: Int
@@ -165,11 +167,11 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.currentLoanBalance = try c.decodeIfPresent(Decimal.self, forKey: .currentLoanBalance) ?? 0
         self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
         if let asInt = try? c.decodeIfPresent(Int.self, forKey: .reservesMonths) {
-            self.reservesMonths = asInt
+            self.reservesMonths = max(0, min(36, asInt))
         } else if let asDouble = try? c.decodeIfPresent(Double.self, forKey: .reservesMonths) {
             // Legacy schema stored this as Double (2.5-allowing). Round
-            // to the nearest integer to fit the stepper's 0-12 Int range.
-            self.reservesMonths = max(0, min(12, Int(asDouble.rounded())))
+            // to the nearest integer to fit the stepper's 0-36 Int range.
+            self.reservesMonths = max(0, min(36, Int(asDouble.rounded())))
         } else {
             self.reservesMonths = 2
         }
