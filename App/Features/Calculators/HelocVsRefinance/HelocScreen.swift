@@ -127,6 +127,8 @@ struct HelocScreen: View {
     @State private var showingNarration = false
     @State private var justSaved = false
     @State private var shareBundle: ShareBundle?
+    @State private var showingSaveNamePrompt: Bool = false
+    @State private var saveNameDraft: String = ""
 
     @Environment(\.modelContext)
     private var modelContext
@@ -164,6 +166,12 @@ struct HelocScreen: View {
             }
         }
         .overlay(alignment: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { save(name: $0) }
+        )
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
         }
@@ -442,9 +450,21 @@ struct HelocScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { save() },
+            onSave: { promptSaveScenarioName() },
             onShare: { generatePDFAndShare() }
         )
+    }
+
+    private var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "HELOC"
+        )
+    }
+
+    private func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
     }
 
     private func generatePDFAndShare() {
@@ -468,11 +488,10 @@ struct HelocScreen: View {
         }
     }
 
-    private func save() {
+    private func save(name: String) {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = (try? encoder.encode(viewModel.inputs)) ?? Data()
-        let name = viewModel.borrower?.fullName ?? "HELOC vs Refi"
         let key = "Blended \(String(format: "%.2f", viewModel.blendedRate))% · "
             + (viewModel.blendedRate < viewModel.inputs.refiRate ? "keep 1st" : "refi wins")
         if let existing = existingScenario {

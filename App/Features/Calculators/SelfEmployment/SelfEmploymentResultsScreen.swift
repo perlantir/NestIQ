@@ -24,6 +24,8 @@ struct SelfEmploymentResultsScreen: View {
     @State private var shareBundle: ShareBundle?
     @State private var expandedYear1: Bool = false
     @State private var expandedYear2: Bool = false
+    @State private var showingSaveNamePrompt: Bool = false
+    @State private var saveNameDraft: String = ""
 
     @Query private var profiles: [LenderProfile]
 
@@ -78,6 +80,12 @@ struct SelfEmploymentResultsScreen: View {
             }
         }
         .safeAreaInset(edge: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { saveScenario(name: $0) }
+        )
         .onAppear {
             if viewModel.output == nil { viewModel.compute() }
         }
@@ -284,17 +292,28 @@ struct SelfEmploymentResultsScreen: View {
             CalculatorDock(
                 saveLabel: justSaved ? "Saved" : "Save",
                 onNarrate: {},
-                onSave: { saveScenario() },
+                onSave: { promptSaveScenarioName() },
                 onShare: { generatePDFAndShare() }
             )
         }
     }
 
+    private var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "Self-Employment"
+        )
+    }
+
+    private func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
+    }
+
     // MARK: Save + share
 
-    private func saveScenario() {
+    private func saveScenario(name: String) {
         let snap = viewModel.buildScenario()
-        let name = viewModel.borrower?.fullName ?? "Self-employment"
         if let existing = existingScenario {
             existing.inputsJSON = snap.inputsJSON
             existing.keyStatLine = snap.keyStat

@@ -79,6 +79,7 @@
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		844F7F55DE4E61428F75CC05 /* AmortizationSchedulePages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99CF5C8486900EF955F9BEE3 /* AmortizationSchedulePages.swift */; };
+		88DCBE802DFC175281B5DAD7 /* SaveScenarioNamePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */; };
 		8992085DCDCABAC4C20C0A86 /* HelocComparisonPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D257C6D1D7B6465CF613EC9 /* HelocComparisonPage.swift */; };
 		8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
@@ -294,6 +295,7 @@
 		E25E78DDA261CA8CE65A412D /* DatePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePill.swift; sourceTree = "<group>"; };
 		E3A9CA1B8E8F599E34F73A31 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHelpers.swift; sourceTree = "<group>"; };
+		E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveScenarioNamePrompt.swift; sourceTree = "<group>"; };
 		E546EE5E4455799D394A7299 /* HelocScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocScreen.swift; sourceTree = "<group>"; };
 		E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationMoneyFormat.swift; sourceTree = "<group>"; };
 		E64C7EF67B2EB437CC1489A0 /* RefinanceComparisonPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceComparisonPage.swift; sourceTree = "<group>"; };
@@ -687,6 +689,7 @@
 				3544DE01D8235962D2B98659 /* CalculatorDock.swift */,
 				2B001B321FAB543828487B6D /* CalculatorNewScenarioView.swift */,
 				0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */,
+				E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */,
 				4065CD1371E8AF3323146F68 /* Amortization */,
 				FCA2F756C2EA9F6A79052554 /* HelocVsRefinance */,
 				4B878BB5890B1093A8DC494D /* IncomeQualification */,
@@ -974,6 +977,7 @@
 				920C99D50AB49C9D0944D870 /* RefinanceViewModel.swift in Sources */,
 				DCDFB1F53A2008A8AD147888 /* RootTabBar.swift in Sources */,
 				0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */,
+				88DCBE802DFC175281B5DAD7 /* SaveScenarioNamePrompt.swift in Sources */,
 				D334B521EEB68DDC50A57BC7 /* SavedScenariosScreen+EditMode.swift in Sources */,
 				9B48F5D76ADF246FA93751A6 /* SavedScenariosScreen.swift in Sources */,
 				EE69351F0C50E901FE0D939F /* ScenarioCard.swift in Sources */,

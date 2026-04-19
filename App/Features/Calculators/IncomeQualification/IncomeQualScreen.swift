@@ -20,6 +20,8 @@ struct IncomeQualScreen: View {
     @State private var showingNarration = false
     @State private var justSaved = false
     @State private var shareBundle: ShareBundle?
+    @State private var showingSaveNamePrompt: Bool = false
+    @State private var saveNameDraft: String = ""
 
     @Environment(\.modelContext)
     private var modelContext
@@ -69,6 +71,12 @@ struct IncomeQualScreen: View {
             }
         }
         .overlay(alignment: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { saveScenario(name: $0) }
+        )
         .navigationDestination(isPresented: $navigateToAmortization) {
             AmortizationInputsScreen(
                 borrower: viewModel.borrower,
@@ -366,19 +374,32 @@ struct IncomeQualScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { saveScenario() },
+            onSave: { promptSaveScenarioName() },
             onShare: { generatePDFAndShare() }
         )
     }
 
+    private var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "Income Qual"
+        )
+    }
+
+    private func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
+    }
+
     private func runScenario() {
-        saveScenario()
+        // "Run scenario" silently persists with the default name and jumps
+        // to Amortization. The explicit Save button still opens the prompt.
+        saveScenario(name: defaultSaveName)
         navigateToAmortization = true
     }
 
-    private func saveScenario() {
+    private func saveScenario(name: String) {
         let snap = viewModel.buildScenario()
-        let name = viewModel.borrower?.fullName ?? "Income qualification"
         if let existing = existingScenario {
             existing.inputsJSON = snap.inputsJSON
             existing.keyStatLine = snap.keyStat

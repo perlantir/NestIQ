@@ -30,11 +30,10 @@ extension TCAScreen {
         }
     }
 
-    func save() {
+    func save(name: String) {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = (try? encoder.encode(viewModel.inputs)) ?? Data()
-        let name = viewModel.borrower?.fullName ?? "TCA"
         let key = "\(viewModel.inputs.scenarios.count) scenarios · 10-yr horizon"
         if let existing = existingScenario {
             existing.inputsJSON = data

@@ -29,6 +29,8 @@ struct AmortizationResultsScreen: View {
     @State private var sharePDFURL: URL?
     @State private var sharePageCount: Int = 0
     @State private var scheduleGranularity: AmortScheduleGranularity
+    @State private var showingSaveNamePrompt: Bool = false
+    @State private var saveNameDraft: String = ""
 
     @Query private var profiles: [LenderProfile]
 
@@ -77,6 +79,12 @@ struct AmortizationResultsScreen: View {
             }
         }
         .safeAreaInset(edge: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { saveScenario(name: $0) }
+        )
         .onAppear {
             if viewModel.schedule == nil { viewModel.compute() }
         }
@@ -349,9 +357,21 @@ struct AmortizationResultsScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { saveScenario() },
+            onSave: { promptSaveScenarioName() },
             onShare: { generatePDFAndShare() }
         )
+    }
+
+    private var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "Amortization"
+        )
+    }
+
+    private func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
     }
 
     // MARK: Narration facts
@@ -395,9 +415,8 @@ struct AmortizationResultsScreen: View {
 
     // MARK: Save
 
-    private func saveScenario() {
+    private func saveScenario(name: String) {
         let snapshot = viewModel.buildScenario()
-        let name = viewModel.borrower?.fullName ?? "Amortization \(Date().formatted(date: .numeric, time: .omitted))"
         if let existing = existingScenario {
             existing.inputsJSON = snapshot.inputsJSON
             existing.outputsJSON = snapshot.outputsJSON

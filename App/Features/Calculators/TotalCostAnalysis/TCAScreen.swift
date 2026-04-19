@@ -35,6 +35,8 @@ struct TCAScreen: View {
     @State private var showingNarration = false
     @State var justSaved = false
     @State var shareBundle: ShareBundle?
+    @State var showingSaveNamePrompt: Bool = false
+    @State var saveNameDraft: String = ""
 
     @Environment(\.modelContext)
     var modelContext
@@ -81,6 +83,12 @@ struct TCAScreen: View {
             }
         }
         .overlay(alignment: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { save(name: $0) }
+        )
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
             if viewModel.result == nil { viewModel.compute() }
@@ -453,9 +461,21 @@ struct TCAScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { save() },
+            onSave: { promptSaveScenarioName() },
             onShare: { generatePDFAndShare() }
         )
+    }
+
+    var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "TCA"
+        )
+    }
+
+    func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
     }
 
     // PDF / save helpers live in TCAScreen+Actions.swift to keep this

@@ -18,6 +18,8 @@ struct RefinanceScreen: View {
     @State private var showingNarration = false
     @State private var justSaved = false
     @State private var shareBundle: ShareBundle?
+    @State private var showingSaveNamePrompt: Bool = false
+    @State private var saveNameDraft: String = ""
 
     @Environment(\.modelContext)
     private var modelContext
@@ -66,6 +68,12 @@ struct RefinanceScreen: View {
             }
         }
         .overlay(alignment: .bottom) { bottomDock }
+        .saveScenarioNameAlert(
+            isPresented: $showingSaveNamePrompt,
+            name: $saveNameDraft,
+            defaultName: defaultSaveName,
+            onSave: { saveScenario(name: $0) }
+        )
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
             if viewModel.result == nil { viewModel.compute() }
@@ -378,14 +386,25 @@ struct RefinanceScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { saveScenario() },
+            onSave: { promptSaveScenarioName() },
             onShare: { generatePDFAndShare() }
         )
     }
 
-    private func saveScenario() {
+    private var defaultSaveName: String {
+        SaveScenarioDefaults.name(
+            borrower: viewModel.borrower,
+            calculator: "Refi"
+        )
+    }
+
+    private func promptSaveScenarioName() {
+        saveNameDraft = defaultSaveName
+        showingSaveNamePrompt = true
+    }
+
+    private func saveScenario(name: String) {
         let snap = viewModel.buildScenarioSnapshot()
-        let name = viewModel.borrower?.fullName ?? "Refi comparison"
         if let existing = existingScenario {
             existing.inputsJSON = snap.inputsJSON
             existing.keyStatLine = snap.keyStat
