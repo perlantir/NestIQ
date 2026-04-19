@@ -36,6 +36,8 @@ struct RefinanceInputsScreen: View {
         currentBalance: 412_300,
         currentRate: 7.375,
         currentRemainingYears: 28,
+        currentMonthlyMI: 0,
+        homeValue: 575_000,
         monthlyTaxes: 542,
         monthlyInsurance: 135,
         monthlyHOA: 0,
@@ -56,15 +58,7 @@ struct RefinanceInputsScreen: View {
                     .padding(.top, Spacing.s8)
 
                 currentLoanSection.padding(.top, Spacing.s16)
-                PropertyDownPaymentSection(
-                    config: Binding(
-                        get: { viewModel.inputs.propertyDP },
-                        set: { viewModel.inputs.propertyDP = $0 }
-                    ),
-                    externalLoanAmount: viewModel.inputs.currentBalance,
-                    header: "Property & LTV — current loan"
-                )
-                .padding(.top, Spacing.s24)
+                propertyValueSection.padding(.top, Spacing.s24)
                 escrowSection.padding(.top, Spacing.s24)
 
                 optionsHeader
@@ -185,8 +179,63 @@ struct RefinanceInputsScreen: View {
                 suffix: "yr"
             )
             divider
+            FieldRow(
+                label: "Monthly MI",
+                prefix: "$",
+                hint: "optional · enter 0 if none",
+                decimal: Binding(
+                    get: { viewModel.inputs.currentMonthlyMI },
+                    set: { viewModel.inputs.currentMonthlyMI = $0 }
+                )
+            )
+            divider
             monthlyPIRow
         }
+    }
+
+    // MARK: Property value
+
+    private var propertyValueSection: some View {
+        fieldGroup(header: "Property") {
+            FieldRow(
+                label: "Current home value",
+                prefix: "$",
+                hint: "LTV denominator for every option below",
+                decimal: Binding(
+                    get: { viewModel.inputs.homeValue },
+                    set: { viewModel.inputs.homeValue = $0 }
+                )
+            )
+            divider
+            currentLTVRow
+        }
+    }
+
+    private var currentLTVRow: some View {
+        let lt = viewModel.inputs.currentLTV
+        let miReq = lt > 0.80
+        return HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("LTV · current")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(miReq
+                     ? "above 80% — MI typical"
+                     : viewModel.inputs.homeValue > 0
+                        ? "at or below 80% — no MI"
+                        : "enter home value for live LTV")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(miReq ? Palette.warn : Palette.inkTertiary)
+            }
+            Spacer()
+            Text(viewModel.inputs.homeValue > 0
+                 ? String(format: "%.1f%%", lt * 100)
+                 : "—")
+                .textStyle(Typography.num.withSize(18, weight: .medium, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
     }
 
     /// Auto-calc of current monthly P&I. Read-only — users who need to
@@ -277,6 +326,18 @@ struct RefinanceInputsScreen: View {
             .padding(.bottom, Spacing.s4)
 
             FieldRow(
+                label: "New loan amount",
+                prefix: "$",
+                hint: loanAmountHint(index: index),
+                decimal: Binding(
+                    get: { viewModel.inputs.options[index].newLoanAmount },
+                    set: { viewModel.inputs.options[index].newLoanAmount = $0 }
+                )
+            )
+            divider
+            optionLTVRow(index: index)
+            divider
+            FieldRow(
                 label: "Rate",
                 suffix: "%",
                 decimal: Binding(
@@ -307,6 +368,16 @@ struct RefinanceInputsScreen: View {
             )
             divider
             FieldRow(
+                label: "Monthly MI",
+                prefix: "$",
+                hint: "optional · per-option",
+                decimal: Binding(
+                    get: { viewModel.inputs.options[index].monthlyMI },
+                    set: { viewModel.inputs.options[index].monthlyMI = $0 }
+                )
+            )
+            divider
+            FieldRow(
                 label: "Closing costs",
                 prefix: "$",
                 decimal: Binding(
@@ -321,6 +392,41 @@ struct RefinanceInputsScreen: View {
                 .stroke(Palette.borderSubtle, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+    }
+
+    private func loanAmountHint(index: Int) -> String {
+        viewModel.inputs.options[index].newLoanAmount > 0
+            ? "overrides current balance"
+            : "leave 0 to use current balance"
+    }
+
+    private func optionLTVRow(index: Int) -> some View {
+        let opt = viewModel.inputs.options[index]
+        let lt = viewModel.inputs.ltv(for: opt)
+        let loan = viewModel.inputs.effectiveLoanAmount(for: opt)
+        let miReq = lt > 0.80
+        return HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("LTV")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(viewModel.inputs.homeValue > 0
+                     ? String(format: "$%@ ÷ $%@",
+                              MoneyFormat.shared.decimalString(loan),
+                              MoneyFormat.shared.decimalString(viewModel.inputs.homeValue))
+                     : "enter home value above")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(miReq ? Palette.warn : Palette.inkTertiary)
+            }
+            Spacer()
+            Text(viewModel.inputs.homeValue > 0
+                 ? String(format: "%.1f%%", lt * 100)
+                 : "—")
+                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
+                .foregroundStyle(miReq ? Palette.warn : Palette.ink)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
     }
 
     // MARK: Compute CTA
@@ -338,9 +444,12 @@ struct RefinanceInputsScreen: View {
         }
     }
 
-    // MARK: Shared
+}
 
-    private func stepperRow(
+// MARK: - Shared helpers
+
+extension RefinanceInputsScreen {
+    func stepperRow(
         label: String,
         value: Binding<Int>,
         range: ClosedRange<Int>,
@@ -364,7 +473,7 @@ struct RefinanceInputsScreen: View {
     }
 
     @ViewBuilder
-    private func fieldGroup<Content: View>(
+    func fieldGroup<Content: View>(
         header: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -384,7 +493,7 @@ struct RefinanceInputsScreen: View {
         }
     }
 
-    private var divider: some View {
+    var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 }

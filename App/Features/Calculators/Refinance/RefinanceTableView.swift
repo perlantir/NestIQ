@@ -61,17 +61,23 @@ struct RefinanceTableView: View {
     }
 
     private var rows: [Row] {
-        let opts = viewModel.inputs.options
-        let dp = viewModel.inputs.propertyDP
-        let bal = viewModel.inputs.currentBalance
-        let miRequired = dp.miRequired(loanAmount: bal)
+        let inputs = viewModel.inputs
+        let opts = inputs.options
+        let anyMI = inputs.currentMonthlyMI > 0 || opts.contains { $0.monthlyMI > 0 }
+        let hasHomeValue = inputs.homeValue > 0
         var base: [Row] = [
+            Row(label: "Loan amt",
+                values: ["$\(MoneyFormat.shared.decimalString(inputs.currentBalance))"]
+                    + opts.map {
+                        "$\(MoneyFormat.shared.decimalString(inputs.effectiveLoanAmount(for: $0)))"
+                    },
+                winnerIndex: nil),
             Row(label: "Rate",
-                values: [String(format: "%.3f%%", viewModel.inputs.currentRate)]
+                values: [String(format: "%.3f%%", inputs.currentRate)]
                     + opts.map { String(format: "%.3f%%", $0.rate) },
                 winnerIndex: nil),
             Row(label: "Term",
-                values: ["\(viewModel.inputs.currentRemainingYears) yr"]
+                values: ["\(inputs.currentRemainingYears) yr"]
                     + opts.map { "\($0.termYears) yr" },
                 winnerIndex: nil),
             Row(label: "Points",
@@ -86,31 +92,27 @@ struct RefinanceTableView: View {
             npvRow(),
             lifetimeRow(),
         ]
-        if miRequired {
+        if hasHomeValue {
             base.append(Row(
-                label: "MI / mo",
-                values: ["$\(MoneyFormat.shared.decimalString(dp.manualMonthlyMI))"]
-                    + opts.map { _ in
-                        "$\(MoneyFormat.shared.decimalString(dp.manualMonthlyMI))"
-                    },
+                label: "LTV",
+                values: [String(format: "%.1f%%", inputs.currentLTV * 100)]
+                    + opts.map { String(format: "%.1f%%", inputs.ltv(for: $0) * 100) },
                 winnerIndex: nil
             ))
-            let dropoff = miDropoffMonth(
-                loanAmount: bal,
-                appraisedValue: dp.purchasePrice > 0
-                    ? dp.purchasePrice : bal * Decimal(1.25),
-                rate: viewModel.inputs.currentRate / 100,
-                termMonths: viewModel.inputs.currentRemainingYears * 12,
-                requestRemovalAt80: dp.requestMIRemovalAt80
-            )
-            let dropoffStr = dropoff.map { "mo \($0)" } ?? "—"
+        }
+        if anyMI {
             base.append(Row(
-                label: "MI drops",
-                values: [dropoffStr] + opts.map { _ in dropoffStr },
+                label: "MI / mo",
+                values: [miDisplay(inputs.currentMonthlyMI)]
+                    + opts.map { miDisplay($0.monthlyMI) },
                 winnerIndex: nil
             ))
         }
         return base
+    }
+
+    private func miDisplay(_ mi: Decimal) -> String {
+        mi > 0 ? "$\(MoneyFormat.shared.decimalString(mi))" : "—"
     }
 
     private func npvRow() -> Row {
