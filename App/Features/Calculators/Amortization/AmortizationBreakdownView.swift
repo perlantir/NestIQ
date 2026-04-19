@@ -92,30 +92,35 @@ struct AmortizationBreakdownView: View {
 
 // MARK: - Schedule table
 
-struct AmortizationScheduleView: View {
-    let viewModel: AmortizationViewModel
-
-    enum Granularity: String, Hashable, CaseIterable {
-        case yearly, monthly
-        var label: String {
-            switch self {
-            case .yearly:  return "Yearly"
-            case .monthly: return "Monthly"
-            }
+enum AmortScheduleGranularity: String, Hashable, CaseIterable {
+    case yearly, monthly
+    var label: String {
+        switch self {
+        case .yearly:  return "Yearly"
+        case .monthly: return "Monthly"
         }
     }
 
-    @State private var granularity: Granularity
+    /// Sensible default for a given term: short terms (≤ 15 yrs) default
+    /// to monthly so the ~180 rows are browsable; longer terms default
+    /// to yearly so the LO isn't buried in 360 rows.
+    static func `default`(termYears: Int) -> AmortScheduleGranularity {
+        termYears <= 15 ? .monthly : .yearly
+    }
+}
+
+struct AmortizationScheduleView: View {
+    let viewModel: AmortizationViewModel
+
+    @Binding var granularity: AmortScheduleGranularity
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    init(viewModel: AmortizationViewModel) {
+    init(viewModel: AmortizationViewModel,
+         granularity: Binding<AmortScheduleGranularity>) {
         self.viewModel = viewModel
-        // Default to monthly for short terms (≤ 15 yrs); yearly otherwise —
-        // avoids dumping 360 rows on someone who just hit Compute.
-        let initial: Granularity = viewModel.inputs.termYears <= 15 ? .monthly : .yearly
-        _granularity = State(initialValue: initial)
+        self._granularity = granularity
     }
 
     var body: some View {
@@ -127,7 +132,7 @@ struct AmortizationScheduleView: View {
                 Spacer()
             }
             SegmentedControl(
-                options: Granularity.allCases,
+                options: AmortScheduleGranularity.allCases,
                 selection: $granularity,
                 label: { $0.label }
             )

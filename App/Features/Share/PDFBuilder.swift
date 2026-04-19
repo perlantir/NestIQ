@@ -9,6 +9,7 @@ import SwiftUI
 import Foundation
 import QuotientPDF
 import QuotientCompliance
+import QuotientFinance
 
 @MainActor
 enum PDFBuilder {
@@ -79,7 +80,8 @@ enum PDFBuilder {
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: AmortizationViewModel,
-        narrative: String
+        narrative: String,
+        scheduleGranularity: AmortScheduleGranularity = .yearly
     ) throws -> URL {
         let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
         let totalPaid = MoneyFormat.shared.dollarsShort(viewModel.totalPaid)
@@ -91,11 +93,12 @@ enum PDFBuilder {
         } ?? "—"
         let fallbackNarrative = "At today's \(rate)% rate, the monthly PITI is \(piti). "
             + "Over the life of the loan, interest totals about \(interest)."
+        let loanSummary = "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rate)%"
         let payload = Payload(
             calculatorSlug: "amortization",
             calculatorTitle: "Amortization analysis",
             complianceScenarioType: .amortization,
-            loanSummary: "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rate)%",
+            loanSummary: loanSummary,
             heroLabel: "Monthly payment · PITI",
             heroValue: piti,
             heroValuePrefix: "",
@@ -106,7 +109,19 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallbackNarrative : narrative
         )
-        return try buildPDF(profile: profile, borrower: borrower, payload: payload)
+        let schedulePages = amortizationSchedulePages(
+            profile: profile,
+            borrower: borrower,
+            viewModel: viewModel,
+            loanSummary: loanSummary,
+            granularity: scheduleGranularity
+        )
+        return try buildPDF(
+            profile: profile,
+            borrower: borrower,
+            payload: payload,
+            extraPages: schedulePages
+        )
     }
 
     static func buildIncomeQualPDF(

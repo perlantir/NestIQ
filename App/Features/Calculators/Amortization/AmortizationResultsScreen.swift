@@ -28,8 +28,17 @@ struct AmortizationResultsScreen: View {
     @State private var saveError: String?
     @State private var sharePDFURL: URL?
     @State private var sharePageCount: Int = 0
+    @State private var scheduleGranularity: AmortScheduleGranularity
 
     @Query private var profiles: [LenderProfile]
+
+    init(viewModel: AmortizationViewModel, existingScenario: Scenario? = nil) {
+        self.viewModel = viewModel
+        self.existingScenario = existingScenario
+        _scheduleGranularity = State(
+            initialValue: AmortScheduleGranularity.default(termYears: viewModel.inputs.termYears)
+        )
+    }
 
     var body: some View {
         ScrollView {
@@ -49,9 +58,12 @@ struct AmortizationResultsScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
 
-                AmortizationScheduleView(viewModel: viewModel)
-                    .padding(.horizontal, Spacing.s20)
-                    .padding(.top, Spacing.s24)
+                AmortizationScheduleView(
+                    viewModel: viewModel,
+                    granularity: $scheduleGranularity
+                )
+                .padding(.horizontal, Spacing.s20)
+                .padding(.top, Spacing.s24)
 
                 Spacer(minLength: 140)
             }
@@ -330,7 +342,8 @@ struct AmortizationResultsScreen: View {
                 profile: profile,
                 borrower: viewModel.borrower,
                 viewModel: viewModel,
-                narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? ""
+                narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? "",
+                scheduleGranularity: scheduleGranularity
             )
             sharePDFURL = url
             sharePageCount = PDFInspector(url: url)?.pageCount ?? 1

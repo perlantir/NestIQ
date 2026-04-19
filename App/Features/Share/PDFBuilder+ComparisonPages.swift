@@ -4,8 +4,66 @@
 
 import SwiftUI
 import QuotientCompliance
+import QuotientFinance
+import QuotientPDF
 
 extension PDFBuilder {
+
+    /// Build the landscape amortization schedule page(s) appropriate to
+    /// the active granularity. Yearly emits a single page; monthly
+    /// paginates across ~30-row slices with a running header + page
+    /// index. MI dropoff marker only renders in purchase mode.
+    static func amortizationSchedulePages(
+        profile: LenderProfile,
+        borrower: Borrower?,
+        viewModel: AmortizationViewModel,
+        loanSummary: String,
+        granularity: AmortScheduleGranularity
+    ) -> [(AnyView, PDFRenderer.Orientation)] {
+        guard let schedule = viewModel.schedule else { return [] }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        let generated = formatter.string(from: Date())
+        let borrowerName = borrower?.fullName ?? "Client"
+        let loFullName = profile.fullName.isEmpty ? "Loan Officer" : profile.fullName
+        let nmlsLine = nmlsLineFor(profile: profile)
+        let dropoff = viewModel.inputs.mode == .purchase
+            ? viewModel.miDropoffPeriod
+            : nil
+        switch granularity {
+        case .yearly:
+            let rows = yearlyAggregate(schedule: schedule)
+            let page = AmortizationYearlyPage(
+                borrowerName: borrowerName,
+                loanSummary: loanSummary,
+                generatedDate: generated,
+                loFullName: loFullName,
+                loNMLSLine: nmlsLine,
+                rows: rows,
+                startDate: viewModel.inputs.startDate,
+                accentHex: profile.brandColorHex
+            )
+            return [(AnyView(page), .landscape)]
+        case .monthly:
+            let chunks = AmortizationSchedulePages.monthlyChunks(schedule.payments)
+            let total = chunks.count
+            return chunks.enumerated().map { idx, chunk in
+                let page = AmortizationMonthlyPage(
+                    borrowerName: borrowerName,
+                    loanSummary: loanSummary,
+                    generatedDate: generated,
+                    loFullName: loFullName,
+                    loNMLSLine: nmlsLine,
+                    payments: chunk,
+                    pageIndex: idx + 1,
+                    pageCount: total,
+                    miDropoffPeriod: dropoff,
+                    accentHex: profile.brandColorHex
+                )
+                return (AnyView(page), .landscape)
+            }
+        }
+    }
 
     static func refinanceComparisonPage(
         profile: LenderProfile,
