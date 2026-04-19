@@ -7,13 +7,16 @@ import SwiftUI
 import SwiftData
 
 struct SavedScenariosScreen: View {
+    // modelContext/allScenarios/scenarios are `internal` (not private) so
+    // the Edit-mode extension in SavedScenariosScreen+EditMode.swift can
+    // read them when committing deletes.
     @Environment(\.modelContext)
-    private var modelContext
+    var modelContext
 
     @Query(sort: \Scenario.updatedAt, order: .reverse)
-    private var allScenarios: [Scenario]
+    var allScenarios: [Scenario]
 
-    private var scenarios: [Scenario] {
+    var scenarios: [Scenario] {
         allScenarios.filter { !$0.archived }
     }
 
@@ -21,34 +24,116 @@ struct SavedScenariosScreen: View {
     @State private var activeFilter: CalculatorFilter = .all
     @State private var editingScenario: Scenario?
 
+    // MARK: Edit-mode state — internal (not private) so the Edit-mode
+    // helpers in SavedScenariosScreen+EditMode.swift can mutate them.
+    @State var isEditMode: Bool = false
+    @State var selectedIDs: Set<UUID> = []
+    @State var pendingDelete: PendingDelete?
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                    header
-                        .padding(.horizontal, Spacing.s20)
-                        .padding(.top, Spacing.s12)
-                        .padding(.bottom, Spacing.s16)
-
-                    searchRow
-                        .padding(.horizontal, Spacing.s20)
-                        .padding(.bottom, Spacing.s16)
-
-                    filterRow
-                        .padding(.horizontal, Spacing.s20)
-                        .padding(.bottom, Spacing.s4)
-
-                    groupedList
+            listBody
+                .listStyle(.plain)
+                .listRowSpacing(0)
+                .scrollContentBackground(.hidden)
+                .background(Palette.surface)
+                .scrollIndicators(.hidden)
+                .contentMargins(.bottom, isEditMode ? Spacing.s96 * 2 : Spacing.s96)
+                .navigationDestination(item: $editingScenario) { s in
+                    openScenarioDestination(s)
                 }
-                .padding(.bottom, Spacing.s96)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        editToolbarButton
+                    }
+                    if isEditMode {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Select all") { selectAll() }
+                                .disabled(filteredScenarios.isEmpty)
+                                .accessibilityIdentifier("saved.selectAll")
+                        }
+                    }
+                }
+                .overlay(alignment: .bottom) {
+                    if isEditMode {
+                        editModeDock
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+                .animation(.easeInOut(duration: 0.2), value: isEditMode)
+                .alert(
+                    "Delete",
+                    isPresented: Binding(
+                        get: { pendingDelete != nil },
+                        set: { if !$0 { pendingDelete = nil } }
+                    ),
+                    presenting: pendingDelete
+                ) { pd in
+                    Button("Delete", role: .destructive) {
+                        commitDelete(pd.scenarios)
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: { pd in
+                    Text(pd.count == 1
+                         ? "Delete this scenario? This cannot be undone."
+                         : "Delete \(pd.count) scenarios? This cannot be undone.")
+                }
+        }
+    }
+
+    @ViewBuilder private var listBody: some View {
+        List {
+            // Hero section: header + search + filter chips. `.plainListRow`
+            // strips the default system row chrome so our custom surface
+            // styling remains intact.
+            Section {
+                VStack(alignment: .leading, spacing: Spacing.s16) {
+                    header
+                    searchRow
+                    filterRow
+                }
+                .padding(.horizontal, Spacing.s20)
+                .padding(.top, Spacing.s12)
+                .padding(.bottom, Spacing.s4)
+                .listRowBackground(Palette.surface)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets())
             }
-            .background(Palette.surface)
-            .scrollIndicators(.hidden)
-            .navigationDestination(item: $editingScenario) { s in
-                openScenarioDestination(s)
+
+            let groups = groupedFiltered()
+            if groups.isEmpty {
+                Section {
+                    emptyState
+                        .padding(.horizontal, Spacing.s20)
+                        .padding(.top, Spacing.s32)
+                        .listRowBackground(Palette.surface)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+            } else {
+                ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
+                    Section {
+                        ForEach(group.1, id: \.id) { scenario in
+                            scenarioRow(scenario: scenario)
+                                .listRowBackground(Palette.surfaceRaised)
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparatorTint(Palette.borderSubtle)
+                        }
+                    } header: {
+                        Eyebrow(group.0)
+                            .padding(.horizontal, Spacing.s20)
+                            .padding(.top, Spacing.s16)
+                            .padding(.bottom, Spacing.s8)
+                            .textCase(nil)
+                    }
+                }
             }
         }
     }
+
+    // Edit-mode toolbar / dock / selection helpers live in
+    // SavedScenariosScreen+EditMode.swift to keep this struct under the
+    // SwiftLint type_body_length cap.
 
     @ViewBuilder
     private func openScenarioDestination(_ s: Scenario) -> some View {
@@ -158,21 +243,7 @@ struct SavedScenariosScreen: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: Groups
-
-    @ViewBuilder private var groupedList: some View {
-        let groups = groupedFiltered()
-        if groups.isEmpty {
-            emptyState
-                .padding(.horizontal, Spacing.s20)
-                .padding(.top, Spacing.s32)
-        } else {
-            ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
-                dateGroup(label: group.0, items: group.1)
-                    .padding(.top, Spacing.s16)
-            }
-        }
-    }
+    // MARK: Empty state
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: Spacing.s8) {
@@ -187,35 +258,25 @@ struct SavedScenariosScreen: View {
         }
     }
 
-    private func dateGroup(label: String, items: [Scenario]) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Eyebrow(label)
-                .padding(.horizontal, Spacing.s20)
-                .padding(.bottom, Spacing.s8)
-            VStack(spacing: 0) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { idx, scenario in
-                    scenarioRow(scenario: scenario)
-                    if idx < items.count - 1 {
-                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    }
-                }
-            }
-            .background(Palette.surfaceRaised)
-            .overlay(
-                VStack(spacing: 0) {
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    Spacer()
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
-            )
-        }
-    }
-
     private func scenarioRow(scenario: Scenario) -> some View {
-        Button {
-            editingScenario = scenario
+        let isSelected = selectedIDs.contains(scenario.id)
+        return Button {
+            if isEditMode {
+                toggle(scenario: scenario)
+            } else {
+                editingScenario = scenario
+            }
         } label: {
             HStack(alignment: .top, spacing: Spacing.s4) {
+                if isEditMode {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundStyle(isSelected ? Palette.accent : Palette.inkTertiary)
+                        .frame(width: 28, height: 24, alignment: .leading)
+                        .padding(.top, 2)
+                        .accessibilityIdentifier("saved.checkbox.\(scenario.calculatorType.rawValue)")
+                }
+
                 Text(scenario.calculatorType.number)
                     .textStyle(Typography.num.withSize(10.5))
                     .foregroundStyle(Palette.inkTertiary)
@@ -249,33 +310,37 @@ struct SavedScenariosScreen: View {
             .padding(.horizontal, Spacing.s16)
             .padding(.vertical, Spacing.s12)
             .contentShape(Rectangle())
+            .background(isSelected ? Palette.accentTint.opacity(0.4) : Color.clear)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("saved.row.\(scenario.calculatorType.rawValue)")
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(role: .destructive) {
-                delete(scenario: scenario)
-            } label: {
-                Label("Delete", systemImage: "trash")
+            if !isEditMode {
+                Button(role: .destructive) {
+                    pendingDelete = PendingDelete(scenarios: [scenario])
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .accessibilityIdentifier("saved.swipeDelete.\(scenario.calculatorType.rawValue)")
+                Button {
+                    duplicate(scenario: scenario)
+                } label: {
+                    Label("Duplicate", systemImage: "doc.on.doc")
+                }
+                .tint(Palette.accent)
+                Button {
+                    archive(scenario: scenario)
+                } label: {
+                    Label("Archive", systemImage: "archivebox")
+                }
+                .tint(Palette.inkSecondary)
             }
-            Button {
-                duplicate(scenario: scenario)
-            } label: {
-                Label("Duplicate", systemImage: "doc.on.doc")
-            }
-            .tint(Palette.accent)
-            Button {
-                archive(scenario: scenario)
-            } label: {
-                Label("Archive", systemImage: "archivebox")
-            }
-            .tint(Palette.inkSecondary)
         }
     }
 
     // MARK: Filtering + grouping
 
-    private var filteredScenarios: [Scenario] {
+    var filteredScenarios: [Scenario] {
         scenarios.filter { s in
             (activeFilter == .all || activeFilter.calculator == s.calculatorType)
                 && (search.isEmpty ||
@@ -318,11 +383,6 @@ struct SavedScenariosScreen: View {
     }
 
     // MARK: Swipe actions
-
-    private func delete(scenario: Scenario) {
-        modelContext.delete(scenario)
-        try? modelContext.save()
-    }
 
     private func archive(scenario: Scenario) {
         scenario.archived = true
