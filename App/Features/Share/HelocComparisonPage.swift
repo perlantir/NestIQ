@@ -168,18 +168,18 @@ extension HelocComparisonPage {
     /// arbitrary rows without dragging the whole HELOC domain along.
     static func rows(for viewModel: HelocViewModel) -> [Row] {
         let inputs = viewModel.inputs
-        let refiMonthly = MoneyFormat.shared.decimalString(viewModel.refiMonthlyPayment())
-        let helocMonth1 = MoneyFormat.shared.decimalString(
+        let refiMonthly = MoneyFormat.shared.currency(viewModel.refiMonthlyPayment())
+        let helocMonth1 = MoneyFormat.shared.currency(
             viewModel.helocMonthlyPayment(shockBps: 0)
         )
-        let postIntro = MoneyFormat.shared.decimalString(
+        let postIntro = MoneyFormat.shared.currency(
             viewModel.helocMonthlyPayment(shockBps: 0)
         )
         let blended10y = String(format: "%.2f%%", viewModel.blendedRateAtTenYears)
-        let cashOut = MoneyFormat.shared.decimalString(
+        let cashOut = MoneyFormat.shared.currency(
             inputs.firstLienBalance + inputs.helocAmount
         )
-        let helocAmt = MoneyFormat.shared.decimalString(inputs.helocAmount)
+        let helocAmt = MoneyFormat.shared.currency(inputs.helocAmount)
         let refiRate = String(format: "%.3f%%", inputs.refiRate)
         let introRate = String(format: "%.3f%%", inputs.helocIntroRate)
         let fullIdx = String(format: "%.3f%%", inputs.helocFullyIndexedRate)
@@ -187,8 +187,8 @@ extension HelocComparisonPage {
         let marginDisplay = String(format: "Prime + %.2f%%", primeMargin)
         return [
             Row(label: "Loan amount / Credit limit",
-                refi: "$\(cashOut)",
-                heloc: "$\(helocAmt)"),
+                refi: cashOut,
+                heloc: helocAmt),
             Row(label: "Rate structure",
                 refi: "Fixed",
                 heloc: "Variable (intro → fully indexed)"),
@@ -205,11 +205,11 @@ extension HelocComparisonPage {
                 refi: refiRate,
                 heloc: fullIdx),
             Row(label: "Monthly payment · month 1",
-                refi: "$\(refiMonthly)",
-                heloc: "$\(helocMonth1)"),
+                refi: refiMonthly,
+                heloc: helocMonth1),
             Row(label: "Monthly payment · post-intro",
-                refi: "$\(refiMonthly)",
-                heloc: "$\(postIntro)"),
+                refi: refiMonthly,
+                heloc: postIntro),
             Row(label: "Blended rate · 10 years",
                 refi: refiRate,
                 heloc: blended10y),

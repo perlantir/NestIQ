@@ -84,24 +84,25 @@ enum PDFBuilder {
         let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
         let totalPaid = MoneyFormat.shared.dollarsShort(viewModel.totalPaid)
         let rate = String(format: "%.3f", viewModel.inputs.annualRate)
-        let loanMoney = MoneyFormat.shared.decimalString(viewModel.inputs.loanAmount)
-        let piti = MoneyFormat.shared.decimalString(viewModel.monthlyPITI)
+        let loanMoney = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
+        let piti = MoneyFormat.shared.currency(viewModel.monthlyPITI)
         let payoff = viewModel.payoffDate.map { d -> String in
             let f = DateFormatter(); f.dateFormat = "MMM yyyy"; return f.string(from: d)
         } ?? "—"
-        let fallbackNarrative = "At today's \(rate)% rate, the monthly PITI is $\(piti). "
-            + "Over the life of the loan, interest totals about $\(interest)."
+        let fallbackNarrative = "At today's \(rate)% rate, the monthly PITI is \(piti). "
+            + "Over the life of the loan, interest totals about \(interest)."
         let payload = Payload(
             calculatorSlug: "amortization",
             calculatorTitle: "Amortization analysis",
             complianceScenarioType: .amortization,
-            loanSummary: "$\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rate)%",
+            loanSummary: "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rate)%",
             heroLabel: "Monthly payment · PITI",
             heroValue: piti,
+            heroValuePrefix: "",
             heroKPIs: [
-                ("Total interest", "$\(interest)"),
+                ("Total interest", interest),
                 ("Payoff", payoff),
-                ("Total paid", "$\(totalPaid)"),
+                ("Total paid", totalPaid),
             ],
             narrative: narrative.isEmpty ? fallbackNarrative : narrative
         )
@@ -114,12 +115,12 @@ enum PDFBuilder {
         viewModel: IncomeQualViewModel,
         narrative: String
     ) throws -> URL {
-        let maxLoan = MoneyFormat.shared.decimalString(viewModel.maxLoan)
-        let piti = MoneyFormat.shared.decimalString(viewModel.maxPITI)
-        let purchase = MoneyFormat.shared.decimalString(viewModel.maxPurchase)
+        let maxLoan = MoneyFormat.shared.currency(viewModel.maxLoan)
+        let piti = MoneyFormat.shared.currency(viewModel.maxPITI)
+        let purchase = MoneyFormat.shared.currency(viewModel.maxPurchase)
         let backDTI = String(format: "%.1f%%", viewModel.backEndDTIIncludingDebts * 100)
         let rate = String(format: "%.3f", viewModel.inputs.annualRate)
-        let fallback = "Qualifies up to $\(maxLoan) at a \(rate)% \(viewModel.inputs.termYears)-yr loan. "
+        let fallback = "Qualifies up to \(maxLoan) at a \(rate)% \(viewModel.inputs.termYears)-yr loan. "
             + "Back-end DTI lands at \(backDTI)."
         let payload = Payload(
             calculatorSlug: "income-qualification",
@@ -128,9 +129,10 @@ enum PDFBuilder {
             loanSummary: "at \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)",
             heroLabel: "Max loan · qualifying",
             heroValue: maxLoan,
+            heroValuePrefix: "",
             heroKPIs: [
-                ("Max PITI", "$\(piti)"),
-                ("Max purchase", "$\(purchase)"),
+                ("Max PITI", piti),
+                ("Max purchase", purchase),
                 ("Back-end DTI", backDTI),
             ],
             narrative: narrative.isEmpty ? fallback : narrative
@@ -144,24 +146,25 @@ enum PDFBuilder {
         viewModel: RefinanceViewModel,
         narrative: String
     ) throws -> URL {
-        let savings = MoneyFormat.shared.decimalString(viewModel.monthlySavings)
+        let savings = MoneyFormat.shared.currency(viewModel.monthlySavings)
         let be = viewModel.breakEvenMonth.map { "\($0) mo" } ?? "—"
         let lifetime = MoneyFormat.shared.dollarsShort(abs(viewModel.lifetimeDelta))
         let npv = MoneyFormat.shared.dollarsShort(abs(viewModel.npvDelta))
         let currentRate = String(format: "%.3f", viewModel.inputs.currentRate)
-        let fallback = "Selected refi saves $\(savings)/mo versus the current \(currentRate)% loan. "
+        let fallback = "Selected refi saves \(savings)/mo versus the current \(currentRate)% loan. "
             + "Break-even: \(be)."
         let payload = Payload(
             calculatorSlug: "refinance",
             calculatorTitle: "Refinance comparison",
             complianceScenarioType: .refinance,
-            loanSummary: "Current $\(MoneyFormat.shared.decimalString(viewModel.inputs.currentBalance)) @ \(currentRate)%",
+            loanSummary: "Current \(MoneyFormat.shared.currency(viewModel.inputs.currentBalance)) @ \(currentRate)%",
             heroLabel: "Monthly savings · selected option",
             heroValue: savings,
+            heroValuePrefix: "",
             heroKPIs: [
                 ("Break-even", be),
-                ("Lifetime Δ", "$\(lifetime)"),
-                ("NPV @ 5%", "$\(npv)"),
+                ("Lifetime Δ", lifetime),
+                ("NPV @ 5%", npv),
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
@@ -184,7 +187,7 @@ enum PDFBuilder {
         viewModel: TCAViewModel,
         narrative: String
     ) throws -> URL {
-        let loan = MoneyFormat.shared.decimalString(viewModel.inputs.loanAmount)
+        let loan = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
         let count = viewModel.inputs.scenarios.count
         let horizons = viewModel.inputs.horizonsYears.map { "\($0)yr" }.joined(separator: "/")
         let winnerIndex = viewModel.result?.winnerByHorizon.last ?? 0
@@ -196,13 +199,14 @@ enum PDFBuilder {
             calculatorSlug: "total-cost",
             calculatorTitle: "Total cost analysis",
             complianceScenarioType: .totalCostAnalysis,
-            loanSummary: "$\(loan) · \(count) scenarios · \(horizons)",
+            loanSummary: "\(loan) · \(count) scenarios · \(horizons)",
             heroLabel: "Scenarios compared",
             heroValue: "\(count)",
+            heroValuePrefix: "",
             heroKPIs: [
                 ("Horizons", "\(viewModel.inputs.horizonsYears.count)"),
                 ("Life winner", winnerName),
-                ("Loan", "$\(MoneyFormat.shared.dollarsShort(viewModel.inputs.loanAmount))"),
+                ("Loan", MoneyFormat.shared.dollarsShort(viewModel.inputs.loanAmount)),
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
@@ -236,7 +240,7 @@ enum PDFBuilder {
             calculatorSlug: "heloc",
             calculatorTitle: "HELOC vs refinance",
             complianceScenarioType: .helocVsRefinance,
-            loanSummary: "1st $\(firstLien) + HELOC $\(helocAmt)",
+            loanSummary: "1st \(firstLien) + HELOC \(helocAmt)",
             heroLabel: "Blended rate · HELOC path",
             heroValue: blend,
             heroValuePrefix: "",

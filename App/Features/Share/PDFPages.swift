@@ -184,6 +184,8 @@ public struct PDFCoverPage: View {
                         Text(heroPITI)
                             .font(.system(size: 44, weight: .medium, design: .monospaced))
                             .foregroundStyle(inkPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
                         if !heroValueSuffix.isEmpty {
                             Text(heroValueSuffix)
                                 .font(.system(size: 14, design: .monospaced))
@@ -192,6 +194,7 @@ public struct PDFCoverPage: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(2)
                 ForEach(heroKPIs.indices, id: \.self) { i in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(heroKPIs[i].label.uppercased())
@@ -201,6 +204,8 @@ public struct PDFCoverPage: View {
                         Text(heroKPIs[i].value)
                             .font(.system(size: 22, weight: .medium, design: .monospaced))
                             .foregroundStyle(inkPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 20)
