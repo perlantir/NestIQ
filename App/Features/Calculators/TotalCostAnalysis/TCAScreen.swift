@@ -29,15 +29,17 @@ struct TCAScreen: View {
     var initialInputs: TCAFormInputs?
     var existingScenario: Scenario?
 
-    @State private var viewModel = TCAViewModel()
+    // State/env members that TCAScreen+Actions.swift needs are internal
+    // (not private) so the extension can reach them.
+    @State var viewModel = TCAViewModel()
     @State private var showingNarration = false
-    @State private var justSaved = false
-    @State private var shareBundle: ShareBundle?
+    @State var justSaved = false
+    @State var shareBundle: ShareBundle?
 
     @Environment(\.modelContext)
-    private var modelContext
+    var modelContext
 
-    @Query private var profiles: [LenderProfile]
+    @Query var profiles: [LenderProfile]
 
     private let scenarioColors: [Color] = [
         Palette.accent, Palette.scenario2, Palette.scenario3, Palette.scenario4,
@@ -252,6 +254,7 @@ struct TCAScreen: View {
         -> MonthlyImpact?
     {
         guard viewModel.inputs.mode == .refinance else { return nil }
+        guard viewModel.inputs.includeDebts else { return nil }
         guard let metrics = viewModel.result?.scenarioMetrics,
               index < metrics.count else { return nil }
         let debts = scenario.otherDebts ?? viewModel.inputs.currentOtherDebts
@@ -344,7 +347,23 @@ struct TCAScreen: View {
               hIdx < (result.scenarioTotalCosts.first?.count ?? 0) else {
             return AnyView(EmptyView())
         }
-        let costs = result.scenarioTotalCosts.map { $0[hIdx] }
+        // Winner determination honors the "Include consumer debts" toggle:
+        // when on (and in refi mode), each scenario's horizon cost adds
+        // its remaining-debt monthly × horizon months. When off — or in
+        // purchase mode — costs are the engine's PITI-only totals.
+        let horizonMonths = Decimal(years * 12)
+        let costs: [Decimal] = result.scenarioTotalCosts.indices.map { i in
+            let piti = result.scenarioTotalCosts[i][hIdx]
+            guard viewModel.inputs.mode == .refinance,
+                  viewModel.inputs.includeDebts,
+                  i < viewModel.inputs.scenarios.count,
+                  let d = viewModel.inputs.scenarios[i].otherDebts
+                        ?? viewModel.inputs.currentOtherDebts,
+                  !d.isZero else {
+                return piti
+            }
+            return piti + d.monthlyPayment * horizonMonths
+        }
         let winner = costs.indices.reduce(0) { costs[$1] < costs[$0] ? $1 : $0 }
         return AnyView(
             HStack(spacing: 0) {
@@ -401,7 +420,7 @@ struct TCAScreen: View {
         }
     }
 
-    private var narrativeText: String {
+    var narrativeText: String {
         guard let result = viewModel.result, !result.winnerByHorizon.isEmpty else {
             return "Running comparison…"
         }
@@ -430,50 +449,6 @@ struct TCAScreen: View {
         )
     }
 
-    private func generatePDFAndShare() {
-        guard let profile = profiles.first else { return }
-        do {
-            let url = try PDFBuilder.buildTCAPDF(
-                profile: profile,
-                borrower: viewModel.borrower,
-                viewModel: viewModel,
-                narrative: narrativeText
-            )
-            shareBundle = ShareBundle(
-                url: url,
-                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
-                profile: profile
-            )
-        } catch {
-            #if DEBUG
-            print("[TCAScreen] PDF gen failed: \(error)")
-            #endif
-        }
-    }
-
-    private func save() {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let data = (try? encoder.encode(viewModel.inputs)) ?? Data()
-        let name = viewModel.borrower?.fullName ?? "TCA"
-        let key = "\(viewModel.inputs.scenarios.count) scenarios · 10-yr horizon"
-        if let existing = existingScenario {
-            existing.inputsJSON = data
-            existing.keyStatLine = key
-            existing.name = name
-            existing.updatedAt = Date()
-        } else {
-            let s = Scenario(
-                borrower: viewModel.borrower,
-                calculatorType: .totalCostAnalysis,
-                name: name,
-                inputsJSON: data,
-                keyStatLine: key
-            )
-            modelContext.insert(s)
-        }
-        try? modelContext.save()
-        justSaved = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
-    }
+    // PDF / save helpers live in TCAScreen+Actions.swift to keep this
+    // struct under the SwiftLint type_body_length cap.
 }

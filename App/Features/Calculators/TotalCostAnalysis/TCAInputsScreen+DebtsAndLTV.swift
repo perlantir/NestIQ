@@ -116,6 +116,35 @@ extension TCAInputsScreen {
         }
     }
 
+    var includeDebtsToggleSection: some View {
+        HStack(spacing: Spacing.s12) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Include consumer debts in analysis")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text("off → winner uses PITI only · on → PITI + remaining debt monthly")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { viewModel.inputs.includeDebts },
+                set: { viewModel.inputs.includeDebts = $0 }
+            ))
+            .labelsHidden()
+            .tint(Palette.accent)
+            .accessibilityIdentifier("tca.includeDebts")
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+        .background(Palette.surfaceRaised)
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.listCard)
+                .stroke(Palette.borderSubtle, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+    }
+
     var currentDebtsSection: some View {
         fieldGroup(header: "Other debts · today") {
             FieldRow(

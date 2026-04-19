@@ -169,7 +169,22 @@ struct TCAComparisonPage: View {
               hIdx < (result.scenarioTotalCosts.first?.count ?? 0) else {
             return AnyView(EmptyView())
         }
-        let costs = result.scenarioTotalCosts.map { $0[hIdx] }
+        // Mirror the in-app rule: when the "Include consumer debts" toggle
+        // is on and we're in refi mode, each scenario's horizon cost adds
+        // its remaining-debt monthly × horizon months. Matches TCAScreen.
+        let horizonMonths = Decimal(years * 12)
+        let costs: [Decimal] = result.scenarioTotalCosts.indices.map { i in
+            let piti = result.scenarioTotalCosts[i][hIdx]
+            guard viewModel.inputs.mode == .refinance,
+                  viewModel.inputs.includeDebts,
+                  i < viewModel.inputs.scenarios.count,
+                  let d = viewModel.inputs.scenarios[i].otherDebts
+                        ?? viewModel.inputs.currentOtherDebts,
+                  !d.isZero else {
+                return piti
+            }
+            return piti + d.monthlyPayment * horizonMonths
+        }
         let winner = costs.indices.reduce(0) { costs[$1] < costs[$0] ? $1 : $0 }
         return AnyView(
             HStack(spacing: 0) {
@@ -214,6 +229,7 @@ struct TCAComparisonPage: View {
         -> PDFMonthlyImpact?
     {
         guard viewModel.inputs.mode == .refinance else { return nil }
+        guard viewModel.inputs.includeDebts else { return nil }
         guard let metrics = viewModel.result?.scenarioMetrics,
               index < metrics.count else { return nil }
         let debts = scenario.otherDebts ?? viewModel.inputs.currentOtherDebts

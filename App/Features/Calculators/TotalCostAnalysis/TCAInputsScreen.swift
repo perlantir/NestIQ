@@ -94,7 +94,12 @@ struct TCAInputsScreen: View {
                     .padding(.top, Spacing.s24)
 
                 if viewModel.inputs.mode == .refinance {
-                    currentDebtsSection.padding(.top, Spacing.s24)
+                    includeDebtsToggleSection
+                        .padding(.horizontal, Spacing.s20)
+                        .padding(.top, Spacing.s24)
+                    if viewModel.inputs.includeDebts {
+                        currentDebtsSection.padding(.top, Spacing.s24)
+                    }
                 }
 
                 horizonSection
@@ -350,7 +355,7 @@ struct TCAInputsScreen: View {
                     set: { viewModel.inputs.scenarios[index].closingCosts = $0 }
                 )
             )
-            if viewModel.inputs.mode == .refinance {
+            if viewModel.inputs.mode == .refinance, viewModel.inputs.includeDebts {
                 divider
                 scenarioDebtsRows(index: index)
             }

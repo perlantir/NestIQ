@@ -102,11 +102,18 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// scenario, `TCAScenario.otherDebts` is what remains after the
     /// scenario's cash-out consolidates some/all of this.
     var currentOtherDebts: OtherDebts?
+    /// Refinance-mode only: when true, debts factor into winner
+    /// determination (monthly total = PITI + scenario debt monthly,
+    /// total cost += remaining debt monthly × horizon months). When
+    /// false, winner is PITI-only and all debt rows are hidden. Purchase
+    /// mode ignores this. Default: true (matches 5E.5 behavior so saved
+    /// scenarios don't regress).
+    var includeDebts: Bool
 
     enum CodingKeys: String, CodingKey {
         case mode, loanAmount, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
-        case scenarios, horizonsYears, currentOtherDebts
+        case scenarios, horizonsYears, currentOtherDebts, includeDebts
     }
 
     init(
@@ -118,7 +125,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         monthlyHOA: Decimal,
         scenarios: [TCAScenario],
         horizonsYears: [Int],
-        currentOtherDebts: OtherDebts? = nil
+        currentOtherDebts: OtherDebts? = nil,
+        includeDebts: Bool = true
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -129,6 +137,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.scenarios = scenarios
         self.horizonsYears = horizonsYears
         self.currentOtherDebts = currentOtherDebts
+        self.includeDebts = includeDebts
     }
 
     init(from decoder: any Decoder) throws {
@@ -142,6 +151,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.scenarios = try c.decode([TCAScenario].self, forKey: .scenarios)
         self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
         self.currentOtherDebts = try c.decodeIfPresent(OtherDebts.self, forKey: .currentOtherDebts)
+        self.includeDebts = try c.decodeIfPresent(Bool.self, forKey: .includeDebts) ?? true
     }
 
     /// Effective principal for the given scenario under the active
