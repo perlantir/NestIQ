@@ -94,6 +94,7 @@
 		B56C34E50BE98BBE02B240FC /* PropertyDownPaymentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */; };
 		B867A917622C9C8DD4DAD497 /* BrandDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
+		BBC30D3D783551C8047A2AE4 /* ScenarioSaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */; };
 		BBDD23BA9E669DE12DF02763 /* ShareBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */; };
 		BD0B1AE598BF3645089DE2EC /* RefinanceInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */; };
 		BD7A57941289F8ADBA75D608 /* DataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4698C088D95213A6366BAE /* DataRow.swift */; };
@@ -265,6 +266,7 @@
 		E64C7EF67B2EB437CC1489A0 /* RefinanceComparisonPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceComparisonPage.swift; sourceTree = "<group>"; };
 		E9494E196F0A2E455640AF19 /* Quotient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Quotient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModelTests.swift; sourceTree = "<group>"; };
+		F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioSaveLoadTests.swift; sourceTree = "<group>"; };
 		F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocViewModelTests.swift; sourceTree = "<group>"; };
 		F2E629BB721D286991CE4C26 /* StackedHorizontalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedHorizontalBar.swift; sourceTree = "<group>"; };
 		F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputs.swift; sourceTree = "<group>"; };
@@ -449,6 +451,7 @@
 				9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */,
 				E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */,
 				C38C48023F20605AA323F916 /* CalculatorTCATests.swift */,
+				F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */,
 				E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */,
 			);
 			path = AppUITests;
@@ -807,6 +810,7 @@
 				C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */,
 				9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */,
 				C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */,
+				BBC30D3D783551C8047A2AE4 /* ScenarioSaveLoadTests.swift in Sources */,
 				13B526571A09FAF55F320B21 /* UITestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

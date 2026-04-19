@@ -92,7 +92,16 @@ public final class LenderProfile {
     public var lastName: String
     public var photoData: Data?
     public var nmlsId: String
-    public var licensedStates: [String]
+    /// Comma-separated USPS abbreviations ("CA,TX,IA"). Stored as a
+    /// String because SwiftData on iOS 18 fails to materialize
+    /// `[String]` attributes at container init — the CoreData bridge
+    /// can't synthesize the Objective-C class for the generic. When
+    /// that happens the whole container goes into a degraded state
+    /// and every `try modelContext.save()` throws silently, which is
+    /// why Saved scenarios never appeared in Nick's QA (5E.1).
+    /// Computed `licensedStates: [String]` preserves the read/write
+    /// API everything else in the app consumes.
+    public var licensedStatesCSV: String = ""
     public var companyName: String
     public var companyLogoData: Data?
     public var brandColorHex: String
@@ -141,7 +150,7 @@ public final class LenderProfile {
         self.firstName = firstName
         self.lastName = lastName
         self.nmlsId = nmlsId
-        self.licensedStates = licensedStates
+        self.licensedStatesCSV = Self.encode(licensedStates: licensedStates)
         self.companyName = companyName
         self.brandColorHex = brandColorHex
         self.phone = phone
@@ -159,6 +168,31 @@ public final class LenderProfile {
         self.hasCompletedOnboarding = hasCompletedOnboarding
         self.createdAt = now
         self.updatedAt = now
+    }
+
+    /// USPS abbreviations derived from the CSV storage. Empty array
+    /// when the profile hasn't picked any states yet. Normalizes on
+    /// write — trims whitespace, uppercases, dedupes while preserving
+    /// input order.
+    public var licensedStates: [String] {
+        get {
+            licensedStatesCSV
+                .split(separator: ",", omittingEmptySubsequences: true)
+                .map { $0.trimmingCharacters(in: .whitespaces).uppercased() }
+                .filter { !$0.isEmpty }
+        }
+        set { licensedStatesCSV = Self.encode(licensedStates: newValue) }
+    }
+
+    private static func encode(licensedStates: [String]) -> String {
+        var seen = Set<String>()
+        var ordered: [String] = []
+        for raw in licensedStates {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces).uppercased()
+            guard !trimmed.isEmpty, seen.insert(trimmed).inserted else { continue }
+            ordered.append(trimmed)
+        }
+        return ordered.joined(separator: ",")
     }
 
     public var appearance: AppearancePreference {

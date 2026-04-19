@@ -42,6 +42,14 @@ struct CalculatorDock: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("dock.narrate")
 
+            // WARNING: do NOT add `.layoutPriority` to any button in
+            // this HStack. With all three labels at `.frame(maxWidth:
+            // .infinity)`, bumping one's priority squashes the other
+            // two to ~0 pt; they remain in the AX tree (so
+            // `XCUIElement.tap()` thinks it has a target) but the
+            // visible-and-tappable area belongs to the priority button.
+            // That's the Session 5E.1 root cause for Save looking
+            // broken in Nick's QA.
             Button(action: onSave) {
                 Text(saveLabel)
                     .textStyle(Typography.bodyLg)
@@ -65,7 +73,6 @@ struct CalculatorDock: View {
                     .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
             }
             .buttonStyle(.plain)
-            .layoutPriority(1)
             .accessibilityIdentifier("dock.share")
         }
         .padding(.horizontal, Spacing.s16)
