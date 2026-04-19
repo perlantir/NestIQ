@@ -35,7 +35,11 @@ final class PDFBuilderTests: XCTestCase {
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         XCTAssertEqual(inspector.pageCount, 1)
         let text = inspector.text(onPage: 0) ?? ""
-        XCTAssertTrue(text.contains("Quotient"))
+        // Post-rebrand (5I.4.d): the "Quotient" serif wordmark text on
+        // the cover was replaced with an image (Masthead-PDF + Wordmark-A
+        // imagesets), so a PDFKit text-layer extraction no longer finds
+        // it. The footer string carries the NestIQ brand as text.
+        XCTAssertTrue(text.contains("NestIQ Mortgage Intelligence"))
         XCTAssertTrue(text.contains("Smith"))
     }
 

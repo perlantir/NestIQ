@@ -128,9 +128,9 @@ struct SettingsScreen: View {
     }
 
     /// Upper-right / hero profile avatar. Renders the uploaded photo if
-    /// any, falling back to an initials monogram. Prior to 5I.3 the hero
-    /// always rendered initials — photoData was saved by ProfileEditor
-    /// but never consumed here.
+    /// any, falling back to the NestIQ monogram (5I.4.d placement
+    /// guide). Prior to 5I.3 the hero always rendered initials —
+    /// photoData was saved by ProfileEditor but never consumed here.
     @ViewBuilder private var profileAvatar: some View {
         if let data = profile.photoData, let image = UIImage(data: data) {
             Image(uiImage: image)
@@ -139,14 +139,13 @@ struct SettingsScreen: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Palette.borderSubtle, lineWidth: 1))
         } else {
-            Circle()
-                .fill(Palette.surfaceSunken)
+            Image("Monogram-Accent")
+                .resizable()
+                .scaledToFit()
+                .padding(6)
+                .background(Palette.surfaceSunken)
+                .clipShape(Circle())
                 .overlay(Circle().stroke(Palette.borderSubtle, lineWidth: 1))
-                .overlay(
-                    Text(profile.initials.isEmpty ? "NM" : profile.initials)
-                        .font(.custom(Typography.serifFamily, size: 20))
-                        .foregroundStyle(Palette.inkSecondary)
-                )
         }
     }
 
@@ -329,10 +328,26 @@ struct SettingsScreen: View {
             // codebase and will be rewired behind a DEBUG-only
             // shake-gesture dev menu in a later session.
             divider
-            SettingsRow(label: "Version",
-                        trailing: .value(versionDisplay),
-                        onTap: nil)
+            aboutRow
         }
+    }
+
+    /// About hero — Wordmark-A at 28pt over version string in SF Mono,
+    /// per the NestIQ placement guide (5I.4.d). Replaces the bare
+    /// "Version" trailing-value row so the About surface actually feels
+    /// like one.
+    private var aboutRow: some View {
+        VStack(spacing: 6) {
+            Image("Wordmark-A")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 28)
+            Text("v\(versionDisplay)")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(Palette.inkTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Spacing.s16)
     }
 
     private var versionDisplay: String {

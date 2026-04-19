@@ -73,9 +73,18 @@ struct OnboardingFlow: View {
     @ViewBuilder private var stepBody: some View {
         switch OnboardingStepID.allCases[index] {
         case .welcome:
+            VStack(alignment: .center, spacing: Spacing.s8) {
+                Image("Wordmark-A")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 48)
+                    .padding(.top, Spacing.s8)
+                    .padding(.bottom, Spacing.s16)
+            }
+            .frame(maxWidth: .infinity)
             stepContent(
                 eyebrow: "Welcome",
-                title: "Quotient.",
+                title: "NestIQ.",
                 paragraph: OnboardingCopy.welcome
             ) { WelcomeMiniature() }
         case .amortization:

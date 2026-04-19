@@ -94,6 +94,17 @@ public struct PDFCoverPage: View {
 
     private var brandStrip: some View {
         VStack(alignment: .leading, spacing: 18) {
+            // Cover masthead — full-width NestIQ brand lockup. Shown only
+            // when the LO hasn't supplied a custom company logo; custom
+            // branding takes precedence in the left column so the LO's
+            // own mark gets primary billing.
+            if logoData == nil {
+                Image("Masthead-PDF")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+            }
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     if let logoData, let logo = UIImage(data: logoData) {
@@ -101,10 +112,6 @@ public struct PDFCoverPage: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxHeight: 36)
-                    } else {
-                        Text("Quotient")
-                            .font(.custom("SourceSerif4", size: 30))
-                            .foregroundStyle(inkPrimary)
                     }
                     Text("Mortgage analysis · prepared for you".uppercased())
                         .font(.system(size: 10.5, weight: .semibold))
@@ -234,10 +241,10 @@ public struct PDFCoverPage: View {
     }
 
     private var footer: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 4) {
             Rectangle().fill(border).frame(height: 1)
             HStack {
-                Text("Estimates for educational purposes · not a commitment to lend")
+                Text("NestIQ Mortgage Intelligence · \(generatedDate)")
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(inkTertiary)
                 Spacer()
@@ -245,7 +252,11 @@ public struct PDFCoverPage: View {
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(inkTertiary)
             }
-            .padding(.top, 12)
+            .padding(.top, 8)
+            Text("Estimates for educational purposes · not a commitment to lend")
+                .font(.system(size: 9.5, design: .monospaced))
+                .foregroundStyle(inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -284,6 +295,19 @@ public struct PDFDisclaimersPage: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Subsequent-page running header: small wordmark left + page
+            // index right in SF Mono. Per placement guide 5I.4.d.
+            HStack(alignment: .center) {
+                Image("Wordmark-A")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 14)
+                Spacer()
+                Text("Page 2 of 2")
+                    .font(.system(size: 9.5, design: .monospaced))
+                    .foregroundStyle(ink3)
+            }
+            .padding(.bottom, 14)
             Text("Disclosures".uppercased())
                 .font(.system(size: 10.5, weight: .semibold))
                 .tracking(1.05)
@@ -320,11 +344,11 @@ public struct PDFDisclaimersPage: View {
             }
 
             HStack {
-                Text("Generated \(generatedAt)")
+                Text("NestIQ Mortgage Intelligence · \(generatedAt)")
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(ink3)
                 Spacer()
-                Text("Page 2")
+                Text("Page 2 of 2")
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(ink3)
             }

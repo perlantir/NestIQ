@@ -82,7 +82,9 @@ targets:
         CFBundleVersion: "1"
         LSRequiresIPhoneOS: YES
         UILaunchScreen:
-          UIColorName: AccentColor
+          UIColorName: Surface
+          UIImageName: Wordmark-A
+          UIImageRespectsSafeAreaInsets: true
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIRequiredDeviceCapabilities:
