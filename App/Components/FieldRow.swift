@@ -20,6 +20,7 @@ struct FieldRow: View {
     var hint: String?
     @Binding var decimal: Decimal
     var fractionDigits: Int = 0
+    var usesGroupingSeparator: Bool = true
 
     @State private var text: String = ""
     @FocusState private var focused: Bool
@@ -86,6 +87,7 @@ struct FieldRow: View {
         f.numberStyle = .decimal
         f.maximumFractionDigits = fractionDigits
         f.minimumFractionDigits = fractionDigits
+        f.usesGroupingSeparator = usesGroupingSeparator
         return f.string(from: value as NSNumber) ?? ""
     }
 

@@ -13,7 +13,8 @@ extension SelfEmploymentInputsScreen {
         cardFrame(title: title) {
             FieldRow(
                 label: "Tax year",
-                decimal: yearDecimalBinding(isY1: isY1)
+                decimal: yearDecimalBinding(isY1: isY1),
+                usesGroupingSeparator: false
             )
             divider
             FieldRow(
@@ -74,7 +75,8 @@ extension SelfEmploymentInputsScreen {
         cardFrame(title: title) {
             FieldRow(
                 label: "Tax year",
-                decimal: yearDecimalBinding(isY1: isY1)
+                decimal: yearDecimalBinding(isY1: isY1),
+                usesGroupingSeparator: false
             )
             divider
             form1120SOwnershipRow(isY1: isY1)
@@ -143,7 +145,8 @@ extension SelfEmploymentInputsScreen {
         cardFrame(title: title) {
             FieldRow(
                 label: "Tax year",
-                decimal: yearDecimalBinding(isY1: isY1)
+                decimal: yearDecimalBinding(isY1: isY1),
+                usesGroupingSeparator: false
             )
             divider
             form1065OwnershipRow(isY1: isY1)
