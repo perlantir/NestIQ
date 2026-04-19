@@ -21,7 +21,7 @@ extension IncomeQualScreen {
     private func reservesCard(months: Int) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.s12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Months in reserves")
+                Text("Reserves: \(months) \(months == 1 ? "month" : "months")")
                     .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
                     .foregroundStyle(Palette.ink)
                 Text("0-12 · conventional loans typically 0-6")
@@ -30,10 +30,6 @@ extension IncomeQualScreen {
             }
             Spacer()
             reservesStepper
-            Text("\(months) mo")
-                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-                .frame(minWidth: 56, alignment: .trailing)
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)

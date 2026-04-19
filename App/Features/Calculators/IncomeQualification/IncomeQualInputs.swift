@@ -164,7 +164,15 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.currentHomeValue = try c.decodeIfPresent(Decimal.self, forKey: .currentHomeValue) ?? 0
         self.currentLoanBalance = try c.decodeIfPresent(Decimal.self, forKey: .currentLoanBalance) ?? 0
         self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
-        self.reservesMonths = try c.decodeIfPresent(Int.self, forKey: .reservesMonths) ?? 2
+        if let asInt = try? c.decodeIfPresent(Int.self, forKey: .reservesMonths) {
+            self.reservesMonths = asInt
+        } else if let asDouble = try? c.decodeIfPresent(Double.self, forKey: .reservesMonths) {
+            // Legacy schema stored this as Double (2.5-allowing). Round
+            // to the nearest integer to fit the stepper's 0-12 Int range.
+            self.reservesMonths = max(0, min(12, Int(asDouble.rounded())))
+        } else {
+            self.reservesMonths = 2
+        }
     }
 
     /// Live current LTV in refinance mode. 0 when home value unset.
