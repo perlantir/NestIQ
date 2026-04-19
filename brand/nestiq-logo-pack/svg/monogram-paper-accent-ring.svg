@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs></defs>
+<rect width="1024" height="1024" fill="#FAF9F5"></rect>
+<rect x="8" y="8" width="1008" height="1008" fill="none" stroke="#1F4D3F" stroke-width="16"></rect>
+<text x="512" y="740" class="serif" font-size="720" letter-spacing="-22" fill="#1F4D3F" text-anchor="middle">N</text>
+<text x="905" y="935" class="mono" font-size="130" letter-spacing="15.6" fill="#1F4D3F" text-anchor="end">iq</text>
+</svg>

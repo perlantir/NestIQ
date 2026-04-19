@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360">
+<defs></defs>
+<rect width="1200" height="360" fill="#FAF9F5"></rect>
+<text x="600" y="70" class="mono" font-size="14" letter-spacing="3.4" fill="#85816F" text-anchor="middle">MORTGAGE INTELLIGENCE · EST. 2026</text>
+<line x1="150" y1="100" x2="1050" y2="100" stroke="#17160F" stroke-width="1.5"></line>
+<text x="490" y="230" class="serif" font-size="120" letter-spacing="-2.4" fill="#17160F">Nest</text>
+<text x="820" y="230" class="serif-i" font-size="120" letter-spacing="-2.4" fill="#1F4D3F">IQ</text>
+<line x1="150" y1="260" x2="1050" y2="260" stroke="#17160F" stroke-width="1.5"></line>
+</svg>

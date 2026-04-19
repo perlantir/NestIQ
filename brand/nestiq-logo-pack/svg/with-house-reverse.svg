@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 240" width="820" height="240">
+<defs></defs>
+<rect width="820" height="240" fill="#17160F"></rect>
+<g stroke="#4F9E7D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M24 116 L120 36 L216 116"></path>
+<path d="M44 108 L44 204 L196 204 L196 108"></path>
+<path d="M100 204 L100 152 L140 152 L140 204"></path>
+</g>
+<text x="270" y="175" class="serif" font-size="120" letter-spacing="-2.4" fill="#FAF9F5">Nest</text>
+<text x="590" y="175" class="serif-i" font-size="120" letter-spacing="-2.4" fill="#DFE6E0">IQ</text>
+</svg>
