@@ -248,23 +248,27 @@ struct LicensedStatesPicker: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(filteredStates, id: \.self) { state in
-                    Button {
-                        toggle(state)
-                    } label: {
-                        HStack {
-                            Text(state.displayName)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(state.rawValue)
-                                .foregroundStyle(.tertiary)
-                                .monospaced()
-                            if selection.contains(state) {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(Palette.accent)
-                                    .padding(.leading, 6)
-                            }
+                if !fullStates.isEmpty {
+                    Section {
+                        ForEach(fullStates, id: \.self) { state in
+                            stateRow(state: state, hasFullText: true)
                         }
+                    } header: {
+                        Text("Full disclosure")
+                    } footer: {
+                        Text("State-specific disclosure text reviewed by counsel is available.")
+                    }
+                }
+                if !fallbackStates.isEmpty {
+                    Section {
+                        ForEach(fallbackStates, id: \.self) { state in
+                            stateRow(state: state, hasFullText: false)
+                        }
+                    } header: {
+                        Text("Fallback")
+                    } footer: {
+                        Text("Generic disclaimer until state-specific text lands — "
+                            + "counsel review still pending.")
                     }
                 }
             }
@@ -279,13 +283,50 @@ struct LicensedStatesPicker: View {
         }
     }
 
-    private var filteredStates: [USState] {
+    @ViewBuilder
+    private func stateRow(state: USState, hasFullText: Bool) -> some View {
+        Button {
+            toggle(state)
+        } label: {
+            HStack(spacing: 10) {
+                Text(state.rawValue)
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(.primary)
+                    .frame(width: 34, alignment: .leading)
+                Text(state.displayName)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Text(hasFullText ? "Full text available" : "Generic disclaimer")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                if selection.contains(state) {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Palette.accent)
+                }
+            }
+        }
+    }
+
+    private static func hasNamedDisclosure(for state: USState) -> Bool {
+        requiredDisclosures(for: .amortization, propertyState: state)
+            .first?.provenance == DisclosureProvenance.stateSpecific
+    }
+
+    private var allFiltered: [USState] {
         let all = USState.allCases.sorted { $0.displayName < $1.displayName }
         let q = search.trimmingCharacters(in: .whitespaces).lowercased()
         guard !q.isEmpty else { return all }
         return all.filter {
             $0.displayName.lowercased().contains(q) || $0.rawValue.lowercased().contains(q)
         }
+    }
+
+    private var fullStates: [USState] {
+        allFiltered.filter(Self.hasNamedDisclosure)
+    }
+
+    private var fallbackStates: [USState] {
+        allFiltered.filter { !Self.hasNamedDisclosure(for: $0) }
     }
 
     private func toggle(_ state: USState) {
