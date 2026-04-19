@@ -69,6 +69,7 @@
 		71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */; };
 		725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B782FB7D6EF280A7AC6FD31A /* Spacing.swift */; };
 		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
+		7549F6B0C6A925A2F108795D /* CalculatorSelfEmploymentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
 		76FEF13AD0F703B78363D3C8 /* PDFBuilder+SelfEmployment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87268BA2B52433B93D3884A5 /* PDFBuilder+SelfEmployment.swift */; };
 		7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36C1D4825AF59A035A76E125 /* SharePreview.swift */; };
@@ -232,6 +233,7 @@
 		860BC6C292C49CFEF58A6ECF /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		87268BA2B52433B93D3884A5 /* PDFBuilder+SelfEmployment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PDFBuilder+SelfEmployment.swift"; sourceTree = "<group>"; };
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
+		892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorSelfEmploymentTests.swift; sourceTree = "<group>"; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
 		8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandDetailScreens.swift; sourceTree = "<group>"; };
 		906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedScenariosScreen+EditMode.swift"; sourceTree = "<group>"; };
@@ -486,6 +488,7 @@
 				A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */,
 				9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */,
 				E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */,
+				892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */,
 				C38C48023F20605AA323F916 /* CalculatorTCATests.swift */,
 				3D7DED8F6F4DC72144EE869D /* SavedScenariosDeleteTests.swift */,
 				F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */,
@@ -862,6 +865,7 @@
 				82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */,
 				C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */,
 				9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */,
+				7549F6B0C6A925A2F108795D /* CalculatorSelfEmploymentTests.swift in Sources */,
 				C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */,
 				E9345E0AAA46308476010623 /* SavedScenariosDeleteTests.swift in Sources */,
 				BBC30D3D783551C8047A2AE4 /* ScenarioSaveLoadTests.swift in Sources */,
