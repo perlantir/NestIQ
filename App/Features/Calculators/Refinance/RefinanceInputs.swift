@@ -74,12 +74,17 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
     var options: [RefiOption]
     var horizonsYears: [Int]
     var stressTestHorizonYears: Int  // 3, 5, 10
+    /// Number of refi options the LO wants to compare (2, 3, or 4).
+    /// Default is 2 — the minimum for "comparison" to mean anything.
+    /// Kept in sync with `options.count` when the user changes the
+    /// selector on the Inputs screen.
+    var scenarioCount: Int
 
     enum CodingKeys: String, CodingKey {
         case currentBalance, currentRate, currentRemainingYears
         case currentMonthlyMI, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
-        case options, horizonsYears, stressTestHorizonYears
+        case options, horizonsYears, stressTestHorizonYears, scenarioCount
     }
 
     init(
@@ -93,7 +98,8 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         monthlyHOA: Decimal,
         options: [RefiOption],
         horizonsYears: [Int],
-        stressTestHorizonYears: Int
+        stressTestHorizonYears: Int,
+        scenarioCount: Int? = nil
     ) {
         self.currentBalance = currentBalance
         self.currentRate = currentRate
@@ -106,6 +112,7 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.options = options
         self.horizonsYears = horizonsYears
         self.stressTestHorizonYears = stressTestHorizonYears
+        self.scenarioCount = scenarioCount ?? options.count
     }
 
     init(from decoder: any Decoder) throws {
@@ -121,6 +128,8 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.options = try c.decode([RefiOption].self, forKey: .options)
         self.horizonsYears = try c.decode([Int].self, forKey: .horizonsYears)
         self.stressTestHorizonYears = try c.decode(Int.self, forKey: .stressTestHorizonYears)
+        self.scenarioCount = try c.decodeIfPresent(Int.self, forKey: .scenarioCount)
+            ?? self.options.count
     }
 
     /// Effective new loan amount for an option. Falls back to
@@ -157,8 +166,44 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
             RefiOption(label: "C", rate: 5.875, termYears: 30, points: 1.5, closingCosts: 14_800),
         ],
         horizonsYears: [5, 7, 10, 15, 30],
-        stressTestHorizonYears: 5
+        stressTestHorizonYears: 5,
+        scenarioCount: 3
     )
+
+    /// Blank option with only the term defaulted to 30 yr (LOs almost
+    /// always start from 30 and trade down if it makes sense). Every
+    /// numeric field is 0 so the LO fills in just the ones that matter.
+    static func blankOption(label: String) -> RefiOption {
+        RefiOption(
+            label: label,
+            rate: 0,
+            termYears: 30,
+            points: 0,
+            closingCosts: 0,
+            newLoanAmount: 0,
+            monthlyMI: 0
+        )
+    }
+
+    /// Grow or shrink `options` to match `newCount`. Preserves any
+    /// existing options (by position) when shrinking; appends blanks
+    /// labeled A/B/C/D when growing. Normalizes labels so they always
+    /// read A..{count} top-to-bottom.
+    mutating func resizeOptions(to newCount: Int) {
+        let clamped = max(2, min(newCount, 4))
+        let labels = ["A", "B", "C", "D"]
+        if options.count < clamped {
+            for i in options.count..<clamped {
+                options.append(Self.blankOption(label: labels[i]))
+            }
+        } else if options.count > clamped {
+            options = Array(options.prefix(clamped))
+        }
+        for (idx, lbl) in labels.prefix(options.count).enumerated() {
+            options[idx].label = lbl
+        }
+        scenarioCount = clamped
+    }
 
     func scenarioInputs() -> [ScenarioInput] {
         let current = ScenarioInput(

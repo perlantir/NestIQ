@@ -14,7 +14,9 @@ struct RefinanceInputsScreen: View {
     let borrower: Borrower?
     var existingScenario: Scenario?
 
-    @State private var viewModel: RefinanceViewModel
+    // `viewModel` is `internal` (not private) so the per-option-card
+    // extension helpers below can read viewModel.inputs.options directly.
+    @State var viewModel: RefinanceViewModel
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
@@ -32,22 +34,26 @@ struct RefinanceInputsScreen: View {
         _selectedBorrower = State(initialValue: borrower)
     }
 
+    /// Default landing state: 2 blank options at term=30, rate=0, every
+    /// other field zero — per 5F.3 spec the LO fills in just the values
+    /// that matter. Loading a saved scenario overrides this with the
+    /// persisted inputs.
     private static let defaultInputs = RefinanceFormInputs(
-        currentBalance: 412_300,
-        currentRate: 7.375,
-        currentRemainingYears: 28,
+        currentBalance: 0,
+        currentRate: 0,
+        currentRemainingYears: 30,
         currentMonthlyMI: 0,
-        homeValue: 575_000,
-        monthlyTaxes: 542,
-        monthlyInsurance: 135,
+        homeValue: 0,
+        monthlyTaxes: 0,
+        monthlyInsurance: 0,
         monthlyHOA: 0,
         options: [
-            RefiOption(label: "A", rate: 6.125, termYears: 30, points: 0.5, closingCosts: 9_800),
-            RefiOption(label: "B", rate: 6.500, termYears: 25, points: 0, closingCosts: 5_200),
-            RefiOption(label: "C", rate: 5.875, termYears: 30, points: 1.5, closingCosts: 14_800),
+            RefinanceFormInputs.blankOption(label: "A"),
+            RefinanceFormInputs.blankOption(label: "B"),
         ],
         horizonsYears: [5, 7, 10, 15, 30],
-        stressTestHorizonYears: 5
+        stressTestHorizonYears: 5,
+        scenarioCount: 2
     )
 
     var body: some View {
@@ -61,9 +67,13 @@ struct RefinanceInputsScreen: View {
                 propertyValueSection.padding(.top, Spacing.s24)
                 escrowSection.padding(.top, Spacing.s24)
 
-                optionsHeader
+                scenarioCountSelector
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
+
+                optionsHeader
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s16)
                     .padding(.bottom, Spacing.s8)
 
                 ForEach(Array(viewModel.inputs.options.enumerated()), id: \.element.id) { idx, _ in
@@ -303,17 +313,112 @@ struct RefinanceInputsScreen: View {
 
     // MARK: Refi options
 
+    private var scenarioCountSelector: some View {
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            Eyebrow("Scenarios")
+            Picker("Scenarios", selection: Binding(
+                get: { viewModel.inputs.scenarioCount },
+                set: { newValue in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.inputs.resizeOptions(to: newValue)
+                    }
+                }
+            )) {
+                Text("2").tag(2)
+                Text("3").tag(3)
+                Text("4").tag(4)
+            }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("refi.scenarioCount")
+        }
+    }
+
     private var optionsHeader: some View {
-        HStack(alignment: .firstTextBaseline) {
+        let labels = viewModel.inputs.options.map(\.label).joined(separator: " · ")
+        return HStack(alignment: .firstTextBaseline) {
             Eyebrow("Refi options")
             Spacer()
-            Text("\(viewModel.inputs.options.count) · A · B · C")
+            Text("\(viewModel.inputs.options.count) · \(labels)")
                 .textStyle(Typography.num.withSize(11))
                 .foregroundStyle(Palette.inkTertiary)
         }
     }
 
-    private func optionCard(index: Int) -> some View {
+    // `optionCard` / `loanAmountHint` / `optionLTVRow` live in the shared
+    // helpers extension below to keep this struct under SwiftLint's
+    // type_body_length cap.
+
+    // MARK: Compute CTA
+
+    private var computeCTA: some View {
+        VStack(spacing: Spacing.s8) {
+            PrimaryButton("Compare scenarios") {
+                navigationActive = true
+            }
+            .accessibilityIdentifier("refi.compute")
+            Text("Break-even, NPV, and winner curve on the next screen.")
+                .textStyle(Typography.body.withSize(11))
+                .foregroundStyle(Palette.inkTertiary)
+                .italic()
+        }
+    }
+
+}
+
+// MARK: - Shared helpers
+
+extension RefinanceInputsScreen {
+    func stepperRow(
+        label: String,
+        value: Binding<Int>,
+        range: ClosedRange<Int>,
+        step: Int = 1,
+        suffix: String
+    ) -> some View {
+        HStack {
+            Text(label)
+                .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                .foregroundStyle(Palette.ink)
+            Spacer()
+            Stepper(value: value, in: range, step: step) { EmptyView() }
+                .labelsHidden()
+            Text("\(value.wrappedValue) \(suffix)")
+                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+                .frame(minWidth: 60, alignment: .trailing)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+    }
+
+    @ViewBuilder
+    func fieldGroup<Content: View>(
+        header: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Eyebrow(header)
+                .padding(.horizontal, Spacing.s20)
+                .padding(.bottom, Spacing.s8)
+            VStack(spacing: 0) { content() }
+                .background(Palette.surfaceRaised)
+                .overlay(
+                    VStack(spacing: 0) {
+                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                        Spacer()
+                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                    }
+                )
+        }
+    }
+
+    var divider: some View {
+        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+    }
+
+    // MARK: Per-option card (moved here from the parent struct)
+
+    func optionCard(index: Int) -> some View {
         VStack(spacing: 0) {
             HStack {
                 Text("Option \(viewModel.inputs.options[index].label)")
@@ -394,13 +499,13 @@ struct RefinanceInputsScreen: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
     }
 
-    private func loanAmountHint(index: Int) -> String {
+    func loanAmountHint(index: Int) -> String {
         viewModel.inputs.options[index].newLoanAmount > 0
             ? "overrides current balance"
             : "leave 0 to use current balance"
     }
 
-    private func optionLTVRow(index: Int) -> some View {
+    func optionLTVRow(index: Int) -> some View {
         let opt = viewModel.inputs.options[index]
         let lt = viewModel.inputs.ltv(for: opt)
         let loan = viewModel.inputs.effectiveLoanAmount(for: opt)
@@ -427,73 +532,5 @@ struct RefinanceInputsScreen: View {
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)
-    }
-
-    // MARK: Compute CTA
-
-    private var computeCTA: some View {
-        VStack(spacing: Spacing.s8) {
-            PrimaryButton("Compare scenarios") {
-                navigationActive = true
-            }
-            .accessibilityIdentifier("refi.compute")
-            Text("Break-even, NPV, and winner curve on the next screen.")
-                .textStyle(Typography.body.withSize(11))
-                .foregroundStyle(Palette.inkTertiary)
-                .italic()
-        }
-    }
-
-}
-
-// MARK: - Shared helpers
-
-extension RefinanceInputsScreen {
-    func stepperRow(
-        label: String,
-        value: Binding<Int>,
-        range: ClosedRange<Int>,
-        step: Int = 1,
-        suffix: String
-    ) -> some View {
-        HStack {
-            Text(label)
-                .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
-                .foregroundStyle(Palette.ink)
-            Spacer()
-            Stepper(value: value, in: range, step: step) { EmptyView() }
-                .labelsHidden()
-            Text("\(value.wrappedValue) \(suffix)")
-                .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-                .frame(minWidth: 60, alignment: .trailing)
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-    }
-
-    @ViewBuilder
-    func fieldGroup<Content: View>(
-        header: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Eyebrow(header)
-                .padding(.horizontal, Spacing.s20)
-                .padding(.bottom, Spacing.s8)
-            VStack(spacing: 0) { content() }
-                .background(Palette.surfaceRaised)
-                .overlay(
-                    VStack(spacing: 0) {
-                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                        Spacer()
-                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    }
-                )
-        }
-    }
-
-    var divider: some View {
-        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 }
