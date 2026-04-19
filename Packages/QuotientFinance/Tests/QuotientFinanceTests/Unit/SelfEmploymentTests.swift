@@ -53,6 +53,42 @@ struct ScheduleCCashFlowTests {
         #expect(cashFlowScheduleC(y) == -15_000)
     }
 
+    @Test("Fannie B3-3.6-03 published example: $60k net profit + $5k depreciation → $65k")
+    func fanniePublishedExample() {
+        let y = ScheduleCYear(
+            year: 2024,
+            netProfit: 60_000,
+            depreciation: 5_000
+        )
+        #expect(cashFlowScheduleC(y) == 65_000)
+    }
+
+    @Test("Property: netProfit X + depreciation Y (alone) == X + Y for 500 random cases")
+    func propertyDepreciationAddsBack() {
+        var rng = SystemRandomNumberGenerator()
+        for _ in 0..<500 {
+            let x = Decimal(Int.random(in: -200_000...500_000, using: &rng))
+            let yAmt = Decimal(Int.random(in: 0...100_000, using: &rng))
+            let year = ScheduleCYear(
+                year: 2024,
+                netProfit: x,
+                depreciation: yAmt
+            )
+            #expect(cashFlowScheduleC(year) == x + yAmt)
+        }
+    }
+
+    @Test("Loss year + depreciation addback preserves negative sign (-50k + 10k = -40k)")
+    func lossYearWithAddbackPreservesNegativeSign() {
+        let y = ScheduleCYear(
+            year: 2024,
+            netProfit: -50_000,
+            depreciation: 10_000
+        )
+        #expect(cashFlowScheduleC(y) == -40_000)
+        #expect(cashFlowScheduleC(y) < 0)
+    }
+
     @Test("Reproducibility — same input, same output (500 random cases)")
     func reproducibility() {
         var rng = SystemRandomNumberGenerator()

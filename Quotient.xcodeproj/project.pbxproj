@@ -64,6 +64,7 @@
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
 		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
 		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
+		666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
 		6C0915635C4789C21F950B40 /* AmortizationResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */; };
 		71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */; };
@@ -285,6 +286,7 @@
 		D89633E5BC5BB72C10F311C0 /* QuotientCompliance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientCompliance; path = Packages/QuotientCompliance; sourceTree = SOURCE_ROOT; };
 		D8A910FE79E1FB0706776507 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Semibold.ttf"; sourceTree = "<group>"; };
+		DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfEmploymentResultsScreen+Breakdown.swift"; sourceTree = "<group>"; };
 		DCCA418EB2A9FFB0B32BB7AB /* TCAComparisonPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAComparisonPage.swift; sourceTree = "<group>"; };
 		DF8B3E7E27F86F9FE22CCDC0 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		E0A55061CEFCACE582B54F89 /* QuotientFinance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientFinance; path = Packages/QuotientFinance; sourceTree = SOURCE_ROOT; };
@@ -504,6 +506,7 @@
 				5D2229147921A6B1EC3387AD /* SelfEmploymentInputsScreen.swift */,
 				5FE0AC5F80F00D95D30E9003 /* SelfEmploymentInputsScreen+Cards.swift */,
 				250BF7806116C37EE4F1CA9B /* SelfEmploymentResultsScreen.swift */,
+				DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */,
 				8237B3292075F160E64146D2 /* SelfEmploymentViewModel.swift */,
 			);
 			path = SelfEmployment;
@@ -979,6 +982,7 @@
 				53EA91F48F530018D8FAB5C4 /* SelfEmploymentInputsScreen+Cards.swift in Sources */,
 				F9A9E76E1B8EC71200C9BD0E /* SelfEmploymentInputsScreen.swift in Sources */,
 				FB16EB7E4FAE3573AF55BC32 /* SelfEmploymentPDFPages.swift in Sources */,
+				666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */,
 				D2C3880F855DA44A1D6A69A5 /* SelfEmploymentResultsScreen.swift in Sources */,
 				F86A92346F133FB1E4B354B5 /* SelfEmploymentViewModel.swift in Sources */,
 				FC1CDEE93CF9F23E35101A8E /* SettingsRow.swift in Sources */,

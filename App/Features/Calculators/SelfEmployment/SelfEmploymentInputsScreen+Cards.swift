@@ -30,40 +30,49 @@ extension SelfEmploymentInputsScreen {
                 decimal: scheduleCDecimal(\.nonRecurringOtherIncomeOrLoss, isY1: isY1)
             )
             divider
+            if isY1 {
+                AddbackInfoButton()
+                divider
+            }
             FieldRow(
                 label: "Depletion (Line 12)",
                 prefix: "$",
+                hint: "added back",
                 decimal: scheduleCDecimal(\.depletion, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Depreciation (Line 13)",
                 prefix: "$",
+                hint: "added back",
                 decimal: scheduleCDecimal(\.depreciation, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Non-deductible meals (Line 24b)",
                 prefix: "$",
+                hint: "subtracted",
                 decimal: scheduleCDecimal(\.nonDeductibleMealsAndEntertainment, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Business use of home (Line 30)",
                 prefix: "$",
+                hint: "added back",
                 decimal: scheduleCDecimal(\.businessUseOfHome, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Amortization / casualty loss",
                 prefix: "$",
+                hint: "added back",
                 decimal: scheduleCDecimal(\.amortizationOrCasualtyLoss, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Mileage depreciation",
                 prefix: "$",
-                hint: "business miles × std mileage depreciation rate",
+                hint: "added back — business miles × std rate",
                 decimal: scheduleCDecimal(\.mileageDepreciation, isY1: isY1)
             )
         }
@@ -105,33 +114,42 @@ extension SelfEmploymentInputsScreen {
                 decimal: f1120SDecimal(\.otherNetRentalIncome, isY1: isY1)
             )
             divider
+            if isY1 {
+                AddbackInfoButton()
+                divider
+            }
             FieldRow(
                 label: "Depreciation",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1120SDecimal(\.depreciation, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Depletion",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1120SDecimal(\.depletion, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Amortization / casualty",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1120SDecimal(\.amortizationOrCasualtyLoss, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Mortgage / notes < 1 yr (Sched L)",
                 prefix: "$",
+                hint: "subtracted",
                 decimal: f1120SDecimal(\.mortgageOrNotesLessThan1Yr, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Non-deductible travel / meals",
                 prefix: "$",
+                hint: "subtracted",
                 decimal: f1120SDecimal(\.nonDeductibleTravelMeals, isY1: isY1)
             )
             divider
@@ -175,33 +193,42 @@ extension SelfEmploymentInputsScreen {
                 decimal: f1065Decimal(\.otherNetRentalIncome, isY1: isY1)
             )
             divider
+            if isY1 {
+                AddbackInfoButton()
+                divider
+            }
             FieldRow(
                 label: "Depreciation",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1065Decimal(\.depreciation, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Depletion",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1065Decimal(\.depletion, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Amortization / casualty",
                 prefix: "$",
+                hint: "added back",
                 decimal: f1065Decimal(\.amortizationOrCasualtyLoss, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Mortgage / notes < 1 yr",
                 prefix: "$",
+                hint: "subtracted",
                 decimal: f1065Decimal(\.mortgageOrNotesLessThan1Yr, isY1: isY1)
             )
             divider
             FieldRow(
                 label: "Non-deductible travel / meals",
                 prefix: "$",
+                hint: "subtracted",
                 decimal: f1065Decimal(\.nonDeductibleTravelMeals, isY1: isY1)
             )
             divider
@@ -487,5 +514,71 @@ extension SelfEmploymentInputsScreen {
 
     var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+    }
+}
+
+// MARK: - Addback info button
+
+/// Info icon + popover explaining the Fannie 1084 addback methodology.
+/// Sits inline in each Year-1 card right before the first addback field.
+struct AddbackInfoButton: View {
+    @State private var showPopover = false
+
+    var body: some View {
+        Button { showPopover = true } label: {
+            HStack(spacing: Spacing.s8) {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Palette.accent)
+                Text("About addbacks & subtractions")
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            .padding(.horizontal, Spacing.s16)
+            .padding(.vertical, Spacing.s12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("selfEmployment.addbackInfo")
+        .popover(isPresented: $showPopover) {
+            AddbackExplanationPopover()
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+private struct AddbackExplanationPopover: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.s12) {
+            Text("Fannie Mae Form 1084 methodology")
+                .textStyle(Typography.bodyLg.withSize(13, weight: .semibold))
+                .foregroundStyle(Palette.ink)
+            Text("""
+                 Addbacks increase qualifying income. Depreciation, \
+                 depletion, business use of home, and similar non-cash \
+                 expenses are subtracted on the tax return but the \
+                 borrower didn't actually pay them in cash. For mortgage \
+                 qualification, Fannie Mae adds them back.
+                 """)
+                .textStyle(Typography.body.withSize(12.5))
+                .foregroundStyle(Palette.inkSecondary)
+            Text("""
+                 Subtractions reduce qualifying income. Non-deductible \
+                 meals and Schedule L short-term mortgages/notes \
+                 represent real cash outflows the tax return doesn't \
+                 reflect — they come out of cash flow.
+                 """)
+                .textStyle(Typography.body.withSize(12.5))
+                .foregroundStyle(Palette.inkSecondary)
+            Text("Selling Guide B3-3.6-03")
+                .textStyle(Typography.num.withSize(11))
+                .foregroundStyle(Palette.inkTertiary)
+        }
+        .padding(Spacing.s16)
+        .frame(maxWidth: 320)
     }
 }

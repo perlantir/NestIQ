@@ -159,14 +159,15 @@ struct SelfEmploymentResultsScreen: View {
         VStack(alignment: .leading, spacing: Spacing.s12) {
             Eyebrow("Per-year cash flow")
             if let out = viewModel.output {
-                yearCard(result: out.year1, expanded: $expandedYear1)
-                yearCard(result: out.year2, expanded: $expandedYear2)
+                yearCard(result: out.year1, isY1: true, expanded: $expandedYear1)
+                yearCard(result: out.year2, isY1: false, expanded: $expandedYear2)
             }
         }
     }
 
-    private func yearCard(
+    func yearCard(
         result: SelfEmploymentYearResult,
+        isY1: Bool,
         expanded: Binding<Bool>
     ) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -191,7 +192,7 @@ struct SelfEmploymentResultsScreen: View {
 
             if expanded.wrappedValue {
                 divider
-                lineItemBreakdown(result: result)
+                signedBreakdown(result: result, isY1: isY1)
             }
         }
         .background(Palette.surfaceRaised)
@@ -200,36 +201,6 @@ struct SelfEmploymentResultsScreen: View {
                 .stroke(Palette.borderSubtle, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-    }
-
-    private func lineItemBreakdown(result: SelfEmploymentYearResult) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(result.addbacks.enumerated()), id: \.offset) { _, ab in
-                lineItemRow(label: ab.label, amount: ab.amount, isDeduction: false)
-            }
-            ForEach(Array(result.deductions.enumerated()), id: \.offset) { _, d in
-                lineItemRow(label: d.label, amount: d.amount, isDeduction: true)
-            }
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s8)
-    }
-
-    private func lineItemRow(
-        label: String,
-        amount: Decimal,
-        isDeduction: Bool
-    ) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(label)
-                .textStyle(Typography.body.withSize(12))
-                .foregroundStyle(Palette.inkSecondary)
-            Spacer()
-            Text((isDeduction ? "−$" : "+$") + MoneyFormat.shared.decimalString(amount))
-                .textStyle(Typography.num.withSize(12, design: .monospaced))
-                .foregroundStyle(isDeduction ? Palette.loss : Palette.gain)
-        }
-        .padding(.vertical, 3)
     }
 
     // MARK: Two-year block
@@ -279,7 +250,7 @@ struct SelfEmploymentResultsScreen: View {
         .padding(.vertical, Spacing.s12)
     }
 
-    private var divider: some View {
+    var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 
