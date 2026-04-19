@@ -12,7 +12,9 @@ struct IncomeQualScreen: View {
     var initialInputs: IncomeQualFormInputs?
     var existingScenario: Scenario?
 
-    @State private var viewModel = IncomeQualViewModel()
+    // viewModel is `internal` (not private) so the reserves extension in
+    // IncomeQualScreen+Reserves.swift can read + write it.
+    @State var viewModel = IncomeQualViewModel()
     @State private var navigateToAmortization = false
     @State private var showingBorrowerPicker = false
     @State private var showingNarration = false
@@ -46,6 +48,10 @@ struct IncomeQualScreen: View {
                     total: viewModel.totalDebt
                 )
                 .padding(.top, Spacing.s24)
+
+                reservesSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s24)
 
                 runScenarioLink
                     .padding(.horizontal, Spacing.s20)
@@ -111,6 +117,9 @@ struct IncomeQualScreen: View {
             ]
         )
     }
+
+    // The reserves selector lives in IncomeQualScreen+Reserves.swift to
+    // keep this struct under SwiftLint's type_body_length cap.
 
     private var runScenarioLink: some View {
         Button { runScenario() } label: {

@@ -88,6 +88,11 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
     var currentLoanBalance: Decimal
     /// Refinance-mode optional monthly MI on the current loan.
     var refiMonthlyMI: Decimal
+    /// Required months of cash reserves. LO-adjustable 0-12. Default is
+    /// 2 months — reasonable starting point for conventional loans.
+    /// Surfaced on the Results view as "Reserves: $X (N months × PITI)"
+    /// using the max qualifying PITI as the month.
+    var reservesMonths: Int
 
     enum CodingKeys: String, CodingKey {
         case mode
@@ -95,6 +100,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         case annualRate, termYears, annualTaxes, annualInsurance, monthlyHOA
         case downPaymentPercent, incomes, debts, propertyDP
         case currentHomeValue, currentLoanBalance, refiMonthlyMI
+        case reservesMonths
     }
 
     init(
@@ -114,7 +120,8 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         propertyDP: PropertyDownPaymentConfig = .empty,
         currentHomeValue: Decimal = 0,
         currentLoanBalance: Decimal = 0,
-        refiMonthlyMI: Decimal = 0
+        refiMonthlyMI: Decimal = 0,
+        reservesMonths: Int = 2
     ) {
         self.mode = mode
         self.loanType = loanType
@@ -133,6 +140,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.currentHomeValue = currentHomeValue
         self.currentLoanBalance = currentLoanBalance
         self.refiMonthlyMI = refiMonthlyMI
+        self.reservesMonths = reservesMonths
     }
 
     init(from decoder: any Decoder) throws {
@@ -156,6 +164,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.currentHomeValue = try c.decodeIfPresent(Decimal.self, forKey: .currentHomeValue) ?? 0
         self.currentLoanBalance = try c.decodeIfPresent(Decimal.self, forKey: .currentLoanBalance) ?? 0
         self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
+        self.reservesMonths = try c.decodeIfPresent(Int.self, forKey: .reservesMonths) ?? 2
     }
 
     /// Live current LTV in refinance mode. 0 when home value unset.

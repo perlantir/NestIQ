@@ -81,6 +81,7 @@
 		927E89E061CFE0FC73FB276F /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BEADBEAC2EA40C63E71FF7 /* SegmentedControl.swift */; };
 		92B227E84BA9ADD8AEB52EF0 /* Radius.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBA2FE384D413626DDAE1D4 /* Radius.swift */; };
 		96E42E5B6369FD34312CCAFA /* IncomeQualViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */; };
+		997DA476F15E2E0D81C8797C /* IncomeQualScreen+Reserves.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E47C819C5A68A03B53124A /* IncomeQualScreen+Reserves.swift */; };
 		9B48F5D76ADF246FA93751A6 /* SavedScenariosScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DDE3329FD65E73CE3193ED /* SavedScenariosScreen.swift */; };
 		9B913174E12A08506176C51D /* ComplianceDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C37A3C9E5111C9F4BB8353 /* ComplianceDetailScreens.swift */; };
 		9F355E3C8B9C0CB5A72A2097 /* CalculatorRefiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */; };
@@ -213,6 +214,7 @@
 		7F25962FDCE571CDFE241131 /* StressPathsChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressPathsChart.swift; sourceTree = "<group>"; };
 		7F288789586295CD7EDEA159 /* ProfileEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditor.swift; sourceTree = "<group>"; };
 		85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateRibbonCell.swift; sourceTree = "<group>"; };
+		85E47C819C5A68A03B53124A /* IncomeQualScreen+Reserves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualScreen+Reserves.swift"; sourceTree = "<group>"; };
 		860BC6C292C49CFEF58A6ECF /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
@@ -393,6 +395,7 @@
 				9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */,
 				19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */,
 				C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */,
+				85E47C819C5A68A03B53124A /* IncomeQualScreen+Reserves.swift */,
 				C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */,
 			);
 			path = IncomeQualification;
@@ -898,6 +901,7 @@
 				0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */,
 				A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */,
 				389E07F52C6B69E232CAEF64 /* IncomeQualListViews.swift in Sources */,
+				997DA476F15E2E0D81C8797C /* IncomeQualScreen+Reserves.swift in Sources */,
 				A294032B30278ED20FBCEA40 /* IncomeQualScreen.swift in Sources */,
 				96E42E5B6369FD34312CCAFA /* IncomeQualViewModel.swift in Sources */,
 				3CA97BE097CFB72AD1DE8982 /* KPITile.swift in Sources */,

@@ -149,12 +149,23 @@ enum PDFBuilder {
             return purchase
         }()
         let currentBal = MoneyFormat.shared.currency(viewModel.inputs.currentLoanBalance)
+        let reservesMonths = viewModel.inputs.reservesMonths
+        let reservesTotal = MoneyFormat.shared.currency(
+            viewModel.maxPITI * Decimal(reservesMonths)
+        )
+        let reservesSentence = reservesMonths > 0
+            ? " Requires \(reservesMonths)-month reserves: \(reservesTotal) (\(reservesMonths) × PITI)."
+            : ""
         let refiNarrative = "Qualifies at \(rate)% \(viewModel.inputs.termYears)-yr — max "
             + "qualifying loan \(maxLoan) vs current balance \(currentBal). "
-            + "Back-end DTI lands at \(backDTI)."
+            + "Back-end DTI lands at \(backDTI)." + reservesSentence
         let purchaseNarrative = "Qualifies up to \(maxLoan) at a \(rate)% "
             + "\(viewModel.inputs.termYears)-yr loan. Back-end DTI lands at \(backDTI)."
+            + reservesSentence
         let fallback = isRefi ? refiNarrative : purchaseNarrative
+        let reservesValue = reservesMonths > 0
+            ? "\(reservesMonths) mo · \(reservesTotal)"
+            : "—"
         let payload = Payload(
             calculatorSlug: "income-qualification",
             calculatorTitle: isRefi ? "Income qualification · refinance" : "Income qualification",
@@ -167,6 +178,7 @@ enum PDFBuilder {
                 ("Max PITI", piti),
                 (secondaryLabel, secondaryValue),
                 ("Back-end DTI", backDTI),
+                ("Reserves", reservesValue),
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
