@@ -466,8 +466,9 @@ extension TCAInputsScreen {
                 Text("\(years) yr")
                     .textStyle(Typography.num.withSize(12, weight: .medium))
                     .foregroundStyle(isOn ? Palette.ink : Palette.inkSecondary)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, Spacing.s12)
+            .frame(maxWidth: .infinity)
             .padding(.vertical, 6)
             .background(isOn ? Palette.accentTint : Palette.surfaceRaised)
             .overlay(

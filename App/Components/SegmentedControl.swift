@@ -44,6 +44,8 @@ public struct SegmentedControl<Option: Hashable>: View {
             Text(label(option))
                 .textStyle(Typography.num)
                 .foregroundStyle(isSelected ? Palette.accentFG : Palette.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.s8)
                 .background(isSelected ? Palette.accent : Palette.surfaceSunken)
