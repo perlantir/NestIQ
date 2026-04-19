@@ -17,6 +17,7 @@
 		10EDA946A0BE0C6C61E70DE3 /* AmortizationInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21294577B6542C065DE45454 /* AmortizationInputsScreen.swift */; };
 		128FCBC880B7116F9009218C /* RefinanceComparisonPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64C7EF67B2EB437CC1489A0 /* RefinanceComparisonPage.swift */; };
 		12B251F0DF98735D91CD06A4 /* HairlineDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7600230EF86B01E049D9B9A2 /* HairlineDivider.swift */; };
+		12EA660423A004DA7B66266E /* IncomeQualInputsScreen+SelfEmployment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84046343BB1DCEDC3BE89CA3 /* IncomeQualInputsScreen+SelfEmployment.swift */; };
 		13B526571A09FAF55F320B21 /* UITestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */; };
 		14931A0957D625E5DE7E6AB0 /* AuthGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE63AF7554AB3115EE357DF7 /* AuthGate.swift */; };
 		17CF296F15E8261DA16DA014 /* BalanceOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA9637847BD8C6534C750E /* BalanceOverTimeChart.swift */; };
@@ -225,6 +226,7 @@
 		7F25962FDCE571CDFE241131 /* StressPathsChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressPathsChart.swift; sourceTree = "<group>"; };
 		7F288789586295CD7EDEA159 /* ProfileEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditor.swift; sourceTree = "<group>"; };
 		8237B3292075F160E64146D2 /* SelfEmploymentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEmploymentViewModel.swift; sourceTree = "<group>"; };
+		84046343BB1DCEDC3BE89CA3 /* IncomeQualInputsScreen+SelfEmployment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualInputsScreen+SelfEmployment.swift"; sourceTree = "<group>"; };
 		85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateRibbonCell.swift; sourceTree = "<group>"; };
 		85E47C819C5A68A03B53124A /* IncomeQualScreen+Reserves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualScreen+Reserves.swift"; sourceTree = "<group>"; };
 		860BC6C292C49CFEF58A6ECF /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
@@ -407,6 +409,7 @@
 			children = (
 				F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */,
 				9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */,
+				84046343BB1DCEDC3BE89CA3 /* IncomeQualInputsScreen+SelfEmployment.swift */,
 				19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */,
 				C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */,
 				85E47C819C5A68A03B53124A /* IncomeQualScreen+Reserves.swift */,
@@ -928,6 +931,7 @@
 				ED9A0F824482974D1EEEA77D /* HelocScreen.swift in Sources */,
 				3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */,
 				0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */,
+				12EA660423A004DA7B66266E /* IncomeQualInputsScreen+SelfEmployment.swift in Sources */,
 				A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */,
 				389E07F52C6B69E232CAEF64 /* IncomeQualListViews.swift in Sources */,
 				997DA476F15E2E0D81C8797C /* IncomeQualScreen+Reserves.swift in Sources */,

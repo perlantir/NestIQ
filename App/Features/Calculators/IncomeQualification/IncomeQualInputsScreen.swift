@@ -15,9 +15,12 @@ struct IncomeQualInputsScreen: View {
     let borrower: Borrower?
     var existingScenario: Scenario?
 
-    @State private var viewModel: IncomeQualViewModel
+    // viewModel + showingSelfEmployment are `internal` (not private) so
+    // the SE-import extension can reach them.
+    @State var viewModel: IncomeQualViewModel
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
+    @State var showingSelfEmployment: Bool = false
     @State private var selectedBorrower: Borrower?
 
     init(
@@ -110,7 +113,20 @@ struct IncomeQualInputsScreen: View {
             )
             .presentationDetents([.large])
         }
+        .sheet(isPresented: $showingSelfEmployment) {
+            NavigationStack {
+                SelfEmploymentInputsScreen(
+                    borrower: selectedBorrower,
+                    onImportMonthly: { monthly in
+                        importSelfEmploymentIncome(monthly)
+                    }
+                )
+            }
+            .presentationDetents([.large])
+        }
     }
+
+    // importSelfEmploymentIncome lives in the extension.
 
     // MARK: Header
 
@@ -157,27 +173,35 @@ struct IncomeQualInputsScreen: View {
     // MARK: Income section
 
     private var incomeSection: some View {
-        fieldGroup(header: "Income · debts") {
-            FieldRow(
-                label: "Gross monthly income",
-                prefix: "$",
-                decimal: Binding(
-                    get: { viewModel.inputs.incomes.first?.monthlyAmount ?? 0 },
-                    set: { setPrimaryIncome($0) }
+        VStack(alignment: .leading, spacing: Spacing.s8) {
+            fieldGroup(header: "Income · debts") {
+                FieldRow(
+                    label: "Gross monthly income",
+                    prefix: "$",
+                    hint: primaryIncomeHint,
+                    decimal: Binding(
+                        get: { viewModel.inputs.incomes.first?.monthlyAmount ?? 0 },
+                        set: { setPrimaryIncome($0) }
+                    )
                 )
-            )
-            divider
-            FieldRow(
-                label: "Monthly debts",
-                prefix: "$",
-                hint: "auto + student + CC min",
-                decimal: Binding(
-                    get: { viewModel.inputs.debts.first?.monthlyAmount ?? 0 },
-                    set: { setPrimaryDebt($0) }
+                divider
+                FieldRow(
+                    label: "Monthly debts",
+                    prefix: "$",
+                    hint: "auto + student + CC min",
+                    decimal: Binding(
+                        get: { viewModel.inputs.debts.first?.monthlyAmount ?? 0 },
+                        set: { setPrimaryDebt($0) }
+                    )
                 )
-            )
+            }
+            selfEmploymentImportPill
+                .padding(.horizontal, Spacing.s20)
         }
     }
+
+    // SE import pill + hint live in IncomeQualInputsScreen+SelfEmployment.swift
+    // to stay under SwiftLint's type_body_length cap.
 
     private func setPrimaryIncome(_ value: Decimal) {
         if viewModel.inputs.incomes.isEmpty {
