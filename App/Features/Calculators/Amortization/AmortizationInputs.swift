@@ -7,7 +7,15 @@
 import Foundation
 import QuotientFinance
 
+/// Purchase analysis vs. "show me this existing loan's schedule".
+/// Gates Property & DP, live LTV, and MI dropoff surfacing on Results.
+enum AmortizationMode: String, Codable, Hashable, Sendable {
+    case purchase
+    case existingLoan
+}
+
 struct AmortizationFormInputs: Codable, Hashable, Sendable {
+    var mode: AmortizationMode
     var loanAmount: Decimal
     var annualRate: Double
     var termYears: Int
@@ -27,6 +35,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
 
     // Legacy decodes won't carry newer keys. Defaults below.
     enum CodingKeys: String, CodingKey {
+        case mode
         case loanAmount, annualRate, termYears, startDate
         case annualTaxes, annualInsurance, monthlyHOA
         case includePMI, manualMonthlyPMI
@@ -34,6 +43,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     }
 
     init(
+        mode: AmortizationMode = .purchase,
         loanAmount: Decimal,
         annualRate: Double,
         termYears: Int,
@@ -47,6 +57,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         biweekly: Bool,
         propertyDP: PropertyDownPaymentConfig = .empty
     ) {
+        self.mode = mode
         self.loanAmount = loanAmount
         self.annualRate = annualRate
         self.termYears = termYears
@@ -63,6 +74,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
 
     init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.mode = try c.decodeIfPresent(AmortizationMode.self, forKey: .mode) ?? .purchase
         self.loanAmount = try c.decode(Decimal.self, forKey: .loanAmount)
         self.annualRate = try c.decode(Double.self, forKey: .annualRate)
         self.termYears = try c.decode(Int.self, forKey: .termYears)

@@ -153,7 +153,10 @@ struct AmortizationResultsScreen: View {
     }
 
     private var miDropoffLine: String? {
-        guard let period = viewModel.miDropoffPeriod else { return nil }
+        // Existing-loan mode has no purchase-price anchor, so the MI
+        // dropoff calculation isn't meaningful to surface.
+        guard viewModel.inputs.mode == .purchase,
+              let period = viewModel.miDropoffPeriod else { return nil }
         let date = viewModel.miDropoffDate
         let fmt = DateFormatter()
         fmt.dateFormat = "MMM yyyy"
@@ -167,15 +170,19 @@ struct AmortizationResultsScreen: View {
             ("Total interest", MoneyFormat.shared.dollarsShort(viewModel.totalInterest)),
             ("Payoff", payoffShort),
             ("Total paid", MoneyFormat.shared.dollarsShort(viewModel.totalPaid)),
-            ("LTV", String(format: "%.0f%%", viewModel.ltv * 100)),
         ]
-        // When MI is active, promote "Total MI paid" into the last
-        // slot; LTV is still visible on the Property & down-payment
-        // section of the Inputs screen.
-        if viewModel.miDropoffPeriod != nil {
-            items[3] = ("Total MI",
-                        MoneyFormat.shared.dollarsShort(viewModel.totalMIPaid))
+        // LTV / Total MI only make sense in purchase mode — existing-loan
+        // mode doesn't carry a purchase-price anchor.
+        if viewModel.inputs.mode == .purchase {
+            if viewModel.miDropoffPeriod != nil {
+                items.append(("Total MI",
+                              MoneyFormat.shared.dollarsShort(viewModel.totalMIPaid)))
+            } else {
+                items.append(("LTV",
+                              String(format: "%.0f%%", viewModel.ltv * 100)))
+            }
         }
+        let lastIdx = items.count - 1
         return HStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { idx, kv in
                 VStack(alignment: .leading, spacing: 3) {
@@ -188,7 +195,7 @@ struct AmortizationResultsScreen: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, idx == 0 ? 0 : 10)
-                .padding(.trailing, idx == 3 ? 0 : 10)
+                .padding(.trailing, idx == lastIdx ? 0 : 10)
                 .overlay(alignment: .leading) {
                     if idx > 0 {
                         Rectangle().fill(Palette.borderSubtle).frame(width: 1)

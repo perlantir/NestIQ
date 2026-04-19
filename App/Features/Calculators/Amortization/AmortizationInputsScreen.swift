@@ -39,16 +39,23 @@ struct AmortizationInputsScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s8)
 
+                modeToggle
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s16)
+
                 loanSection
                     .padding(.top, Spacing.s16)
-                PropertyDownPaymentSection(
-                    config: Binding(
-                        get: { viewModel.inputs.propertyDP },
-                        set: { viewModel.inputs.propertyDP = $0 }
-                    ),
-                    externalLoanAmount: viewModel.inputs.loanAmount
-                )
-                .padding(.top, Spacing.s24)
+                if viewModel.inputs.mode == .purchase {
+                    PropertyDownPaymentSection(
+                        config: Binding(
+                            get: { viewModel.inputs.propertyDP },
+                            set: { viewModel.inputs.propertyDP = $0 }
+                        ),
+                        externalLoanAmount: viewModel.inputs.loanAmount
+                    )
+                    .padding(.top, Spacing.s24)
+                    .transition(modeReveal)
+                }
                 propertySection
                     .padding(.top, Spacing.s24)
                 advancedSection
@@ -59,6 +66,10 @@ struct AmortizationInputsScreen: View {
                     .padding(.vertical, Spacing.s24)
             }
             .padding(.bottom, Spacing.s96)
+            .animation(
+                reduceMotion ? nil : Motion.defaultEaseOut,
+                value: viewModel.inputs.mode
+            )
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
@@ -102,12 +113,30 @@ struct AmortizationInputsScreen: View {
             Text("New scenario")
                 .textStyle(Typography.display.withSize(26, weight: .bold))
                 .foregroundStyle(Palette.ink)
-            Text("Enter loan terms and property details. Results update live.")
+            Text(viewModel.inputs.mode == .purchase
+                 ? "Price, down payment, and loan terms. Results update live."
+                 : "Existing loan balance and terms only — no purchase context.")
                 .textStyle(Typography.body)
                 .foregroundStyle(Palette.inkSecondary)
             borrowerChip
                 .padding(.top, Spacing.s12)
         }
+    }
+
+    private var modeToggle: some View {
+        Picker("Mode", selection: Binding(
+            get: { viewModel.inputs.mode },
+            set: { viewModel.inputs.mode = $0 }
+        )) {
+            Text("Purchase").tag(AmortizationMode.purchase)
+            Text("Existing loan").tag(AmortizationMode.existingLoan)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("amort.modeToggle")
+    }
+
+    private var modeReveal: AnyTransition {
+        reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top))
     }
 
     @ViewBuilder private var borrowerChip: some View {
