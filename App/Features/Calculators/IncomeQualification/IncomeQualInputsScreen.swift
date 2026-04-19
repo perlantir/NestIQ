@@ -58,16 +58,25 @@ struct IncomeQualInputsScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s8)
 
+                modeToggle
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.top, Spacing.s16)
+
                 incomeSection.padding(.top, Spacing.s16)
                 loanSection.padding(.top, Spacing.s24)
-                PropertyDownPaymentSection(
-                    config: Binding(
-                        get: { viewModel.inputs.propertyDP },
-                        set: { viewModel.inputs.propertyDP = $0 }
-                    ),
-                    externalLoanAmount: viewModel.maxLoan
-                )
-                .padding(.top, Spacing.s24)
+                if viewModel.inputs.mode == .purchase {
+                    PropertyDownPaymentSection(
+                        config: Binding(
+                            get: { viewModel.inputs.propertyDP },
+                            set: { viewModel.inputs.propertyDP = $0 }
+                        ),
+                        externalLoanAmount: viewModel.maxLoan
+                    )
+                    .padding(.top, Spacing.s24)
+                } else {
+                    refinanceSection
+                        .padding(.top, Spacing.s24)
+                }
                 propertySection.padding(.top, Spacing.s24)
                 dtiSection.padding(.top, Spacing.s24)
 
@@ -351,10 +360,86 @@ struct IncomeQualInputsScreen: View {
         }
     }
 
-    // MARK: Shared field group
+    // MARK: Mode toggle + refinance section
 
+    private var modeToggle: some View {
+        Picker("Mode", selection: Binding(
+            get: { viewModel.inputs.mode },
+            set: { viewModel.inputs.mode = $0 }
+        )) {
+            Text("Purchase").tag(IncomeQualMode.purchase)
+            Text("Refinance").tag(IncomeQualMode.refinance)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("incomeQual.modeToggle")
+    }
+
+    private var refinanceSection: some View {
+        fieldGroup(header: "Current loan & property") {
+            FieldRow(
+                label: "Current home value",
+                prefix: "$",
+                decimal: Binding(
+                    get: { viewModel.inputs.currentHomeValue },
+                    set: { viewModel.inputs.currentHomeValue = $0 }
+                )
+            )
+            divider
+            FieldRow(
+                label: "Current loan balance",
+                prefix: "$",
+                hint: "qualifying against this balance",
+                decimal: Binding(
+                    get: { viewModel.inputs.currentLoanBalance },
+                    set: { viewModel.inputs.currentLoanBalance = $0 }
+                )
+            )
+            divider
+            FieldRow(
+                label: "Monthly MI",
+                prefix: "$",
+                hint: "optional",
+                decimal: Binding(
+                    get: { viewModel.inputs.refiMonthlyMI },
+                    set: { viewModel.inputs.refiMonthlyMI = $0 }
+                )
+            )
+            divider
+            currentLTVRow
+        }
+    }
+
+    private var currentLTVRow: some View {
+        let lt = viewModel.inputs.currentRefiLTV
+        let miReq = lt > 0.80
+        return HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Current LTV")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text(viewModel.inputs.currentHomeValue > 0
+                     ? (miReq ? "above 80% — MI typical" : "at or below 80% — no MI")
+                     : "enter home value for live LTV")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(miReq ? Palette.warn : Palette.inkTertiary)
+            }
+            Spacer()
+            Text(viewModel.inputs.currentHomeValue > 0
+                 ? String(format: "%.1f%%", lt * 100) : "—")
+                .textStyle(Typography.num.withSize(18, weight: .medium, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
+    }
+
+}
+
+// MARK: - Shared helpers
+
+extension IncomeQualInputsScreen {
     @ViewBuilder
-    private func fieldGroup<Content: View>(
+    func fieldGroup<Content: View>(
         header: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -374,7 +459,7 @@ struct IncomeQualInputsScreen: View {
         }
     }
 
-    private var divider: some View {
+    var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 }

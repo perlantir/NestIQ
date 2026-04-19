@@ -5,6 +5,14 @@
 import Foundation
 import QuotientFinance
 
+/// Income qualification can support either a purchase (find the max
+/// loan the borrower can afford) or a refinance (find whether the
+/// current loan + property still qualify at today's terms).
+enum IncomeQualMode: String, Codable, Hashable, Sendable {
+    case purchase
+    case refinance
+}
+
 struct IncomeSource: Codable, Hashable, Sendable, Identifiable {
     var id: UUID
     var label: String
@@ -57,6 +65,7 @@ struct MonthlyDebt: Codable, Hashable, Sendable, Identifiable {
 }
 
 struct IncomeQualFormInputs: Codable, Hashable, Sendable {
+    var mode: IncomeQualMode
     var loanType: String        // stored as String for Codable simplicity
     var creditScore: Int
     var frontEndLimit: Double   // e.g. 0.28
@@ -70,14 +79,26 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
     var incomes: [IncomeSource]
     var debts: [MonthlyDebt]
     var propertyDP: PropertyDownPaymentConfig
+    /// Refinance-mode current appraised value. Drives the live current
+    /// LTV readout. 0 in purchase mode (or when the LO hasn't entered
+    /// it yet).
+    var currentHomeValue: Decimal
+    /// Refinance-mode current first-lien balance. Becomes the implicit
+    /// loan amount being qualified for. 0 in purchase mode.
+    var currentLoanBalance: Decimal
+    /// Refinance-mode optional monthly MI on the current loan.
+    var refiMonthlyMI: Decimal
 
     enum CodingKeys: String, CodingKey {
+        case mode
         case loanType, creditScore, frontEndLimit, backEndLimit
         case annualRate, termYears, annualTaxes, annualInsurance, monthlyHOA
         case downPaymentPercent, incomes, debts, propertyDP
+        case currentHomeValue, currentLoanBalance, refiMonthlyMI
     }
 
     init(
+        mode: IncomeQualMode = .purchase,
         loanType: String,
         creditScore: Int,
         frontEndLimit: Double,
@@ -90,8 +111,12 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         downPaymentPercent: Double,
         incomes: [IncomeSource],
         debts: [MonthlyDebt],
-        propertyDP: PropertyDownPaymentConfig = .empty
+        propertyDP: PropertyDownPaymentConfig = .empty,
+        currentHomeValue: Decimal = 0,
+        currentLoanBalance: Decimal = 0,
+        refiMonthlyMI: Decimal = 0
     ) {
+        self.mode = mode
         self.loanType = loanType
         self.creditScore = creditScore
         self.frontEndLimit = frontEndLimit
@@ -105,10 +130,14 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.incomes = incomes
         self.debts = debts
         self.propertyDP = propertyDP
+        self.currentHomeValue = currentHomeValue
+        self.currentLoanBalance = currentLoanBalance
+        self.refiMonthlyMI = refiMonthlyMI
     }
 
     init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.mode = try c.decodeIfPresent(IncomeQualMode.self, forKey: .mode) ?? .purchase
         self.loanType = try c.decode(String.self, forKey: .loanType)
         self.creditScore = try c.decode(Int.self, forKey: .creditScore)
         self.frontEndLimit = try c.decode(Double.self, forKey: .frontEndLimit)
@@ -124,6 +153,15 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.propertyDP = try c.decodeIfPresent(
             PropertyDownPaymentConfig.self, forKey: .propertyDP
         ) ?? .empty
+        self.currentHomeValue = try c.decodeIfPresent(Decimal.self, forKey: .currentHomeValue) ?? 0
+        self.currentLoanBalance = try c.decodeIfPresent(Decimal.self, forKey: .currentLoanBalance) ?? 0
+        self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
+    }
+
+    /// Live current LTV in refinance mode. 0 when home value unset.
+    var currentRefiLTV: Double {
+        guard currentHomeValue > 0 else { return 0 }
+        return Double(truncating: (currentLoanBalance / currentHomeValue) as NSNumber)
     }
 
     static let sampleDefault = IncomeQualFormInputs(

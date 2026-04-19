@@ -120,19 +120,37 @@ enum PDFBuilder {
         let purchase = MoneyFormat.shared.currency(viewModel.maxPurchase)
         let backDTI = String(format: "%.1f%%", viewModel.backEndDTIIncludingDebts * 100)
         let rate = String(format: "%.3f", viewModel.inputs.annualRate)
-        let fallback = "Qualifies up to \(maxLoan) at a \(rate)% \(viewModel.inputs.termYears)-yr loan. "
+        let isRefi = viewModel.inputs.mode == .refinance
+        let summary = isRefi
+            ? "Refi · \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
+            : "at \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
+        let secondaryLabel = isRefi ? "Current LTV" : "Max purchase"
+        let secondaryValue: String = {
+            if isRefi {
+                let ltv = viewModel.inputs.currentRefiLTV
+                guard viewModel.inputs.currentHomeValue > 0 else { return "—" }
+                return String(format: "%.1f%%", ltv * 100)
+            }
+            return purchase
+        }()
+        let currentBal = MoneyFormat.shared.currency(viewModel.inputs.currentLoanBalance)
+        let refiNarrative = "Qualifies at \(rate)% \(viewModel.inputs.termYears)-yr — max "
+            + "qualifying loan \(maxLoan) vs current balance \(currentBal). "
             + "Back-end DTI lands at \(backDTI)."
+        let purchaseNarrative = "Qualifies up to \(maxLoan) at a \(rate)% "
+            + "\(viewModel.inputs.termYears)-yr loan. Back-end DTI lands at \(backDTI)."
+        let fallback = isRefi ? refiNarrative : purchaseNarrative
         let payload = Payload(
             calculatorSlug: "income-qualification",
-            calculatorTitle: "Income qualification",
+            calculatorTitle: isRefi ? "Income qualification · refinance" : "Income qualification",
             complianceScenarioType: .incomeQualification,
-            loanSummary: "at \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)",
+            loanSummary: summary,
             heroLabel: "Max loan · qualifying",
             heroValue: maxLoan,
             heroValuePrefix: "",
             heroKPIs: [
                 ("Max PITI", piti),
-                ("Max purchase", purchase),
+                (secondaryLabel, secondaryValue),
                 ("Back-end DTI", backDTI),
             ],
             narrative: narrative.isEmpty ? fallback : narrative

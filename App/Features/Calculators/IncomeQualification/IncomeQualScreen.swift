@@ -181,15 +181,21 @@ struct IncomeQualScreen: View {
             Text(assumptionLine)
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.inkTertiary)
+            if viewModel.inputs.mode == .refinance, let refiLine = refiStatusLine {
+                Text(refiLine)
+                    .textStyle(Typography.num.withSize(12))
+                    .foregroundStyle(viewModel.inputs.currentLoanBalance <= viewModel.maxLoan
+                                     ? Palette.gain : Palette.warn)
+            }
 
             HStack(spacing: 0) {
                 kpiCell(
-                    label: "Max PITI",
+                    label: viewModel.inputs.mode == .refinance ? "Current PITI" : "Max PITI",
                     value: "$\(MoneyFormat.shared.decimalString(viewModel.maxPITI))"
                 )
                 kpiCell(
-                    label: "Max purchase",
-                    value: "$\(MoneyFormat.shared.decimalString(viewModel.maxPurchase))",
+                    label: viewModel.inputs.mode == .refinance ? "Current LTV" : "Max purchase",
+                    value: refiHeroSecondaryValue,
                     leadingDivider: true
                 )
                 kpiCell(
@@ -220,7 +226,37 @@ struct IncomeQualScreen: View {
         let taxIns = MoneyFormat.shared.decimalString(
             viewModel.inputs.monthlyTax + viewModel.inputs.monthlyInsurance
         )
+        if viewModel.inputs.mode == .refinance {
+            return "at \(rate)% · \(viewModel.inputs.termYears)-yr · $\(taxIns)/mo tax & ins"
+        }
         return "at \(rate)% · \(viewModel.inputs.termYears)-yr · \(down)% down · $\(taxIns)/mo tax & ins"
+    }
+
+    /// Refi-mode status line shown below the hero value: "Qualified —
+    /// current balance $X is within the $Y cap" or a delta if short.
+    private var refiStatusLine: String? {
+        let balance = viewModel.inputs.currentLoanBalance
+        guard balance > 0 else { return nil }
+        let balanceStr = MoneyFormat.shared.dollarsShort(balance)
+        let maxStr = MoneyFormat.shared.dollarsShort(viewModel.maxLoan)
+        if balance <= viewModel.maxLoan {
+            return "Qualified — current balance \(balanceStr) ≤ max \(maxStr)"
+        }
+        let short = balance - viewModel.maxLoan
+        return "Short — current \(balanceStr) exceeds max \(maxStr) by \(MoneyFormat.shared.dollarsShort(short))"
+    }
+
+    /// Second hero KPI: "Max purchase" in purchase mode, "Current LTV"
+    /// in refinance mode. Purpose of the slot shifts with mode.
+    private var refiHeroSecondaryValue: String {
+        switch viewModel.inputs.mode {
+        case .purchase:
+            return "$\(MoneyFormat.shared.decimalString(viewModel.maxPurchase))"
+        case .refinance:
+            let ltv = viewModel.inputs.currentRefiLTV
+            guard viewModel.inputs.currentHomeValue > 0 else { return "—" }
+            return String(format: "%.1f%%", ltv * 100)
+        }
     }
 
     private func kpiCell(
