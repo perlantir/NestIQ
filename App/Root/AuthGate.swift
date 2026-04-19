@@ -52,10 +52,11 @@ struct AuthGate<Content: View>: View {
             VStack(spacing: Spacing.s32) {
                 Spacer()
                 VStack(spacing: Spacing.s16) {
-                    Text("Q")
-                        .font(.custom(Typography.serifFamily, size: 84))
-                        .foregroundStyle(Palette.ink)
-                    Text("Quotient")
+                    Image("Monogram-Accent")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 96, height: 96)
+                    Text("NestIQ")
                         .textStyle(Typography.eyebrow)
                         .foregroundStyle(Palette.inkTertiary)
                     Text("Five calculators, built for loan officers.")
@@ -140,7 +141,7 @@ struct AuthGate<Content: View>: View {
                 Image(systemName: "faceid")
                     .font(.system(size: 64, weight: .ultraLight))
                     .foregroundStyle(Palette.accent)
-                Text("Unlock Quotient")
+                Text("Unlock NestIQ")
                     .textStyle(Typography.h2)
                     .foregroundStyle(Palette.ink)
                 if let biometricError {

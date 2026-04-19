@@ -55,7 +55,7 @@ struct FeedbackMailSheet: View {
     }
 
     private var subject: String {
-        "Quotient feedback — v\(appVersion) build \(appBuild)"
+        "NestIQ feedback — v\(appVersion) build \(appBuild)"
     }
 
     /// Prefilled body: diagnostics header up top so Nick can triage by
@@ -346,7 +346,7 @@ struct LicensesLegalView: View {
             Text("© 2026 Perlantir AI Studio")
                 .textStyle(Typography.body.withSize(12))
                 .foregroundStyle(Palette.inkSecondary)
-            Text("Quotient is a calculation tool. It is not a loan offer, "
+            Text("NestIQ is a calculation tool. It is not a loan offer, "
                 + "a commitment to lend, or a pre-qualification.")
                 .textStyle(Typography.body.withSize(11.5))
                 .foregroundStyle(Palette.inkTertiary)

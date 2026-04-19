@@ -222,7 +222,7 @@ struct BorrowerPicker: View {
             Text("Pull from Contacts")
                 .textStyle(Typography.h2)
                 .foregroundStyle(Palette.ink)
-            Text("Add borrowers from your iPhone contacts in one tap. Quotient only reads the contact you pick.")
+            Text("Add borrowers from your iPhone contacts in one tap. NestIQ only reads the contact you pick.")
                 .textStyle(Typography.body)
                 .foregroundStyle(Palette.inkSecondary)
                 .multilineTextAlignment(.center)

@@ -44,7 +44,7 @@ public struct ComponentGallery: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: Spacing.s8) {
             Eyebrow("Components · gallery · DEBUG")
-            Text("Quotient · components")
+            Text("NestIQ · components")
                 .textStyle(Typography.serifDisplay)
                 .foregroundStyle(Palette.ink)
         }

@@ -18,7 +18,7 @@ public struct ThemePreview: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.s32) {
                 eyebrow("Foundations · Theme layer")
-                Text("Quotient — design system")
+                Text("NestIQ — design system")
                     .textStyle(Typography.serifDisplay)
                     .foregroundStyle(Palette.ink)
 
@@ -140,7 +140,7 @@ public struct ThemePreview: View {
             )
             typeRow(
                 label: "Serif display · Source Serif 4 34",
-                sample: "Quotient",
+                sample: "NestIQ",
                 style: Typography.serifDisplay
             )
             typeRow(

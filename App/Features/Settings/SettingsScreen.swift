@@ -357,7 +357,7 @@ struct SettingsScreen: View {
     }
 
     private var footer: some View {
-        Text("Quotient — made in Portland, OR")
+        Text("NestIQ — made in Portland, OR")
             .font(.custom(Typography.serifFamily + "-It", size: 11))
             .foregroundStyle(Palette.inkTertiary)
             .frame(maxWidth: .infinity)

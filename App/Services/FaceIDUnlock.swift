@@ -20,7 +20,7 @@ public enum FaceIDUnlock {
         return ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &err)
     }
 
-    public static func authenticate(reason: String = "Unlock Quotient") async -> FaceIDUnlockResult {
+    public static func authenticate(reason: String = "Unlock NestIQ") async -> FaceIDUnlockResult {
         let ctx = LAContext()
         var err: NSError?
         guard ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &err) else {
