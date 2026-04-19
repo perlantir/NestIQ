@@ -248,6 +248,36 @@ struct LicensedStatesPicker: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    HStack {
+                        Text(countLabel)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("licensedStates.count")
+                        Spacer()
+                        Button {
+                            selectAllVisible()
+                        } label: {
+                            Text("Select all")
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .buttonStyle(.borderless)
+                        .disabled(selectAllDisabled)
+                        .accessibilityIdentifier("licensedStates.selectAll")
+                        Text("·")
+                            .font(.footnote)
+                            .foregroundStyle(.tertiary)
+                        Button {
+                            deselectAllVisible()
+                        } label: {
+                            Text("Deselect all")
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .buttonStyle(.borderless)
+                        .disabled(deselectAllDisabled)
+                        .accessibilityIdentifier("licensedStates.deselectAll")
+                    }
+                }
                 if !fullStates.isEmpty {
                     Section {
                         ForEach(fullStates, id: \.self) { state in
@@ -281,6 +311,30 @@ struct LicensedStatesPicker: View {
                 }
             }
         }
+    }
+
+    private var countLabel: String {
+        "Licensed in \(selection.count) of \(USState.allCases.count) states"
+    }
+
+    /// Target set for bulk actions — respects the current search filter so
+    /// an LO can narrow with search and bulk-select the subset.
+    private var visibleStates: [USState] { allFiltered }
+
+    private var selectAllDisabled: Bool {
+        !visibleStates.contains { !selection.contains($0) }
+    }
+
+    private var deselectAllDisabled: Bool {
+        !visibleStates.contains { selection.contains($0) }
+    }
+
+    private func selectAllVisible() {
+        selection.formUnion(visibleStates)
+    }
+
+    private func deselectAllVisible() {
+        selection.subtract(visibleStates)
     }
 
     @ViewBuilder
