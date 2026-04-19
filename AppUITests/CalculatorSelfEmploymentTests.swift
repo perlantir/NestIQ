@@ -74,8 +74,20 @@ final class CalculatorSelfEmploymentTests: XCTestCase {
                       "'Use this income' button did not appear in SE Results")
         useIncome.tap()
 
-        // After the sheet dismisses we should still see the IncomeQual
-        // Compute CTA — confirming we returned to the right parent view.
+        // After tap: the sheet must fully dismiss. A prior revision of
+        // this test only checked that incomeQual.compute existed after
+        // tapping — but that passes even when the sheet is still on
+        // screen, because XCUIElement.waitForExistence returns true for
+        // elements in the hierarchy regardless of z-order. Assert the
+        // SE-only controls are GONE (sheet dismissed, not just that the
+        // IncomeQual compute button is queryable behind the sheet).
+        XCTAssertTrue(useIncome.waitForNonExistence(timeout: 5),
+                      "SE Results 'Use this income' still visible — sheet did not dismiss")
+        let seCompute = app.buttons["selfEmployment.compute"]
+        XCTAssertFalse(seCompute.exists,
+                       "SE Inputs compute still visible — nav popped instead of sheet dismissing")
+
+        // Returning to IncomeQual Inputs means the compute CTA is hittable.
         let iqCompute = app.buttons["incomeQual.compute"]
         XCTAssertTrue(iqCompute.waitForExistence(timeout: 5),
                       "Did not return to Income Qualification Inputs")

@@ -15,13 +15,15 @@ struct IncomeQualInputsScreen: View {
     let borrower: Borrower?
     var existingScenario: Scenario?
 
-    // viewModel + showingSelfEmployment are `internal` (not private) so
-    // the SE-import extension can reach them.
+    // viewModel, showingSelfEmployment, and selectedBorrower are
+    // `internal` (not private) so the SE-import extension can reach
+    // them — the sheet content lives over there to keep this struct
+    // under the SwiftLint type_body_length cap.
     @State var viewModel: IncomeQualViewModel
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State var showingSelfEmployment: Bool = false
-    @State private var selectedBorrower: Borrower?
+    @State var selectedBorrower: Borrower?
 
     init(
         borrower: Borrower? = nil,
@@ -114,15 +116,7 @@ struct IncomeQualInputsScreen: View {
             .presentationDetents([.large])
         }
         .sheet(isPresented: $showingSelfEmployment) {
-            NavigationStack {
-                SelfEmploymentInputsScreen(
-                    borrower: selectedBorrower,
-                    onImportMonthly: { monthly in
-                        importSelfEmploymentIncome(monthly)
-                    }
-                )
-            }
-            .presentationDetents([.large])
+            selfEmploymentSheetContent
         }
     }
 

@@ -61,4 +61,27 @@ extension IncomeQualInputsScreen {
             viewModel.inputs.incomes[0] = imported
         }
     }
+
+    /// Sheet content for the SE import flow. Owns dismissal: both
+    /// closures flip `showingSelfEmployment = false`. This is the fix
+    /// for Session 5I.2 — the SE Results view's Cancel / "Use this
+    /// income" buttons used to call `@Environment(\.dismiss)`, which
+    /// only popped the NavigationStack inside the sheet, stranding the
+    /// user on SE Inputs until they tapped Cancel again to close the
+    /// sheet. Dismissal must live at the sheet's presenter.
+    @ViewBuilder var selfEmploymentSheetContent: some View {
+        NavigationStack {
+            SelfEmploymentInputsScreen(
+                borrower: selectedBorrower,
+                onImportMonthly: { monthly in
+                    importSelfEmploymentIncome(monthly)
+                    showingSelfEmployment = false
+                },
+                onCancel: {
+                    showingSelfEmployment = false
+                }
+            )
+        }
+        .presentationDetents([.large])
+    }
 }

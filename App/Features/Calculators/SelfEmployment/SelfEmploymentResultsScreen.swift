@@ -13,12 +13,12 @@ struct SelfEmploymentResultsScreen: View {
     @Bindable var viewModel: SelfEmploymentViewModel
     var existingScenario: Scenario?
     var onImportMonthly: ((Decimal) -> Void)?
+    /// Sheet-mode cancel hook. Nil on standalone calls. See
+    /// SelfEmploymentInputsScreen for the dismiss-vs-pop rationale.
+    var onCancel: (() -> Void)?
 
     @Environment(\.modelContext)
     private var modelContext
-
-    @Environment(\.dismiss)
-    private var dismiss
 
     @State private var justSaved = false
     @State private var shareBundle: ShareBundle?
@@ -63,13 +63,12 @@ struct SelfEmploymentResultsScreen: View {
             }
             if onImportMonthly != nil {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { onCancel?() }
                         .accessibilityIdentifier("selfEmployment.cancel")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         onImportMonthly?(viewModel.qualifyingMonthly)
-                        dismiss()
                     } label: {
                         Text("Use this income")
                             .textStyle(Typography.bodyLg.withSize(14, weight: .semibold))

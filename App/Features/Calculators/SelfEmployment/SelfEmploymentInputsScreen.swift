@@ -13,27 +13,34 @@ struct SelfEmploymentInputsScreen: View {
     var existingScenario: Scenario?
     /// Present-as-sheet import hook. When non-nil, the Results view's
     /// "Use this income" button calls this with the qualifying monthly
-    /// value and the calling sheet dismisses.
+    /// value. The caller owns sheet dismissal — do not also call
+    /// dismiss() here, because when Results is pushed inside the sheet's
+    /// NavigationStack, dismiss() only pops nav (leaving the user
+    /// stranded on SE Inputs inside the sheet). See Session 5I.2.
     var onImportMonthly: ((Decimal) -> Void)?
+    /// Present-as-sheet cancel hook. When non-nil, both SE Inputs and SE
+    /// Results Cancel buttons call this instead of `dismiss()`. Same
+    /// reason as onImportMonthly: dismiss() from a pushed view pops nav
+    /// rather than closing the enclosing sheet.
+    var onCancel: (() -> Void)?
 
     @State var viewModel = SelfEmploymentViewModel()
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
 
-    @Environment(\.dismiss)
-    private var dismiss
-
     init(
         borrower: Borrower? = nil,
         initialInputs: SelfEmploymentFormInputs? = nil,
         existingScenario: Scenario? = nil,
-        onImportMonthly: ((Decimal) -> Void)? = nil
+        onImportMonthly: ((Decimal) -> Void)? = nil,
+        onCancel: (() -> Void)? = nil
     ) {
         self.borrower = borrower
         self.initialInputs = initialInputs
         self.existingScenario = existingScenario
         self.onImportMonthly = onImportMonthly
+        self.onCancel = onCancel
     }
 
     var body: some View {
@@ -85,7 +92,7 @@ struct SelfEmploymentInputsScreen: View {
             }
             if onImportMonthly != nil {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { onCancel?() }
                         .accessibilityIdentifier("selfEmployment.cancel")
                 }
             }
@@ -94,7 +101,8 @@ struct SelfEmploymentInputsScreen: View {
             SelfEmploymentResultsScreen(
                 viewModel: viewModel,
                 existingScenario: existingScenario,
-                onImportMonthly: onImportMonthly
+                onImportMonthly: onImportMonthly,
+                onCancel: onCancel
             )
         }
         .sheet(isPresented: $showingBorrowerPicker) {
