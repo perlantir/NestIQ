@@ -58,6 +58,13 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
+    # User-facing brand is NestIQ; internal code, module names, Xcode
+    # target, and git repo stay "Quotient" to preserve git history.
+    # Bundle ID overrides the bundleIdPrefix for the main target only —
+    # test targets keep the ai.perlantir namespace (invisible to users).
+    # Registered in Apple Developer with Sign In with Apple + Associated
+    # Domains enabled (2026-04-19).
+    bundleId: mortgage.nestiq
     sources:
       - path: App
         excludes:
@@ -69,7 +76,8 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: Quotient
+        CFBundleDisplayName: NestIQ
+        CFBundleName: NestIQ
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         LSRequiresIPhoneOS: YES
@@ -92,12 +100,12 @@ targets:
           - SourceSerif4-Semibold.ttf
           - SourceSerif4-SemiboldIt.ttf
         NSContactsUsageDescription: Quickly add borrowers from your contacts.
-        NSFaceIDUsageDescription: Unlock Quotient securely with Face ID.
+        NSFaceIDUsageDescription: Unlock NestIQ securely with Face ID.
         NSCameraUsageDescription: Capture your company logo or professional photo.
         NSPhotoLibraryUsageDescription: Choose your company logo or professional photo.
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: ai.perlantir.quotient
+        PRODUCT_BUNDLE_IDENTIFIER: mortgage.nestiq
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
