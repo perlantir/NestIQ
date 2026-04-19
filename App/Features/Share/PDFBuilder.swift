@@ -310,6 +310,9 @@ enum PDFBuilder {
         )
     }
 
+    // `buildSelfEmploymentPDF` lives in PDFBuilder+SelfEmployment.swift
+    // to keep this enum under SwiftLint's type_body_length cap.
+
     private static func helocComparisonPage(
         profile: LenderProfile,
         borrower: Borrower?,

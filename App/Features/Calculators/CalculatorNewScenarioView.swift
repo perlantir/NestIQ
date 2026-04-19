@@ -21,6 +21,8 @@ struct CalculatorNewScenarioView: View {
             TCAInputsScreen(borrower: nil)
         case .helocVsRefinance:
             HelocInputsScreen(borrower: nil)
+        case .selfEmployment:
+            SelfEmploymentInputsScreen(borrower: nil)
         }
     }
 }

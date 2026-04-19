@@ -17,7 +17,7 @@ import Foundation
 // MARK: - Public types
 
 public enum ScenarioType: String, Sendable, Codable, CaseIterable {
-    case amortization, incomeQualification, refinance, totalCostAnalysis, helocVsRefinance
+    case amortization, incomeQualification, refinance, totalCostAnalysis, helocVsRefinance, selfEmployment
 }
 
 public enum NarrationAudience: String, Sendable, Codable, CaseIterable {

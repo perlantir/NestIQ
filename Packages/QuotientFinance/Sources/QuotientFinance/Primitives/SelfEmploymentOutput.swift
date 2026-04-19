@@ -97,11 +97,11 @@ public struct SelfEmploymentOutput: Codable, Sendable, Hashable {
 /// LO's math without re-deriving it.
 public func compute(input: SelfEmploymentInput) -> SelfEmploymentOutput {
     switch input {
-    case .scheduleC(let y1, let y2):
+    case let .scheduleC(y1, y2):
         return computeScheduleC(y1: y1, y2: y2)
-    case .form1120S(let y1, let y2):
+    case let .form1120S(y1, y2):
         return compute1120S(y1: y1, y2: y2)
-    case .form1065(let y1, let y2):
+    case let .form1065(y1, y2):
         return compute1065(y1: y1, y2: y2)
     }
 }

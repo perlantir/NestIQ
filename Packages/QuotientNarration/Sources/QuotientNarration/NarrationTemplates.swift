@@ -24,6 +24,8 @@ public enum NarrationTemplates {
             return isES ? tcaES(facts) : tcaEN(facts)
         case .helocVsRefinance:
             return isES ? helocES(facts) : helocEN(facts)
+        case .selfEmployment:
+            return isES ? selfEmploymentES(facts) : selfEmploymentEN(facts)
         }
     }
 
@@ -107,5 +109,21 @@ public enum NarrationTemplates {
     private static func helocES(_ f: ScenarioFacts) -> String {
         let blended = f.fields["blendedRate"] ?? "—"
         return "Mantener la primera hipoteca con una HELOC resulta en una tasa mezclada de \(blended)."
+    }
+
+    // MARK: Self-employment
+
+    private static func selfEmploymentEN(_ f: ScenarioFacts) -> String {
+        let monthly = f.fields["qualifyingMonthly"] ?? "—"
+        let trend = f.fields["trend"] ?? "stable"
+        return "Two-year cash-flow analysis per Fannie 1084 puts qualifying monthly "
+            + "income at \(monthly) (\(trend)). Tax return addbacks included; "
+            + "any declining trend uses the lower year per Fannie guideline."
+    }
+
+    private static func selfEmploymentES(_ f: ScenarioFacts) -> String {
+        let monthly = f.fields["qualifyingMonthly"] ?? "—"
+        return "Análisis de flujo de caja a 2 años según Fannie 1084: ingreso mensual "
+            + "calificable de \(monthly)."
     }
 }

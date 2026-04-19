@@ -13,4 +13,5 @@ public enum ScenarioType: String, Sendable, Hashable, Codable, CaseIterable {
     case refinance
     case totalCostAnalysis
     case helocVsRefinance
+    case selfEmployment
 }

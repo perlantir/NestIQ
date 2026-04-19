@@ -164,6 +164,12 @@ struct SavedScenariosScreen: View {
                 initialInputs: decode(HelocFormInputs.self, from: s.inputsJSON),
                 existingScenario: s
             )
+        case .selfEmployment:
+            SelfEmploymentInputsScreen(
+                borrower: s.borrower,
+                initialInputs: decode(SelfEmploymentFormInputs.self, from: s.inputsJSON),
+                existingScenario: s
+            )
         }
     }
 
@@ -409,7 +415,7 @@ struct SavedScenariosScreen: View {
 }
 
 enum CalculatorFilter: Hashable, CaseIterable {
-    case all, amort, income, refi, tca, heloc
+    case all, amort, income, refi, tca, heloc, selfEmp
 
     var label: String {
         switch self {
@@ -419,6 +425,7 @@ enum CalculatorFilter: Hashable, CaseIterable {
         case .refi: "Refi"
         case .tca: "TCA"
         case .heloc: "HELOC"
+        case .selfEmp: "Self-emp"
         }
     }
 
@@ -430,6 +437,7 @@ enum CalculatorFilter: Hashable, CaseIterable {
         case .refi: .refinance
         case .tca: .totalCostAnalysis
         case .heloc: .helocVsRefinance
+        case .selfEmp: .selfEmployment
         }
     }
 }

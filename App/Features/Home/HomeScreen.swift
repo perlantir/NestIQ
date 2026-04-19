@@ -351,6 +351,7 @@ enum CalculatorCopy {
         case .refinance: "Refinance comparison"
         case .totalCostAnalysis: "Total cost analysis"
         case .helocVsRefinance: "HELOC vs refinance"
+        case .selfEmployment: "Self-employment income"
         }
     }
 
@@ -361,6 +362,7 @@ enum CalculatorCopy {
         case .refinance: "Break-even, NPV, side-by-side."
         case .totalCostAnalysis: "Two to four scenarios over 5/7/10/15/30 yr."
         case .helocVsRefinance: "Blended rate vs cash-out, with stress paths."
+        case .selfEmployment: "Fannie 1084 cash flow · Sch C / 1120S / 1065."
         }
     }
 }

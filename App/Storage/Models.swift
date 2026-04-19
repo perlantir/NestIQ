@@ -13,6 +13,7 @@ public enum CalculatorType: String, Codable, Sendable, CaseIterable {
     case refinance
     case totalCostAnalysis
     case helocVsRefinance
+    case selfEmployment
 
     public var shortLabel: String {
         switch self {
@@ -21,6 +22,7 @@ public enum CalculatorType: String, Codable, Sendable, CaseIterable {
         case .refinance: "Refi compare"
         case .totalCostAnalysis: "Total cost"
         case .helocVsRefinance: "HELOC vs Refi"
+        case .selfEmployment: "Self-employ"
         }
     }
 
@@ -31,6 +33,7 @@ public enum CalculatorType: String, Codable, Sendable, CaseIterable {
         case .refinance: "03"
         case .totalCostAnalysis: "04"
         case .helocVsRefinance: "05"
+        case .selfEmployment: "06"
         }
     }
 }
