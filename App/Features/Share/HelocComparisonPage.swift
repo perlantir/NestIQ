@@ -22,6 +22,16 @@ struct HelocComparisonPage: View {
     let disclaimer: String
     let ehoStatement: String
     let accentHex: String
+    /// Effective blended rate (1st lien + HELOC) at the 10-year horizon.
+    /// Surfaced as the hero callout above the comparison table in 5F.5.
+    let blendedRate10yr: Double
+    /// Equivalent cash-out refinance rate, shown beside the hero for
+    /// at-a-glance comparison.
+    let refiRate: Double
+    /// "keep 1st" when blended < refi, "refi wins" otherwise. Drives the
+    /// verdict chip on the hero so the LO doesn't have to do the compare
+    /// in their head.
+    let verdict: String
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
     private let inkSecondary = Color(red: 0x4A / 255, green: 0x48 / 255, blue: 0x40 / 255)
@@ -33,8 +43,10 @@ struct HelocComparisonPage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+            blendedRateHero
+                .padding(.top, 16)
             comparisonTable
-                .padding(.top, 24)
+                .padding(.top, 14)
             Spacer(minLength: 0)
             footer
         }
@@ -42,6 +54,68 @@ struct HelocComparisonPage: View {
         .padding(.vertical, 28)
         .frame(width: 792, height: 612)
         .background(Color.white)
+    }
+
+    // MARK: Blended-rate hero callout
+
+    private var blendedRateHero: some View {
+        let blendedStr = String(format: "%.2f%%", blendedRate10yr)
+        let refiStr = String(format: "%.3f%%", refiRate)
+        let helocWins = blendedRate10yr < refiRate
+        let verdictColor: Color = helocWins ? accent : inkSecondary
+        return HStack(alignment: .center, spacing: 24) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("BLENDED RATE · 10-YEAR HORIZON")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(1.0)
+                    .foregroundStyle(inkTertiary)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(blendedStr)
+                        .font(.system(size: 40, weight: .medium, design: .monospaced))
+                        .foregroundStyle(helocWins ? accent : inkPrimary)
+                }
+                Text("1st lien + HELOC weighted, simulated over 120 months")
+                    .font(.system(size: 9.5, design: .monospaced))
+                    .foregroundStyle(inkTertiary)
+            }
+            Rectangle().fill(border).frame(width: 1, height: 68)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("VS CASH-OUT REFI")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(1.0)
+                    .foregroundStyle(inkTertiary)
+                Text(refiStr)
+                    .font(.system(size: 26, weight: .regular, design: .monospaced))
+                    .foregroundStyle(inkPrimary)
+                Text("fixed, over 30 yr")
+                    .font(.system(size: 9.5, design: .monospaced))
+                    .foregroundStyle(inkTertiary)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("VERDICT")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(1.0)
+                    .foregroundStyle(inkTertiary)
+                Text(verdict.uppercased())
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(verdictColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(verdictColor, lineWidth: 1.2)
+                    )
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(Color(red: 0xFB / 255, green: 0xF9 / 255, blue: 0xF3 / 255))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(border, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
     // MARK: Header

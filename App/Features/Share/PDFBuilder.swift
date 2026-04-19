@@ -321,6 +321,8 @@ enum PDFBuilder {
             case .none: return ""
             }
         }()
+        let blended10yr = viewModel.blendedRateAtTenYears
+        let verdict = blended10yr < viewModel.inputs.refiRate ? "keep 1st" : "refi wins"
         return HelocComparisonPage(
             borrowerName: borrower?.fullName ?? "Client",
             generatedDate: generated,
@@ -329,7 +331,10 @@ enum PDFBuilder {
             rows: rows,
             disclaimer: disclaimer,
             ehoStatement: ehoStatement,
-            accentHex: profile.brandColorHex
+            accentHex: profile.brandColorHex,
+            blendedRate10yr: blended10yr,
+            refiRate: viewModel.inputs.refiRate,
+            verdict: verdict
         )
     }
 
