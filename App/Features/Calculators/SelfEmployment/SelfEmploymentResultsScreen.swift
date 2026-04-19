@@ -53,7 +53,29 @@ struct SelfEmploymentResultsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Eyebrow("06 · Self-employment")
+                if onImportMonthly != nil {
+                    Text("Self-Employment Income")
+                        .textStyle(Typography.bodyLg.withSize(15, weight: .semibold))
+                        .foregroundStyle(Palette.ink)
+                } else {
+                    Eyebrow("06 · Self-employment")
+                }
+            }
+            if onImportMonthly != nil {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .accessibilityIdentifier("selfEmployment.cancel")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        onImportMonthly?(viewModel.qualifyingMonthly)
+                        dismiss()
+                    } label: {
+                        Text("Use this income")
+                            .textStyle(Typography.bodyLg.withSize(14, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("selfEmployment.useIncome")
+                }
             }
         }
         .safeAreaInset(edge: .bottom) { bottomDock }
@@ -256,60 +278,17 @@ struct SelfEmploymentResultsScreen: View {
 
     // MARK: Dock
 
-    private var bottomDock: some View {
-        if onImportMonthly != nil {
-            return AnyView(importDock)
+    @ViewBuilder private var bottomDock: some View {
+        // In sheet mode the "Use this income" + "Cancel" controls live in
+        // the nav bar, so no bottom dock is shown.
+        if onImportMonthly == nil {
+            CalculatorDock(
+                saveLabel: justSaved ? "Saved" : "Save",
+                onNarrate: {},
+                onSave: { saveScenario() },
+                onShare: { generatePDFAndShare() }
+            )
         }
-        return AnyView(CalculatorDock(
-            saveLabel: justSaved ? "Saved" : "Save",
-            onNarrate: {},
-            onSave: { saveScenario() },
-            onShare: { generatePDFAndShare() }
-        ))
-    }
-
-    private var importDock: some View {
-        HStack(spacing: Spacing.s12) {
-            Button {
-                dismiss()
-            } label: {
-                Text("Cancel")
-                    .textStyle(Typography.bodyLg)
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.surfaceRaised)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.listCard)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                onImportMonthly?(viewModel.qualifyingMonthly)
-                dismiss()
-            } label: {
-                Text("Use this income")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("selfEmployment.useIncome")
-        }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.top, Spacing.s12)
-        .padding(.bottom, Spacing.s32)
-        .background(.ultraThinMaterial)
-        .overlay(
-            Rectangle().fill(Palette.borderSubtle).frame(height: 1),
-            alignment: .top
-        )
     }
 
     // MARK: Save + share

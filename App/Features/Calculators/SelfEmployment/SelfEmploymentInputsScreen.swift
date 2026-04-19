@@ -21,6 +21,9 @@ struct SelfEmploymentInputsScreen: View {
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
 
+    @Environment(\.dismiss)
+    private var dismiss
+
     init(
         borrower: Borrower? = nil,
         initialInputs: SelfEmploymentFormInputs? = nil,
@@ -72,7 +75,19 @@ struct SelfEmploymentInputsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Eyebrow("06 · Self-employment")
+                if onImportMonthly != nil {
+                    Text("Self-Employment Income")
+                        .textStyle(Typography.bodyLg.withSize(15, weight: .semibold))
+                        .foregroundStyle(Palette.ink)
+                } else {
+                    Eyebrow("06 · Self-employment")
+                }
+            }
+            if onImportMonthly != nil {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .accessibilityIdentifier("selfEmployment.cancel")
+                }
             }
         }
         .navigationDestination(isPresented: $navigationActive) {

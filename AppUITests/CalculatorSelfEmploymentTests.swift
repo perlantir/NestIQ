@@ -79,6 +79,13 @@ final class CalculatorSelfEmploymentTests: XCTestCase {
         let iqCompute = app.buttons["incomeQual.compute"]
         XCTAssertTrue(iqCompute.waitForExistence(timeout: 5),
                       "Did not return to Income Qualification Inputs")
+
+        // Verify the income was actually imported: primary income FieldRow
+        // hint flips to "imported from Self-Employment analysis" when the
+        // first income has kind=.selfEmployed.
+        let importedHint = app.staticTexts["imported from Self-Employment analysis"]
+        XCTAssertTrue(importedHint.waitForExistence(timeout: 3),
+                      "Primary income hint did not reflect the imported SE value")
     }
 
     // MARK: - Helpers
