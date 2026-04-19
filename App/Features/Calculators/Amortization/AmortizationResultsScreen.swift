@@ -149,6 +149,9 @@ struct AmortizationResultsScreen: View {
                     .textStyle(Typography.num.withSize(12))
                     .foregroundStyle(Palette.inkSecondary)
             }
+            if viewModel.inputs.biweekly {
+                biweeklyCallout
+            }
             kpiRow
         }
         .padding(.horizontal, Spacing.s20)
@@ -222,6 +225,43 @@ struct AmortizationResultsScreen: View {
         let f = DateFormatter()
         f.dateFormat = "MMM yyyy"
         return f.string(from: d)
+    }
+
+    /// Biweekly acceleration summary shown under the hero PITI when the
+    /// borrower has the toggle on. Compares against the monthly-cadence
+    /// reference schedule preserved on the view model.
+    private var biweeklyCallout: some View {
+        let biweeklyStr = "$\(MoneyFormat.shared.decimalString(viewModel.biweeklyPayment))"
+        let monthlyEquivStr = "$\(MoneyFormat.shared.decimalString(viewModel.monthlyPI))/mo equiv"
+        let months = viewModel.biweeklyMonthsSaved
+        let years = months / 12
+        let remMonths = months % 12
+        let shortenLine: String
+        if months <= 0 {
+            shortenLine = "Accelerated cadence — totals update below."
+        } else if years > 0 && remMonths > 0 {
+            shortenLine = "Retires \(years) yr \(remMonths) mo earlier"
+        } else if years > 0 {
+            shortenLine = "Retires \(years) yr earlier"
+        } else {
+            shortenLine = "Retires \(months) mo earlier"
+        }
+        let interestSaved = MoneyFormat.shared.dollarsShort(viewModel.biweeklyInterestSaved)
+        return HStack(alignment: .top, spacing: Spacing.s12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Biweekly · \(biweeklyStr) every 2 weeks (26/yr)")
+                    .textStyle(Typography.num.withSize(12.5, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text("\(monthlyEquivStr) · \(shortenLine) · saves \(interestSaved) interest")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.gain)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, Spacing.s12)
+        .padding(.vertical, Spacing.s8)
+        .background(Palette.accentTint.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.monoChip))
     }
 
     // MARK: Balance chart

@@ -27,17 +27,61 @@ final class AmortizationViewModel {
     func compute() {
         let loan = inputs.toLoan()
         let options = inputs.toOptions()
-        schedule = amortize(loan: loan, options: options)
+        let monthly = amortize(loan: loan, options: options)
+        // Biweekly toggle wires to the accelerated engine primitive — pay
+        // monthlyPMT/2 every 14 days until balance=0 — NOT the "same term
+        // over 780 periods" convertToBiweekly re-slice. See Biweekly.swift.
+        schedule = inputs.biweekly ? biweeklyAccelerated(schedule: monthly) : monthly
+        monthlyScheduleForReference = inputs.biweekly ? monthly : nil
         hasComputed = true
     }
 
+    /// Monthly-cadence schedule for the same loan, preserved when the
+    /// borrower has the biweekly toggle on so the Results view can show
+    /// "monthly equivalent $X" alongside the accelerated schedule.
+    var monthlyScheduleForReference: AmortizationSchedule?
+
     // Derived displays pulled off the schedule for the results screen.
 
+    /// Monthly principal + interest. Always the monthly-equivalent amount —
+    /// when the biweekly toggle is on, `schedule.payments.first.payment` is
+    /// the biweekly payment (half of this), so we pull from the monthly
+    /// reference schedule (or fall back to a fresh engine compute).
     var monthlyPI: Decimal {
-        guard let p = schedule?.payments.first?.payment else {
-            return paymentFor(loan: inputs.toLoan())
+        if inputs.biweekly, let ref = monthlyScheduleForReference?.payments.first {
+            return ref.payment
         }
-        return p
+        if !inputs.biweekly, let p = schedule?.payments.first?.payment {
+            return p
+        }
+        return paymentFor(loan: inputs.toLoan())
+    }
+
+    /// Biweekly scheduled payment (= monthlyPI / 2 rounded to cents). Only
+    /// meaningful when `inputs.biweekly == true`; returns 0 otherwise.
+    var biweeklyPayment: Decimal {
+        guard inputs.biweekly else { return 0 }
+        if let p = schedule?.payments.first?.payment { return p }
+        return (paymentFor(loan: inputs.toLoan()) / 2).money()
+    }
+
+    /// Calendar months shaved off the monthly-schedule payoff by turning on
+    /// biweekly acceleration. 0 when the toggle is off or when no reference
+    /// is available.
+    var biweeklyMonthsSaved: Int {
+        guard inputs.biweekly,
+              let ref = monthlyScheduleForReference?.payments.last?.date,
+              let cur = schedule?.payments.last?.date else { return 0 }
+        return Calendar(identifier: .gregorian)
+            .dateComponents([.month], from: cur, to: ref).month ?? 0
+    }
+
+    /// Interest saved vs the monthly reference schedule for the same loan.
+    /// 0 when the biweekly toggle is off.
+    var biweeklyInterestSaved: Decimal {
+        guard inputs.biweekly,
+              let ref = monthlyScheduleForReference else { return 0 }
+        return max(ref.totalInterest - totalInterest, 0)
     }
 
     var monthlyTax: Decimal { inputs.annualTaxes / 12 }

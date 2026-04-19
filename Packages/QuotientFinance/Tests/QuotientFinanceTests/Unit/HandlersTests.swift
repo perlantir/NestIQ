@@ -192,8 +192,8 @@ struct ConvertToBiweeklyTests {
         #expect(days == 14)
     }
 
-    @Test("Biweekly retires loan earlier than monthly")
-    func retiresEarlier() {
+    @Test("Payoff arrives within ~45 days of monthly — cadence re-slice, not acceleration")
+    func nearEqualPayoff() {
         let monthly = Loan(
             principal: 250_000,
             annualRate: 0.06,
@@ -203,9 +203,10 @@ struct ConvertToBiweeklyTests {
         let source = amortize(loan: monthly)
         let biweekly = convertToBiweekly(schedule: source)
 
-        // In calendar time, biweekly payoff arrives before the monthly
-        // payoff — each payment is half of monthly, at 26/yr vs 12/yr pace,
-        // producing one extra monthly-equivalent per year of principal.
+        // convertToBiweekly re-slices into 26/yr cadence over the same
+        // calendar term; biweekly end lands within ~1 month of the monthly
+        // source (780 × 14 days = 10,920 days vs ~10,957 days for 360
+        // monthly). For real payoff acceleration use biweeklyAccelerated.
         guard
             let monthlyEnd = source.payments.last?.date,
             let biweeklyEnd = biweekly.payments.last?.date
@@ -213,11 +214,13 @@ struct ConvertToBiweeklyTests {
             Issue.record("schedule empty")
             return
         }
-        #expect(biweeklyEnd < monthlyEnd)
+        let days = Calendar(identifier: .gregorian)
+            .dateComponents([.day], from: biweeklyEnd, to: monthlyEnd).day ?? 0
+        #expect(abs(days) < 45, "payoff within ~45 days — got \(days)-day delta")
     }
 
-    @Test("Biweekly totals to ≤ monthly total interest")
-    func reducesInterest() {
+    @Test("Total interest within ~$500 of monthly — cadence re-slice, not acceleration")
+    func nearEqualInterest() {
         let monthly = Loan(
             principal: 250_000,
             annualRate: 0.06,
@@ -226,7 +229,8 @@ struct ConvertToBiweeklyTests {
         )
         let monthlySched = amortize(loan: monthly)
         let biweekly = convertToBiweekly(schedule: monthlySched)
-        #expect(biweekly.totalInterest < monthlySched.totalInterest)
+        let delta = abs((biweekly.totalInterest - monthlySched.totalInterest).asDouble)
+        #expect(delta < 500, "interest within ~$500 — got $\(delta) delta")
     }
 
     @Test("Source extras are intentionally dropped")
@@ -261,5 +265,128 @@ struct ConvertToBiweeklyTests {
         #expect(out.loan.frequency == .biweekly)
         #expect(out.payments.count == source.payments.count)
         #expect(out.scheduledPeriodicPayment == source.scheduledPeriodicPayment)
+    }
+}
+
+@Suite("biweeklyAccelerated")
+struct BiweeklyAcceleratedTests {
+
+    private static let standard30yr = Loan(
+        principal: 250_000,
+        annualRate: 0.06,
+        termMonths: 360,
+        startDate: date(2026, 1, 1),
+        frequency: .monthly
+    )
+
+    @Test("Retires 30-yr note at least 24 months earlier than monthly")
+    func retiresEarly() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        guard
+            let monthlyEnd = source.payments.last?.date,
+            let accelEnd = accel.payments.last?.date
+        else {
+            Issue.record("schedule empty")
+            return
+        }
+        let months = Calendar(identifier: .gregorian)
+            .dateComponents([.month], from: accelEnd, to: monthlyEnd).month ?? 0
+        #expect(months >= 24, "expected ≥24 months of acceleration, got \(months)")
+    }
+
+    @Test("Reduces total interest vs monthly source")
+    func reducesInterest() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        #expect(accel.totalInterest < source.totalInterest)
+        // At 6% / $250k / 30yr the saving is well north of $30k; guard
+        // against a regression where the fn silently becomes a no-op.
+        let saving = (source.totalInterest - accel.totalInterest).asDouble
+        #expect(saving > 20_000, "expected material interest saving, got $\(saving)")
+    }
+
+    @Test("Biweekly payment equals half the monthly P&I")
+    func halfMonthlyPayment() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        let expectedHalf = (source.scheduledPeriodicPayment / 2).money()
+        #expect(accel.scheduledPeriodicPayment == expectedHalf)
+    }
+
+    @Test("Schedule zeroes out within $1 floating-point tolerance")
+    func zeroEnding() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        guard let last = accel.payments.last else {
+            Issue.record("schedule empty"); return
+        }
+        #expect(abs(last.balance.asDouble) < 1.0)
+    }
+
+    @Test("Sum of payments = principal + total interest")
+    func sumsConserve() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        let totalPaid = accel.payments.reduce(Decimal(0)) { $0 + $1.payment }
+        let expected = Self.standard30yr.principal + accel.totalInterest
+        let delta = abs((totalPaid - expected).asDouble)
+        #expect(delta < 1.0, "payments sum off by \(delta)")
+    }
+
+    @Test("14-day cadence between payments")
+    func fourteenDaySpacing() {
+        let source = amortize(loan: Self.standard30yr)
+        let accel = biweeklyAccelerated(schedule: source)
+        guard accel.payments.count >= 2 else {
+            Issue.record("schedule too short"); return
+        }
+        let d0 = accel.payments[0].date
+        let d1 = accel.payments[1].date
+        let days = Calendar(identifier: .gregorian)
+            .dateComponents([.day], from: d0, to: d1).day ?? 0
+        #expect(days == 14)
+    }
+
+    @Test("Drops source extras / PMI / recast")
+    func dropsSourceExtras() {
+        let source = amortize(
+            loan: Self.standard30yr,
+            options: AmortizationOptions(extraPeriodicPrincipal: 500)
+        )
+        let accel = biweeklyAccelerated(schedule: source)
+        #expect(accel.options.extraPeriodicPrincipal == 0)
+        #expect(accel.options.oneTimeExtra.isEmpty)
+        #expect(accel.options.pmiSchedule == nil)
+    }
+
+    @Test("Zero principal produces an empty schedule")
+    func zeroPrincipal() {
+        let zeroLoan = Loan(
+            principal: 0,
+            annualRate: 0.06,
+            termMonths: 360,
+            startDate: date(2026, 1, 1)
+        )
+        let source = amortize(loan: zeroLoan)
+        let accel = biweeklyAccelerated(schedule: source)
+        #expect(accel.payments.isEmpty)
+    }
+
+    @Test("Zero rate retires loan in fixed number of half-PMT periods")
+    func zeroRateAmortizes() {
+        let noRate = Loan(
+            principal: 240_000,
+            annualRate: 0,
+            termMonths: 360,
+            startDate: date(2026, 1, 1)
+        )
+        let source = amortize(loan: noRate)
+        let accel = biweeklyAccelerated(schedule: source)
+        // monthly PMT = 240k / 360 = 666.67; biweekly = 333.33; principal
+        // clears in ceil(240000 / 333.33) = 721 biweekly periods (~27.7yr).
+        #expect(accel.payments.count > 600 && accel.payments.count < 800)
+        #expect(accel.payments.last?.balance == 0)
+        #expect(accel.totalInterest == 0)
     }
 }

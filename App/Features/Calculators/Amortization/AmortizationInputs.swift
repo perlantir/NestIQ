@@ -134,6 +134,11 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     }
 
     func toLoan() -> Loan {
+        // Always .monthly — the biweekly toggle is a payment-cadence overlay
+        // applied in the view model by calling `biweeklyAccelerated(schedule:)`
+        // on the monthly schedule. Keeping the underlying loan monthly keeps
+        // PITI, per-month tax/insurance, and PMI-dropoff math on the same
+        // monthly basis they always used.
         Loan(
             principal: loanAmount,
             annualRate: annualRate / 100,
@@ -141,7 +146,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
             loanType: .conventional,
             rateType: .fixed,
             startDate: startDate,
-            frequency: biweekly ? .biweekly : .monthly
+            frequency: .monthly
         )
     }
 

@@ -191,8 +191,33 @@ struct AmortizationInputsScreen: View {
             divider
             termRow
             divider
+            biweeklyRow
+            divider
             startDateRow
         }
+    }
+
+    private var biweeklyRow: some View {
+        HStack(spacing: Spacing.s12) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Biweekly payments")
+                    .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                    .foregroundStyle(Palette.ink)
+                Text("26/yr — half monthly P&I every 2 weeks")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { viewModel.inputs.biweekly },
+                set: { viewModel.inputs.biweekly = $0 }
+            ))
+            .labelsHidden()
+            .tint(Palette.accent)
+            .accessibilityIdentifier("amort.biweekly")
+        }
+        .padding(.horizontal, Spacing.s16)
+        .padding(.vertical, Spacing.s12)
     }
 
     private var termRow: some View {
@@ -355,23 +380,6 @@ struct AmortizationInputsScreen: View {
                         set: { viewModel.inputs.extraPrincipalMonthly = $0 }
                     )
                 )
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Biweekly cadence")
-                            .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
-                            .foregroundStyle(Palette.ink)
-                        Text("26 payments per year")
-                            .textStyle(Typography.num.withSize(11))
-                            .foregroundStyle(Palette.inkTertiary)
-                    }
-                    Spacer()
-                    Toggle("", isOn: Binding(
-                        get: { viewModel.inputs.biweekly },
-                        set: { viewModel.inputs.biweekly = $0 }
-                    ))
-                    .labelsHidden()
-                    .tint(Palette.accent)
-                }
             }
             .padding(.top, Spacing.s12)
         } label: {
@@ -380,7 +388,7 @@ struct AmortizationInputsScreen: View {
                     .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
                     .foregroundStyle(Palette.ink)
                 Spacer()
-                Text("Extra principal · Biweekly")
+                Text("Extra principal")
                     .textStyle(Typography.num.withSize(12))
                     .foregroundStyle(Palette.inkTertiary)
             }
@@ -409,33 +417,6 @@ struct AmortizationInputsScreen: View {
                 .foregroundStyle(Palette.inkTertiary)
                 .italic()
         }
-    }
-
-    // MARK: Shared field group
-
-    @ViewBuilder
-    private func fieldGroup<Content: View>(
-        header: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Eyebrow(header)
-                .padding(.horizontal, Spacing.s20)
-                .padding(.bottom, Spacing.s8)
-            VStack(spacing: 0) { content() }
-                .background(Palette.surfaceRaised)
-                .overlay(
-                    VStack(spacing: 0) {
-                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                        Spacer()
-                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    }
-                )
-        }
-    }
-
-    private var divider: some View {
-        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 }
 
