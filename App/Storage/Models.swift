@@ -250,7 +250,14 @@ public final class Borrower {
     /// SwiftData's Objective-C bridge has misfired on richer types
     /// (5E.1 `[String]` incident). Nil for purchase-only borrowers.
     public var currentMortgageJSON: Data?
-    @Relationship(deleteRule: .cascade, inverse: \Scenario.borrower)
+    /// Session 5Q.2 (D10): `.nullify`, not `.cascade`. When a borrower is
+    /// deleted their scenarios survive with `scenario.borrower == nil` —
+    /// the scenario's own `inputsJSON` / `outputsJSON` + the 5P.8
+    /// `currentMortgage` snapshot preserve correctness; all UI / PDF
+    /// surfaces already tolerate a nil borrower (the "no-borrower"
+    /// path predates this change — scenarios can be created without
+    /// picking one).
+    @Relationship(deleteRule: .nullify, inverse: \Scenario.borrower)
     public var scenarios: [Scenario]
     public var createdAt: Date
     public var updatedAt: Date

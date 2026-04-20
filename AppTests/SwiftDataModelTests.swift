@@ -108,22 +108,105 @@ final class SwiftDataModelTests: XCTestCase {
         XCTAssertTrue(scenario.archived)
     }
 
-    func testCascadeDeleteOnBorrower() throws {
+    /// Session 5Q.2 (D10): Borrower→Scenarios relationship uses
+    /// `.nullify`, not `.cascade`. Deleting a borrower leaves the
+    /// scenarios intact with their `borrower` reference set to nil.
+    /// Scenarios are time-sensitive historical artifacts; an LO
+    /// cleaning up stale borrower records shouldn't forfeit analysis
+    /// work. `Scenario.borrower` is already Optional, so all downstream
+    /// readers already tolerate nil (they fall back to `scenario.name`
+    /// or "Client" on calculator Results / PDF surfaces).
+    func testNullifyDeleteOnBorrower() throws {
         let ctx = makeContext()
         let borrower = Borrower(firstName: "Priya", lastName: "V", source: .manual)
         ctx.insert(borrower)
         let s1 = Scenario(borrower: borrower, calculatorType: .refinance,
-                          name: "Refi A", inputsJSON: Data(), keyStatLine: "")
+                          name: "Refi A", inputsJSON: Data("refiA".utf8), keyStatLine: "refi A line")
         let s2 = Scenario(borrower: borrower, calculatorType: .refinance,
-                          name: "Refi B", inputsJSON: Data(), keyStatLine: "")
+                          name: "Refi B", inputsJSON: Data("refiB".utf8), keyStatLine: "refi B line")
         ctx.insert(s1); ctx.insert(s2)
         try ctx.save()
         XCTAssertEqual(try ctx.fetch(FetchDescriptor<Scenario>()).count, 2)
 
         ctx.delete(borrower)
         try ctx.save()
-        XCTAssertTrue(try ctx.fetch(FetchDescriptor<Scenario>()).isEmpty,
-                      "Scenarios should cascade-delete with their borrower")
+
+        let survivors = try ctx.fetch(FetchDescriptor<Scenario>())
+        XCTAssertEqual(survivors.count, 2,
+                       "Scenarios must survive borrower deletion under .nullify")
+        for scenario in survivors {
+            XCTAssertNil(scenario.borrower,
+                         "Scenario.borrower must be nilled out after borrower deletion")
+        }
+        // Payloads intact.
+        let names = Set(survivors.map(\.name))
+        XCTAssertEqual(names, Set(["Refi A", "Refi B"]))
+    }
+
+    /// Session 5Q.2: an LO deletes a borrower; the scenario saved under
+    /// that borrower still loads with its `inputsJSON`, `outputsJSON`,
+    /// and 5P.8 `currentMortgage` snapshot intact. The scenario loses
+    /// its live borrower link but its data is self-contained.
+    func testSavedScenarioSurvivesBorrowerDeletion() throws {
+        let ctx = makeContext()
+        let borrower = Borrower(firstName: "Jesse", lastName: "Okafor", source: .manual)
+        borrower.currentMortgage = CurrentMortgage(
+            currentBalance: 312_000,
+            currentRatePercent: 6.125,
+            currentMonthlyPaymentPI: 1_992,
+            originalLoanAmount: 340_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 490_000
+        )
+        ctx.insert(borrower)
+
+        // Simulate a TCA refi scenario that snapshots the borrower's
+        // currentMortgage into inputsJSON (5P.8 behavior).
+        let inputs = TCAFormInputs(
+            mode: .refinance,
+            loanAmount: 312_000,
+            homeValue: 490_000,
+            monthlyTaxes: 0,
+            monthlyInsurance: 0,
+            monthlyHOA: 0,
+            scenarios: [TCAFormInputs.blankScenario(label: "A")],
+            horizonsYears: [5, 7, 10, 15, 30],
+            currentMortgage: borrower.currentMortgage
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let payload = try encoder.encode(inputs)
+
+        let scenario = Scenario(
+            borrower: borrower,
+            calculatorType: .totalCostAnalysis,
+            name: "Okafor · TCA refi",
+            inputsJSON: payload,
+            keyStatLine: "$312K refi · status quo baseline"
+        )
+        ctx.insert(scenario)
+        try ctx.save()
+
+        // Delete the borrower.
+        ctx.delete(borrower)
+        try ctx.save()
+
+        // Scenario survives.
+        let survivors = try ctx.fetch(FetchDescriptor<Scenario>())
+        XCTAssertEqual(survivors.count, 1)
+        let survivor = try XCTUnwrap(survivors.first)
+        XCTAssertNil(survivor.borrower, "Borrower reference should nil out after delete")
+        XCTAssertEqual(survivor.name, "Okafor · TCA refi")
+        XCTAssertEqual(survivor.keyStatLine, "$312K refi · status quo baseline")
+
+        // Snapshot still round-trips; the calculator can rebuild its
+        // status-quo anchor without the borrower record.
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let restored = try decoder.decode(TCAFormInputs.self, from: survivor.inputsJSON)
+        XCTAssertEqual(restored.currentMortgage?.currentBalance, 312_000)
+        XCTAssertEqual(restored.currentMortgage?.currentMonthlyPaymentPI, 1_992)
     }
 
     /// Session 5K.1: when a Scenario is loaded from the Saved tab and

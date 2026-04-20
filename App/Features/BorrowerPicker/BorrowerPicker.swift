@@ -34,6 +34,10 @@ struct BorrowerPicker: View {
     @State private var tab: BorrowerPickerTab = .recents
     @State private var search: String = ""
     @State private var contactsPickerShown = false
+    // Session 5Q.2: swipe-action state for the Recents list.
+    @State private var editingBorrower: Borrower?
+    @State private var borrowerToDelete: Borrower?
+    @State private var showDeleteToast: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -97,6 +101,74 @@ struct BorrowerPicker: View {
                 }
                 .ignoresSafeArea()
             }
+            .navigationDestination(item: $editingBorrower) { borrower in
+                BorrowerForm(
+                    mode: .edit(borrower),
+                    onSubmit: { _ in
+                        try? modelContext.save()
+                        editingBorrower = nil
+                    },
+                    onDelete: {
+                        modelContext.delete(borrower)
+                        try? modelContext.save()
+                        editingBorrower = nil
+                        withAnimation { showDeleteToast = true }
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .seconds(2))
+                            withAnimation { showDeleteToast = false }
+                        }
+                    }
+                )
+                .navigationTitle("Edit borrower")
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .alert(
+                "Delete borrower?",
+                isPresented: Binding(
+                    get: { borrowerToDelete != nil },
+                    set: { if !$0 { borrowerToDelete = nil } }
+                ),
+                presenting: borrowerToDelete
+            ) { borrower in
+                Button("Delete", role: .destructive) {
+                    deleteBorrower(borrower)
+                }
+                Button("Cancel", role: .cancel) {
+                    borrowerToDelete = nil
+                }
+            } message: { borrower in
+                Text("\(borrower.fullName) will be removed from your list. Saved scenarios for this borrower remain intact.")
+            }
+            .overlay(alignment: .top) { deleteToast }
+        }
+    }
+
+    private func deleteBorrower(_ borrower: Borrower) {
+        modelContext.delete(borrower)
+        try? modelContext.save()
+        borrowerToDelete = nil
+        withAnimation { showDeleteToast = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation { showDeleteToast = false }
+        }
+    }
+
+    @ViewBuilder private var deleteToast: some View {
+        if showDeleteToast {
+            Text("Borrower deleted")
+                .textStyle(Typography.body.withSize(13, weight: .medium))
+                .foregroundStyle(Palette.ink)
+                .padding(.horizontal, Spacing.s16)
+                .padding(.vertical, Spacing.s12)
+                .background(.ultraThinMaterial)
+                .overlay(
+                    Capsule().stroke(Palette.borderSubtle, lineWidth: 1)
+                )
+                .clipShape(Capsule())
+                .padding(.top, Spacing.s8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .accessibilityIdentifier("borrowerPicker.deleteToast")
         }
     }
 
@@ -165,15 +237,45 @@ struct BorrowerPicker: View {
             .frame(maxWidth: .infinity)
             .padding(Spacing.s32)
         } else {
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(matches, id: \.id) { b in
-                        borrowerRow(b)
-                        HairlineDivider().padding(.leading, 62)
-                    }
+            // Session 5Q.2: List (not LazyVStack) so `.swipeActions`
+            // picks up the standard iOS left/right swipe affordances.
+            // `.plain` list style + per-row background + hidden
+            // separator keeps the existing visual — grouped card
+            // surface + custom hairline between rows — while the
+            // underlying infrastructure is now a native List.
+            List {
+                ForEach(matches, id: \.id) { b in
+                    borrowerRow(b)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Palette.surfaceRaised)
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                            Button {
+                                editingBorrower = b
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                            .tint(Palette.accent)
+                            .accessibilityIdentifier("borrowerRow.edit")
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                borrowerToDelete = b
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                            .accessibilityIdentifier("borrowerRow.delete")
+                        }
+                    HairlineDivider()
+                        .padding(.leading, 62)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Palette.surfaceRaised)
+                        .listRowSeparator(.hidden)
                 }
-                .background(Palette.surfaceRaised)
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Palette.surfaceRaised)
         }
     }
 
