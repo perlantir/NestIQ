@@ -21,11 +21,15 @@ struct SelfEmploymentCashFlowPage: View {
     let year2: SelfEmploymentYearResult
     let accentHex: String
     let generatedDate: String
+    let pageIndex: Int
+    let pageCount: Int
 
     private var accent: Color { Color(brandHex: accentHex) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: generatedDate)
+                .padding(.bottom, 20)
             header
             twoColumnTable
                 .padding(.top, 18)
@@ -33,7 +37,8 @@ struct SelfEmploymentCashFlowPage: View {
             footer
         }
         .padding(.horizontal, 48)
-        .padding(.vertical, 28)
+        .padding(.top, 18)
+        .padding(.bottom, 28)
         .frame(width: 612, height: 792)
         .background(Color.white)
     }
@@ -44,19 +49,13 @@ struct SelfEmploymentCashFlowPage: View {
                 .font(.system(size: 10.5, weight: .semibold))
                 .tracking(1.1)
                 .foregroundStyle(accent)
-            HStack(alignment: .firstTextBaseline) {
-                Text("For ")
-                    .font(.custom("SourceSerif4", size: 22))
-                    .foregroundStyle(sePaperInk)
-                    +
-                    Text(borrowerName)
-                    .font(.custom("SourceSerif4-It", size: 22))
-                    .foregroundStyle(sePaperInk)
-                Spacer()
-                Text(generatedDate)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(sePaperInkTertiary)
-            }
+            Text("For ")
+                .font(.custom("SourceSerif4", size: 22))
+                .foregroundStyle(sePaperInk)
+                +
+                Text(borrowerName)
+                .font(.custom("SourceSerif4-It", size: 22))
+                .foregroundStyle(sePaperInk)
             Text("\(businessType.display) · 2-year line-item breakdown")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(sePaperInkSecondary)

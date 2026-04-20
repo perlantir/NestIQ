@@ -42,10 +42,13 @@ extension PDFBuilder {
             ],
             narrative: output.trendNotes ?? fallback
         )
+        // Self-Employment ships cover + 1 cash-flow + disclaimers → 3 pages.
         let cashFlowPage = AnyView(makeCashFlowPage(
             profile: profile,
             borrower: borrower,
-            output: output
+            output: output,
+            pageIndex: 2,
+            pageCount: 3
         ))
         return try buildPDF(
             profile: profile,
@@ -58,11 +61,11 @@ extension PDFBuilder {
     private static func makeCashFlowPage(
         profile: LenderProfile,
         borrower: Borrower?,
-        output: SelfEmploymentOutput
+        output: SelfEmploymentOutput,
+        pageIndex: Int,
+        pageCount: Int
     ) -> some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
+        let generated = PDFPageHeader.formatDate(Date())
         let nmlsLine: String = {
             switch profile.nmlsDisplayFormat {
             case .idOnly: return "NMLS \(profile.nmlsId)"
@@ -78,7 +81,9 @@ extension PDFBuilder {
             year1: output.year1,
             year2: output.year2,
             accentHex: profile.brandColorHex,
-            generatedDate: generated
+            generatedDate: generated,
+            pageIndex: pageIndex,
+            pageCount: pageCount
         )
     }
 }
