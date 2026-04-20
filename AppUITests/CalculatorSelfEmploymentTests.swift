@@ -118,6 +118,7 @@ final class CalculatorSelfEmploymentTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after SE compute")
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
 
         let tab = app.tabBars.buttons["Scenarios"]
         XCTAssertTrue(tab.waitForExistence(timeout: 5),

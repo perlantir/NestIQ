@@ -40,6 +40,18 @@ enum UITest {
         coordinate.tap()
     }
 
+    /// Dismiss the "Save scenario" alert that Session 5J.3 added on the
+    /// Save tap. Accepts the default name (the alert prefills "{Borrower}
+    /// · {Calculator}") and taps the alert's Save button. UI test paths
+    /// that want to exercise a specific user-chosen name can instead
+    /// reach into `app.alerts["Save scenario"].textFields` directly.
+    static func confirmSaveAlert(_ app: XCUIApplication) {
+        let alert = app.alerts["Save scenario"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5),
+                      "Save-name alert did not appear after dock.save tap")
+        alert.buttons["Save"].tap()
+    }
+
     /// Switch to the Scenarios tab and tap the saved row for the
     /// given calculator slug. Uses coordinate taps because the tab bar
     /// and saved rows both trigger the simulator's AX scroll-to-
@@ -71,6 +83,7 @@ enum UITest {
                       "dock.share absent for \(slug)")
 
         tapDock(app, "save")
+        confirmSaveAlert(app)
         tapDock(app, "share")
 
         let previewTitle = app.staticTexts["Preview"]
@@ -110,6 +123,7 @@ enum UITest {
                       "dock.share absent after compute for \(slug)")
 
         tapDock(app, "save")
+        confirmSaveAlert(app)
         tapDock(app, "share")
 
         let previewTitle = app.staticTexts["Preview"]

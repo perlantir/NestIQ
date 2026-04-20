@@ -39,6 +39,7 @@ final class ScenarioSaveLoadTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after Amort compute")
         dock.tap()
+        UITest.confirmSaveAlert(app)
 
         // Give SwiftData.save() a moment to propagate to @Query.
         let row = app.buttons["saved.row.amortization"]
@@ -66,6 +67,7 @@ final class ScenarioSaveLoadTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after IncomeQual compute")
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
 
         let tab = app.tabBars.buttons["Scenarios"]
         XCTAssertTrue(tab.waitForExistence(timeout: 5),
@@ -92,6 +94,7 @@ final class ScenarioSaveLoadTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after Refi compute")
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
 
         let tab = app.tabBars.buttons["Scenarios"]
         XCTAssertTrue(tab.waitForExistence(timeout: 5),
@@ -118,6 +121,7 @@ final class ScenarioSaveLoadTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after TCA compute")
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
 
         let tab = app.tabBars.buttons["Scenarios"]
         XCTAssertTrue(tab.waitForExistence(timeout: 5),
@@ -144,6 +148,7 @@ final class ScenarioSaveLoadTests: XCTestCase {
         XCTAssertTrue(dock.waitForExistence(timeout: 10),
                       "Dock did not appear after HELOC compute")
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
 
         let tab = app.tabBars.buttons["Scenarios"]
         XCTAssertTrue(tab.waitForExistence(timeout: 5),

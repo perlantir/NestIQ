@@ -98,6 +98,7 @@ final class SavedScenariosDeleteTests: XCTestCase {
         compute.tap()
         XCTAssertTrue(app.buttons["dock.save"].waitForExistence(timeout: 10))
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
         backToHome(app)
     }
 
@@ -109,6 +110,7 @@ final class SavedScenariosDeleteTests: XCTestCase {
         compute.tap()
         XCTAssertTrue(app.buttons["dock.save"].waitForExistence(timeout: 10))
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
         backToHome(app)
     }
 
@@ -120,6 +122,7 @@ final class SavedScenariosDeleteTests: XCTestCase {
         compute.tap()
         XCTAssertTrue(app.buttons["dock.save"].waitForExistence(timeout: 10))
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
         backToHome(app)
     }
 

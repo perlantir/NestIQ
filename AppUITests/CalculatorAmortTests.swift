@@ -41,6 +41,7 @@ final class CalculatorAmortTests: XCTestCase {
         XCTAssertTrue(app.buttons["dock.share"].exists)
 
         UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
         UITest.tapDock(app, "share")
         let previewTitle = app.staticTexts["Preview"]
         XCTAssertTrue(previewTitle.waitForExistence(timeout: 8),
