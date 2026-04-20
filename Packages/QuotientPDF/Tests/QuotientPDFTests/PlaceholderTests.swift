@@ -1,21 +1,23 @@
 import Testing
-import SwiftUI
 import Foundation
+import PDFKit
 @testable import QuotientPDF
 
 @Suite("QuotientPDF")
-struct PDFRendererTests {
+struct PDFInspectorTests {
 
-    @Test("renderPDF produces a readable PDFKit document")
-    @MainActor
-    func testRenderBasicPDF() throws {
+    @Test("PDFInspector reads a valid PDF")
+    func testReadsPDF() throws {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("quotient-test-\(UUID()).pdf")
-        let pages: [AnyView] = [
-            AnyView(Text("Page One").frame(width: 612, height: 792)),
-            AnyView(Text("Page Two").frame(width: 612, height: 792)),
-        ]
-        try PDFRenderer.renderPDF(pages: pages, to: url)
+        // Write a minimal PDF using UIGraphicsBeginPDFContext equivalent
+        // via PDFKit: create an empty PDFDocument + PDFPage, save to disk.
+        let doc = PDFDocument()
+        let page = PDFPage()
+        doc.insert(page, at: 0)
+        doc.insert(PDFPage(), at: 1)
+        try #require(doc.write(to: url))
+
         let inspector = try #require(PDFInspector(url: url))
         #expect(inspector.pageCount == 2)
     }

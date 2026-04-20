@@ -356,7 +356,7 @@ struct HelocScreen: View {
         VStack(spacing: 0) {
             sideBySideHeader
             ForEach(
-                Array(HelocComparisonPage.rows(for: viewModel).enumerated()),
+                Array(HelocPDFHTML.rows(for: viewModel).enumerated()),
                 id: \.offset
             ) { idx, row in
                 sideBySideRow(row: row, zebra: idx.isMultiple(of: 2))
@@ -392,7 +392,7 @@ struct HelocScreen: View {
         }
     }
 
-    private func sideBySideRow(row: HelocComparisonPage.Row, zebra: Bool) -> some View {
+    private func sideBySideRow(row: HelocPDFHTML.Row, zebra: Bool) -> some View {
         HStack(alignment: .top, spacing: 0) {
             Text(row.label)
                 .textStyle(Typography.body.withSize(11, weight: .medium))
