@@ -230,10 +230,13 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
+        // Refi ships cover + 1 comparison + disclaimers → 3 pages total.
         let comparison = AnyView(refinanceComparisonPage(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel
+            viewModel: viewModel,
+            pageIndex: 2,
+            pageCount: 3
         ))
         return try buildPDF(
             profile: profile,

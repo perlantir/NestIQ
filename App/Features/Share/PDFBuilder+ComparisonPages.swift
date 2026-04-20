@@ -72,11 +72,11 @@ extension PDFBuilder {
     static func refinanceComparisonPage(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: RefinanceViewModel
+        viewModel: RefinanceViewModel,
+        pageIndex: Int,
+        pageCount: Int
     ) -> some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
+        let generated = PDFPageHeader.formatDate(Date())
         let state = resolveState(borrower: borrower)
         let disclosures = requiredDisclosures(
             for: .refinance,
@@ -96,7 +96,9 @@ extension PDFBuilder {
             tableView: RefinanceTableView(viewModel: viewModel, scenarioColors: colors),
             disclaimer: disclaimer,
             ehoStatement: ehoStatement,
-            accentHex: profile.brandColorHex
+            accentHex: profile.brandColorHex,
+            pageIndex: pageIndex,
+            pageCount: pageCount
         )
     }
 

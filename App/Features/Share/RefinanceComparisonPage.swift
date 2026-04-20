@@ -14,6 +14,8 @@ struct RefinanceComparisonPage: View {
     let disclaimer: String
     let ehoStatement: String
     let accentHex: String
+    let pageIndex: Int
+    let pageCount: Int
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
     private let inkSecondary = Color(red: 0x4A / 255, green: 0x48 / 255, blue: 0x40 / 255)
@@ -23,6 +25,8 @@ struct RefinanceComparisonPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: generatedDate)
+                .padding(.bottom, 20)
             header
             tableView
                 .padding(.top, 22)
@@ -30,7 +34,8 @@ struct RefinanceComparisonPage: View {
             footer
         }
         .padding(.horizontal, 48)
-        .padding(.vertical, 28)
+        .padding(.top, 18)
+        .padding(.bottom, 28)
         .frame(width: 792, height: 612)
         .background(Color.white)
     }
@@ -41,19 +46,13 @@ struct RefinanceComparisonPage: View {
                 .font(.system(size: 11, weight: .semibold))
                 .tracking(1.1)
                 .foregroundStyle(accent)
-            HStack(alignment: .firstTextBaseline) {
-                Text("For ")
-                    .font(.custom("SourceSerif4", size: 26))
-                    .foregroundStyle(inkPrimary)
-                    +
-                    Text(borrowerName)
-                    .font(.custom("SourceSerif4-It", size: 26))
-                    .foregroundStyle(inkPrimary)
-                Spacer()
-                Text(generatedDate)
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-            }
+            Text("For ")
+                .font(.custom("SourceSerif4", size: 26))
+                .foregroundStyle(inkPrimary)
+                +
+                Text(borrowerName)
+                .font(.custom("SourceSerif4-It", size: 26))
+                .foregroundStyle(inkPrimary)
             Rectangle().fill(inkPrimary).frame(height: 1.5)
         }
     }
