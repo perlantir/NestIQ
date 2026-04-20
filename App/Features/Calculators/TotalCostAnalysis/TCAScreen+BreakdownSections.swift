@@ -237,20 +237,65 @@ extension TCAScreen {
         scenario: TCAScenario,
         monthlyPayments: [Decimal]
     ) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
+        let delta = reinvestmentSavingsDelta(idx: idx, monthlyPayments: monthlyPayments)
+        return VStack(alignment: .leading, spacing: Spacing.s4) {
             HStack(spacing: Spacing.s8) {
                 Circle().fill(breakdownColor(idx)).frame(width: 8, height: 8)
                 Text(scenario.label.uppercased() + " · " + scenario.name)
                     .textStyle(Typography.num.withSize(12, weight: .semibold))
                     .foregroundStyle(Palette.ink)
             }
-            reinvestmentPathAGrid(idx: idx, monthlyPayments: monthlyPayments)
-            reinvestmentPathBLine(idx: idx, monthlyPayments: monthlyPayments)
+            switch delta {
+            case .positive:
+                reinvestmentPathAGrid(idx: idx, monthlyPayments: monthlyPayments)
+                reinvestmentPathBLine(idx: idx, monthlyPayments: monthlyPayments)
+            case .zero:
+                Text("Equivalent monthly payment — no savings to reinvest.")
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+            case .negative(let costMoreLabel):
+                Text(
+                    "\(scenario.label.uppercased()) costs \(costMoreLabel) more per "
+                    + "month than baseline — no monthly savings available to invest."
+                )
+                .textStyle(Typography.body.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+            }
         }
         .padding(.vertical, Spacing.s8)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Palette.borderSubtle).frame(height: 1)
         }
+    }
+
+    /// Session 5N.5: classify the monthly savings delta for a
+    /// scenario relative to the baseline (scenario index 0). Drives
+    /// the contextual messaging in the reinvestment section — full
+    /// horizon projections only render when savings are positive.
+    enum ReinvestmentDelta {
+        case positive
+        case zero
+        case negative(costMore: String)
+    }
+
+    func reinvestmentSavingsDelta(
+        idx: Int,
+        monthlyPayments: [Decimal]
+    ) -> ReinvestmentDelta {
+        guard monthlyPayments.indices.contains(idx),
+              let baseline = monthlyPayments.first else {
+            return .zero
+        }
+        let scenario = monthlyPayments[idx]
+        let diff = baseline - scenario  // savings (positive when cheaper)
+        // Sub-penny difference is "equivalent" — avoids displaying a
+        // spurious projection when the two loans round-trip to the
+        // same P&I to the cent.
+        if abs(diff.asDouble) < 0.01 { return .zero }
+        if diff < 0 {
+            return .negative(costMore: MoneyFormat.shared.currency(-diff))
+        }
+        return .positive
     }
 
     /// "Invest the savings" horizon snapshots: one balance number per

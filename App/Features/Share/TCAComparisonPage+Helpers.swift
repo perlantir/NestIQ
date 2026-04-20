@@ -75,8 +75,19 @@ extension TCAComparisonPage {
     }
 
     private func reinvestmentParts(longest: Int, monthlyPayments: [Decimal]) -> [String] {
-        Array(viewModel.inputs.scenarios.enumerated()).compactMap { idx, s -> String? in
-            guard idx > 0 else { return nil }
+        let baseline = monthlyPayments.first ?? 0
+        return Array(viewModel.inputs.scenarios.enumerated()).compactMap { idx, s -> String? in
+            guard idx > 0, monthlyPayments.indices.contains(idx) else { return nil }
+            let diff = baseline - monthlyPayments[idx]
+            // Session 5N.5: zero/negative savings — show a one-line
+            // explainer instead of a misleading $0 projection.
+            if abs(diff.asDouble) < 0.01 {
+                return "\(s.label): equivalent payment — no savings to reinvest"
+            }
+            if diff < 0 {
+                let more = MoneyFormat.shared.currency(-diff)
+                return "\(s.label): costs \(more)/mo more — no savings available"
+            }
             let invest = viewModel.inputs.pathAInvestmentBalance(
                 scenarioIndex: idx,
                 months: longest * 12,
