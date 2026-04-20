@@ -108,9 +108,34 @@ struct RefinanceInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
+                    applyBorrowerCurrentMortgage(selected)
                 }
             )
             .presentationDetents([.large])
+        }
+        .onAppear {
+            applyBorrowerCurrentMortgage(selectedBorrower)
+        }
+    }
+
+    /// 5P.12: when a borrower with a persisted currentMortgage is
+    /// attached, prefill the current-loan fields (balance / rate /
+    /// remaining years / home value) so the LO doesn't re-type what
+    /// the borrower model already stores. Only overwrites when the
+    /// form-level currentBalance is 0 — respects any edits the LO has
+    /// already made.
+    private func applyBorrowerCurrentMortgage(_ borrower: Borrower?) {
+        guard let mortgage = borrower?.currentMortgage,
+              viewModel.inputs.currentBalance == 0 else { return }
+        viewModel.inputs.currentBalance = mortgage.currentBalance
+        viewModel.inputs.currentRate = Double(truncating: mortgage.currentRatePercent as NSNumber)
+        let remainingMonths = CurrentMortgageCalculations.monthsRemaining(
+            originalTermYears: mortgage.originalTermYears,
+            loanStartDate: mortgage.loanStartDate
+        )
+        viewModel.inputs.currentRemainingYears = max(1, remainingMonths / 12)
+        if viewModel.inputs.homeValue == 0 {
+            viewModel.inputs.homeValue = mortgage.propertyValueToday
         }
     }
 
