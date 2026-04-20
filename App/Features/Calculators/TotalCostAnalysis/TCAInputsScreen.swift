@@ -22,6 +22,15 @@ struct TCAInputsScreen: View {
     // until the draft is either fully valid or fully blank.
     @State var currentMortgageDraft = CurrentMortgageDraft()
     @State var currentMortgageExpanded: Bool = false
+    // 5Q.3: when the LO enters or edits the current mortgage inline
+    // AND a borrower is attached, write the final mortgage back to
+    // `borrower.currentMortgage` on Compute so the next session with
+    // the same borrower is pre-filled. Toggle lives at the form level;
+    // defaults to ON. Disabled (ignored) when no borrower is selected.
+    @State var saveToBorrowerOnCompute: Bool = true
+
+    @Environment(\.modelContext)
+    var modelContext
 
     init(
         borrower: Borrower? = nil,
@@ -436,6 +445,7 @@ struct TCAInputsScreen: View {
     private var computeCTA: some View {
         VStack(spacing: Spacing.s8) {
             PrimaryButton("Compute total cost analysis") {
+                persistCurrentMortgageToBorrowerIfNeeded()
                 navigationActive = true
             }
             .accessibilityIdentifier("tca.compute")
