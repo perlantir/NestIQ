@@ -42,6 +42,7 @@
 		3CA97BE097CFB72AD1DE8982 /* KPITile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00A91D51212853350CE39F8 /* KPITile.swift */; };
 		3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE473E21016935AB38F78564 /* HomeScreen.swift */; };
 		44C767529EDBC2DC74CCFB27 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514FAC8A89F4FEEE70FAB0F7 /* OnboardingStep.swift */; };
+		44E9388216E24948EED3206B /* ScenarioDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8C5AC11529B03874DFA57FB /* ScenarioDestination.swift */; };
 		456044E0A90F9CDC6FE3B665 /* HelocViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */; };
 		45BDCF05270984C4D7995217 /* BorrowerPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4A4881C0CA2B982907EC15 /* BorrowerPill.swift */; };
 		45EDBA4287AC65E86FC29A8D /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = F025FA2D597BEFBBC4A3075F /* QuotientFinance */; };
@@ -278,6 +279,7 @@
 		C46A0D36A77F51B65D629E99 /* IncomeQualViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualViewModel.swift; sourceTree = "<group>"; };
 		C71FF7CDA3FAB8942C679382 /* SourceSerif4-SemiboldIt.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-SemiboldIt.ttf"; sourceTree = "<group>"; };
 		C728ACEFCBFB4C6C8A95F7B7 /* OnboardingMiniatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMiniatures.swift; sourceTree = "<group>"; };
+		C8C5AC11529B03874DFA57FB /* ScenarioDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioDestination.swift; sourceTree = "<group>"; };
 		CB19EEDB2AFF2A92A2514534 /* BottomActionDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomActionDock.swift; sourceTree = "<group>"; };
 		D00A91D51212853350CE39F8 /* KPITile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KPITile.swift; sourceTree = "<group>"; };
 		D0D1F3B75BEEB2A8E1AF4C00 /* AssumptionsDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssumptionsDrawer.swift; sourceTree = "<group>"; };
@@ -527,6 +529,7 @@
 			children = (
 				54DDE3329FD65E73CE3193ED /* SavedScenariosScreen.swift */,
 				906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */,
+				C8C5AC11529B03874DFA57FB /* ScenarioDestination.swift */,
 			);
 			path = SavedScenarios;
 			sourceTree = "<group>";
@@ -981,6 +984,7 @@
 				D334B521EEB68DDC50A57BC7 /* SavedScenariosScreen+EditMode.swift in Sources */,
 				9B48F5D76ADF246FA93751A6 /* SavedScenariosScreen.swift in Sources */,
 				EE69351F0C50E901FE0D939F /* ScenarioCard.swift in Sources */,
+				44E9388216E24948EED3206B /* ScenarioDestination.swift in Sources */,
 				927E89E061CFE0FC73FB276F /* SegmentedControl.swift in Sources */,
 				EF76BAD6C4966AA84448E2B3 /* SelfEmploymentInputs.swift in Sources */,
 				53EA91F48F530018D8FAB5C4 /* SelfEmploymentInputsScreen+Cards.swift in Sources */,

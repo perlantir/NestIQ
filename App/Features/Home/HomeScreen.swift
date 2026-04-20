@@ -25,6 +25,7 @@ struct HomeScreen: View {
     @State private var rateReport: RateReport?
     @State private var isRefreshing = false
     @State private var activeCalculator: CalculatorType?
+    @State private var openScenario: Scenario?
 
     private let rateService: any RateService = MockRateService()
 
@@ -51,6 +52,9 @@ struct HomeScreen: View {
             .scrollIndicators(.hidden)
             .navigationDestination(item: $activeCalculator) { type in
                 CalculatorNewScenarioView(calculator: type)
+            }
+            .navigationDestination(item: $openScenario) { scenario in
+                ScenarioDestinationView(scenario: scenario)
             }
             .task {
                 if rateReport == nil { await refreshRates() }
@@ -289,37 +293,54 @@ struct HomeScreen: View {
     }
 
     private func recentRow(scenario: Scenario) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
-            HStack(spacing: Spacing.s8) {
-                Text(scenario.calculatorType.shortLabel)
-                    .textStyle(Typography.num.withSize(10))
-                    .foregroundStyle(Palette.inkSecondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.monoChip)
-                            .stroke(Palette.borderSubtle, lineWidth: 1)
-                    )
-                Text(relativeTime(for: scenario.updatedAt))
-                    .textStyle(Typography.body.withSize(11))
+        // Session 5K.4: tapping a recent row opens the calculator with
+        // the scenario loaded — same dispatcher (ScenarioDestinationView)
+        // the Saved tab uses, so Save + Share + existingScenario routing
+        // are consistent.
+        Button {
+            openScenario = scenario
+        } label: {
+            HStack(alignment: .center, spacing: Spacing.s12) {
+                VStack(alignment: .leading, spacing: Spacing.s4) {
+                    HStack(spacing: Spacing.s8) {
+                        Text(scenario.calculatorType.shortLabel)
+                            .textStyle(Typography.num.withSize(10))
+                            .foregroundStyle(Palette.inkSecondary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Radius.monoChip)
+                                    .stroke(Palette.borderSubtle, lineWidth: 1)
+                            )
+                        Text(relativeTime(for: scenario.updatedAt))
+                            .textStyle(Typography.body.withSize(11))
+                            .foregroundStyle(Palette.inkTertiary)
+                    }
+                    Text(scenario.borrower?.fullName ?? scenario.name)
+                        .textStyle(Typography.bodyLg.withSize(14, weight: .semibold))
+                        .foregroundStyle(Palette.ink)
+                    Text(scenario.keyStatLine)
+                        .textStyle(Typography.num.withSize(12, design: .monospaced))
+                        .foregroundStyle(Palette.inkSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Palette.inkTertiary)
             }
-            Text(scenario.borrower?.fullName ?? scenario.name)
-                .textStyle(Typography.bodyLg.withSize(14, weight: .semibold))
-                .foregroundStyle(Palette.ink)
-            Text(scenario.keyStatLine)
-                .textStyle(Typography.num.withSize(12, design: .monospaced))
-                .foregroundStyle(Palette.inkSecondary)
+            .padding(.horizontal, Spacing.s16)
+            .padding(.vertical, Spacing.s12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .background(Palette.surfaceRaised)
+            .overlay(
+                RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous)
+                    .stroke(Palette.borderSubtle, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous))
         }
-        .padding(.horizontal, Spacing.s16)
-        .padding(.vertical, Spacing.s12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.surfaceRaised)
-        .overlay(
-            RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous)
-                .stroke(Palette.borderSubtle, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous))
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("home.recent.row.\(scenario.calculatorType.rawValue)")
     }
 
     private func relativeTime(for date: Date) -> String {

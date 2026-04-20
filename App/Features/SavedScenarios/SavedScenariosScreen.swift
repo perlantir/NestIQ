@@ -40,7 +40,7 @@ struct SavedScenariosScreen: View {
                 .scrollIndicators(.hidden)
                 .contentMargins(.bottom, isEditMode ? Spacing.s96 * 2 : Spacing.s96)
                 .navigationDestination(item: $editingScenario) { s in
-                    openScenarioDestination(s)
+                    ScenarioDestinationView(scenario: s)
                 }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -135,49 +135,9 @@ struct SavedScenariosScreen: View {
     // SavedScenariosScreen+EditMode.swift to keep this struct under the
     // SwiftLint type_body_length cap.
 
-    @ViewBuilder
-    private func openScenarioDestination(_ s: Scenario) -> some View {
-        switch s.calculatorType {
-        case .amortization:
-            AmortizationInputsScreen(
-                borrower: s.borrower,
-                initialInputs: decode(AmortizationFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        case .incomeQualification:
-            IncomeQualScreen(
-                initialInputs: decode(IncomeQualFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        case .refinance:
-            RefinanceScreen(
-                initialInputs: decode(RefinanceFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        case .totalCostAnalysis:
-            TCAScreen(
-                initialInputs: decode(TCAFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        case .helocVsRefinance:
-            HelocScreen(
-                initialInputs: decode(HelocFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        case .selfEmployment:
-            SelfEmploymentInputsScreen(
-                borrower: s.borrower,
-                initialInputs: decode(SelfEmploymentFormInputs.self, from: s.inputsJSON),
-                existingScenario: s
-            )
-        }
-    }
-
-    private func decode<T: Decodable>(_ type: T.Type, from data: Data) -> T? {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try? decoder.decode(type, from: data)
-    }
+    // Scenario → calculator-screen dispatch extracted to
+    // ScenarioDestination.swift in Session 5K.4 so the Home recent-list
+    // can reuse it for tap-through navigation.
 
     // MARK: Header
 

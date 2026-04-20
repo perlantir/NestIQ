@@ -134,6 +134,45 @@ final class ScenarioSaveLoadTests: XCTestCase {
 
     // MARK: - HELOC
 
+    /// Session 5K.4: the Home tab's "Recent scenarios" rows were
+    /// rendered as passive cards — tapping did nothing. This test saves
+    /// a scenario, returns to Home, taps the recent row, and asserts the
+    /// calculator screen reopens with its Inputs populated (Compute CTA
+    /// visible = we landed on the Amortization Inputs screen).
+    func testRecentScenarioTapLoadsCalculator() async throws {
+        let app = UITest.launchApp()
+        UITest.tapCalculator(app, slug: "amortization")
+
+        if app.keyboards.count > 0 { app.typeText("\n") }
+        let compute = app.buttons["amort.compute"]
+        XCTAssertTrue(compute.waitForExistence(timeout: 5),
+                      "Amort compute CTA not found")
+        compute.tap()
+
+        XCTAssertTrue(app.buttons["dock.save"].waitForExistence(timeout: 10),
+                      "Dock did not appear after Amort compute")
+        UITest.tapDock(app, "save")
+        UITest.confirmSaveAlert(app)
+
+        // Pop back to Home by tapping the Calculators tab again. In
+        // SwiftUI TabView, tapping the already-selected tab pops its
+        // nav stack to root — which here is the Home screen.
+        let homeTab = app.tabBars.buttons["Calculators"]
+        XCTAssertTrue(homeTab.waitForExistence(timeout: 5),
+                      "Calculators tab not found")
+        homeTab.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
+        let recent = app.buttons["home.recent.row.amortization"]
+        XCTAssertTrue(recent.waitForExistence(timeout: 5),
+                      "Recent-scenario row did not appear on Home")
+        recent.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
+        // Landing target: the Amortization Inputs screen, which is
+        // identified by its Compute CTA.
+        XCTAssertTrue(app.buttons["amort.compute"].waitForExistence(timeout: 5),
+                      "Recent-row tap did not open Amortization Inputs")
+    }
+
     func testHelocSaveThenShowsInSavedTab() async throws {
         let app = UITest.launchApp()
         UITest.tapCalculator(app, slug: "helocVsRefinance")
