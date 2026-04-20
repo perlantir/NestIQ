@@ -463,6 +463,12 @@ struct HelocScreen: View {
     }
 
     private func promptSaveScenarioName() {
+        // When the scenario was loaded from the Saved tab, overwrite in
+        // place without prompting for a new name.
+        if let existing = existingScenario {
+            save(name: existing.name)
+            return
+        }
         saveNameDraft = defaultSaveName
         showingSaveNamePrompt = true
     }

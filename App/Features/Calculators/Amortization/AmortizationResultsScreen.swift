@@ -370,6 +370,13 @@ struct AmortizationResultsScreen: View {
     }
 
     private func promptSaveScenarioName() {
+        // When the scenario was loaded from the Saved tab, overwrite in
+        // place without prompting for a new name — the toast + "Saved"
+        // dock label still confirms the write.
+        if let existing = existingScenario {
+            saveScenario(name: existing.name)
+            return
+        }
         saveNameDraft = defaultSaveName
         showingSaveNamePrompt = true
     }

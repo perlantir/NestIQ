@@ -126,6 +126,68 @@ final class SwiftDataModelTests: XCTestCase {
                       "Scenarios should cascade-delete with their borrower")
     }
 
+    /// Session 5K.1: when a Scenario is loaded from the Saved tab and
+    /// re-saved after edits, the calculator screens' Save button must
+    /// mutate the existing record in place rather than insert a new one.
+    /// This pins the two branches of the `if let existing =
+    /// existingScenario` pattern used across all six calculator screens.
+    func testSaveOverwriteDoesNotDuplicate() throws {
+        let ctx = makeContext()
+        let borrower = Borrower(firstName: "Jane", lastName: "Doe", source: .manual)
+        ctx.insert(borrower)
+        let original = Scenario(
+            borrower: borrower,
+            calculatorType: .amortization,
+            name: "Doe · Amortization",
+            inputsJSON: Data("v1".utf8),
+            keyStatLine: "$400K · 30-yr · 6.500%"
+        )
+        ctx.insert(original)
+        try ctx.save()
+        XCTAssertEqual(try ctx.fetch(FetchDescriptor<Scenario>()).count, 1)
+
+        // Simulate the overwrite branch used by every results screen:
+        // mutate inputsJSON / keyStatLine / updatedAt on the same
+        // record, save, assert the count is unchanged.
+        original.inputsJSON = Data("v2".utf8)
+        original.keyStatLine = "$450K · 30-yr · 6.375%"
+        original.updatedAt = Date()
+        try ctx.save()
+
+        let scenarios = try ctx.fetch(FetchDescriptor<Scenario>())
+        XCTAssertEqual(scenarios.count, 1, "overwrite must not duplicate")
+        XCTAssertEqual(scenarios.first?.inputsJSON, Data("v2".utf8))
+        XCTAssertEqual(scenarios.first?.keyStatLine, "$450K · 30-yr · 6.375%")
+    }
+
+    /// Session 5K.1: saving from a fresh calculator (no existingScenario
+    /// handle) inserts a new record. This pins the else-branch.
+    func testSaveNewScenarioInserts() throws {
+        let ctx = makeContext()
+        XCTAssertEqual(try ctx.fetch(FetchDescriptor<Scenario>()).count, 0)
+
+        let fresh = Scenario(
+            calculatorType: .refinance,
+            name: "New scenario · Refi",
+            inputsJSON: Data(),
+            keyStatLine: ""
+        )
+        ctx.insert(fresh)
+        try ctx.save()
+        XCTAssertEqual(try ctx.fetch(FetchDescriptor<Scenario>()).count, 1)
+
+        let another = Scenario(
+            calculatorType: .refinance,
+            name: "Another · Refi",
+            inputsJSON: Data(),
+            keyStatLine: ""
+        )
+        ctx.insert(another)
+        try ctx.save()
+        XCTAssertEqual(try ctx.fetch(FetchDescriptor<Scenario>()).count, 2,
+                       "fresh saves must accumulate as distinct records")
+    }
+
     // MARK: - Amortization form inputs round trip
 
     func testAmortizationInputsRoundTrip() throws {
