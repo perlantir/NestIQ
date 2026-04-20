@@ -423,4 +423,46 @@ final class TCAViewModelTests: XCTestCase {
             0
         )
     }
+
+    // MARK: - 5P.5 Scenario input isolation
+
+    func testScenariosHaveDistinctUUIDs() {
+        let vm = TCAViewModel()
+        let ids = vm.inputs.scenarios.map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count,
+                       "Each scenario must have a unique UUID so SwiftUI can key views per scenario")
+    }
+
+    func testScenarioEditDoesNotBleedAcrossIndices() {
+        var inputs = TCAFormInputs.sampleDefault
+        let originalBRate = inputs.scenarios[1].rate
+        let originalBLoan = inputs.scenarios[1].loanAmount
+        let originalCRate = inputs.scenarios[2].rate
+        inputs.scenarios[0].rate = 4.25
+        inputs.scenarios[0].loanAmount = 400_000
+        XCTAssertEqual(inputs.scenarios[1].rate, originalBRate,
+                       "Editing scenario A rate must not change scenario B rate")
+        XCTAssertEqual(inputs.scenarios[1].loanAmount, originalBLoan,
+                       "Editing scenario A loan must not change scenario B loan")
+        XCTAssertEqual(inputs.scenarios[2].rate, originalCRate,
+                       "Editing scenario A rate must not change scenario C rate")
+    }
+
+    func testResizeScenariosPreservesExistingEntries() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.scenarios[0].rate = 3.125
+        inputs.scenarios[1].rate = 4.75
+        let originalA = inputs.scenarios[0].id
+        let originalB = inputs.scenarios[1].id
+        inputs.resizeScenarios(to: 4)
+        XCTAssertEqual(inputs.scenarios[0].id, originalA)
+        XCTAssertEqual(inputs.scenarios[1].id, originalB)
+        XCTAssertEqual(inputs.scenarios[0].rate, 3.125)
+        XCTAssertEqual(inputs.scenarios[1].rate, 4.75)
+        XCTAssertEqual(inputs.scenarios.count, 4)
+        inputs.resizeScenarios(to: 2)
+        XCTAssertEqual(inputs.scenarios[0].id, originalA)
+        XCTAssertEqual(inputs.scenarios[1].id, originalB)
+        XCTAssertEqual(inputs.scenarios.count, 2)
+    }
 }

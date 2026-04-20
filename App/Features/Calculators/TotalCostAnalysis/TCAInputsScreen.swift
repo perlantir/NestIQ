@@ -257,7 +257,14 @@ struct TCAInputsScreen: View {
                 selection: $activeTab,
                 label: { viewModel.inputs.scenarios[$0].label }
             )
+            // Key the scenario card on the scenario's stable UUID so
+            // SwiftUI creates fresh child views (FieldRow, stepper,
+            // etc.) when the LO switches tabs. Without this, FieldRow's
+            // internal @State text buffer carries the previous tab's
+            // typed value into the new tab — the 5P.5 cross-scenario
+            // input bleed Nick flagged in QA.
             scenarioCard(index: clampedTab)
+                .id(viewModel.inputs.scenarios[clampedTab].id)
         }
     }
 
