@@ -90,13 +90,13 @@ final class PDFBuilderTests: XCTestCase {
     /// bytes. Asserts against size delta (toggle-ON PDF is larger than
     /// the matching toggle-OFF PDF by at least the JPEG payload size
     /// minus PDF re-encoding overhead).
-    func testPhotoShowsOnPDFCoverWhenToggleOn() throws {
+    func testPhotoShowsOnPDFCoverWhenToggleOn() async throws {
         let jpeg = makeTestJPEG()
         XCTAssertGreaterThan(jpeg.count, 2_000,
                              "Test JPEG payload is unexpectedly small — size-delta proxy won't be meaningful")
 
-        let on = try renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: true)
-        let off = try renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: false)
+        let on = try await renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: true)
+        let off = try await renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: false)
         let delta = on.size - off.size
         XCTAssertGreaterThan(delta, 1_000,
                              "PDF with photo toggle ON is not materially larger than toggle OFF (delta=\(delta) bytes) — photo likely not rendered")
@@ -104,10 +104,10 @@ final class PDFBuilderTests: XCTestCase {
 
     /// Toggle-OFF + photoData still set → PDF cover omits the photo.
     /// Paired with the ON test this proves the toggle is the gate.
-    func testPhotoHiddenOnPDFCoverWhenToggleOff() throws {
+    func testPhotoHiddenOnPDFCoverWhenToggleOff() async throws {
         let jpeg = makeTestJPEG()
-        let off = try renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: false)
-        let baseline = try renderAmortizationPDF(photoData: nil, showPhotoOnPDF: false)
+        let off = try await renderAmortizationPDF(photoData: jpeg, showPhotoOnPDF: false)
+        let baseline = try await renderAmortizationPDF(photoData: nil, showPhotoOnPDF: false)
         // No photo ≈ toggle off with photo, within PDF-overhead noise.
         let delta = abs(off.size - baseline.size)
         XCTAssertLessThan(delta, 1_000,
@@ -141,7 +141,7 @@ final class PDFBuilderTests: XCTestCase {
     private func renderAmortizationPDF(
         photoData: Data?,
         showPhotoOnPDF: Bool
-    ) throws -> (url: URL, size: Int) {
+    ) async throws -> (url: URL, size: Int) {
         let profile = LenderProfile(
             appleUserID: "apple.photo.\(UUID().uuidString)",
             firstName: "Nick",
@@ -158,7 +158,7 @@ final class PDFBuilderTests: XCTestCase {
                                 propertyState: "CA", source: .manual)
         let vm = AmortizationViewModel(borrower: borrower)
         vm.compute()
-        let url = try PDFBuilder.buildAmortizationPDF(
+        let url = try await PDFBuilder.buildAmortizationPDF(
             profile: profile,
             borrower: borrower,
             viewModel: vm,
@@ -171,19 +171,17 @@ final class PDFBuilderTests: XCTestCase {
     // MARK: - Session 5N.8: PDF data integrity audit
 
     /// Verifies cover + disclaimers carry their "Page N of M"
-    /// counters after the 5N.2a rollout. Landscape middle pages (the
-    /// amortization schedule in this case) render the same header
-    /// visually, but PDFKit's text-extraction on landscape pages
-    /// inconsistently captures the SF Mono counter glyphs — the
-    /// cover/disclaimers assertions pin the threading is correct.
-    func testPDFHeaderRendersPageNofMOnCoverAndDisclaimers() throws {
+    /// counters. Session 5O rebuilt on HTMLPDFRenderer; headers are
+    /// now drawn by NestIQPrintRenderer per-page in Core Graphics so
+    /// every portrait page of the document should carry the counter.
+    func testPDFHeaderRendersPageNofMOnCoverAndDisclaimers() async throws {
         let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
                                       companyName: "Gallick Holdings LLC")
         let borrower = Borrower(firstName: "John", lastName: "Smith",
                                 propertyState: "CA", source: .manual)
         let vm = AmortizationViewModel(borrower: borrower)
         vm.compute()
-        let url = try PDFBuilder.buildAmortizationPDF(
+        let url = try await PDFBuilder.buildAmortizationPDF(
             profile: profile,
             borrower: borrower,
             viewModel: vm,
@@ -191,7 +189,7 @@ final class PDFBuilderTests: XCTestCase {
         )
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         let total = inspector.pageCount
-        XCTAssertGreaterThanOrEqual(total, 3)
+        XCTAssertGreaterThanOrEqual(total, 2)
         let cover = inspector.text(onPage: 0) ?? ""
         XCTAssertTrue(cover.contains("Page 1 of \(total)"),
                       "Cover missing 'Page 1 of \(total)'. Got: \(cover)")
@@ -203,10 +201,10 @@ final class PDFBuilderTests: XCTestCase {
     /// Empty companyName on the LenderProfile renders the signature
     /// block without a blank company line — pre-5N.3 regression from
     /// the "—" placeholder that leaked into the sig block.
-    func testPDFSignatureHandlesMissingCompany() throws {
+    func testPDFSignatureHandlesMissingCompany() async throws {
         let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
                                       companyName: "")
-        let url = try renderMinimalAmortizationPDF(profile: profile)
+        let url = try await renderMinimalAmortizationPDF(profile: profile)
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         let text = inspector.text(onPage: 0) ?? ""
         XCTAssertTrue(text.contains("Nick Gallick"))
@@ -222,12 +220,12 @@ final class PDFBuilderTests: XCTestCase {
 
     /// profile.photoData = nil must render the signature block
     /// without a phantom empty circle on the right.
-    func testPDFSignatureHandlesMissingPhoto() throws {
+    func testPDFSignatureHandlesMissingPhoto() async throws {
         let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
                                       companyName: "Gallick Holdings LLC")
         // No photoData, no showPhotoOnPDF — identical to a fresh
         // profile that hasn't uploaded a photo yet.
-        let url = try renderMinimalAmortizationPDF(profile: profile)
+        let url = try await renderMinimalAmortizationPDF(profile: profile)
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         XCTAssertGreaterThanOrEqual(inspector.pageCount, 2)
     }
@@ -249,12 +247,12 @@ final class PDFBuilderTests: XCTestCase {
         )
     }
 
-    private func renderMinimalAmortizationPDF(profile: LenderProfile) throws -> URL {
+    private func renderMinimalAmortizationPDF(profile: LenderProfile) async throws -> URL {
         let borrower = Borrower(firstName: "Jane", lastName: "Doe",
                                 propertyState: "CA", source: .manual)
         let vm = AmortizationViewModel(borrower: borrower)
         vm.compute()
-        return try PDFBuilder.buildAmortizationPDF(
+        return try await PDFBuilder.buildAmortizationPDF(
             profile: profile,
             borrower: borrower,
             viewModel: vm,
@@ -262,7 +260,7 @@ final class PDFBuilderTests: XCTestCase {
         )
     }
 
-    func testAmortizationPDFEndToEnd() throws {
+    func testAmortizationPDFEndToEnd() async throws {
         let profile = LenderProfile(
             appleUserID: "apple.1",
             firstName: "Nick",
@@ -282,7 +280,7 @@ final class PDFBuilderTests: XCTestCase {
         )
         let vm = AmortizationViewModel(borrower: borrower)
         vm.compute()
-        let url = try PDFBuilder.buildAmortizationPDF(
+        let url = try await PDFBuilder.buildAmortizationPDF(
             profile: profile,
             borrower: borrower,
             viewModel: vm,

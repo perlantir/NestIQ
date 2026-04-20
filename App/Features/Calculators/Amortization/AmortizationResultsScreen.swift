@@ -407,19 +407,21 @@ struct AmortizationResultsScreen: View {
 
     private func generatePDFAndShare() {
         guard let profile = profiles.first else { return }
-        do {
-            let url = try PDFBuilder.buildAmortizationPDF(
-                profile: profile,
-                borrower: viewModel.borrower,
-                viewModel: viewModel,
-                narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? "",
-                scheduleGranularity: scheduleGranularity
-            )
-            sharePDFURL = url
-            sharePageCount = PDFInspector(url: url)?.pageCount ?? 1
-            showingShare = true
-        } catch {
-            saveError = error.localizedDescription
+        Task { @MainActor in
+            do {
+                let url = try await PDFBuilder.buildAmortizationPDF(
+                    profile: profile,
+                    borrower: viewModel.borrower,
+                    viewModel: viewModel,
+                    narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? "",
+                    scheduleGranularity: scheduleGranularity
+                )
+                sharePDFURL = url
+                sharePageCount = PDFInspector(url: url)?.pageCount ?? 1
+                showingShare = true
+            } catch {
+                saveError = error.localizedDescription
+            }
         }
     }
 

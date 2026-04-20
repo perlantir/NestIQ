@@ -84,60 +84,26 @@ enum PDFBuilder {
 
     // MARK: Per-calculator convenience builders
 
+    /// Session 5O.2 — rebuilt to render via HTMLPDFRenderer
+    /// (UIPrintPageRenderer + WKWebView.viewPrintFormatter). Async
+    /// because WKWebView HTML loading is async.
     static func buildAmortizationPDF(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: AmortizationViewModel,
         narrative: String,
         scheduleGranularity: AmortScheduleGranularity = .yearly
-    ) throws -> URL {
-        let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
-        let totalPaid = MoneyFormat.shared.dollarsShort(viewModel.totalPaid)
-        let rate = String(format: "%.3f", viewModel.inputs.annualRate)
-        let rateDisplay = displayRateAndAPR(rate: viewModel.inputs.annualRate, decimalAPR: viewModel.inputs.aprRate)
-        let loanMoney = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
-        let piti = MoneyFormat.shared.currency(viewModel.monthlyPITI)
-        let payoff = viewModel.payoffDate.map { d -> String in
-            let f = DateFormatter(); f.dateFormat = "MMM yyyy"; return f.string(from: d)
-        } ?? "—"
-        let fallbackNarrative = "At today's \(rate)% rate, the monthly PITI is \(piti). "
-            + "Over the life of the loan, interest totals about \(interest)."
-        let loanSummary = "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rateDisplay)"
-        let payload = Payload(
-            calculatorSlug: "amortization",
-            calculatorTitle: "Amortization analysis",
-            complianceScenarioType: .amortization,
-            loanSummary: loanSummary,
-            heroLabel: "Monthly payment · PITI",
-            heroValue: piti,
-            heroValuePrefix: "",
-            heroKPIs: [
-                ("Total interest", interest),
-                ("Payoff", payoff),
-                ("Total paid", totalPaid),
-            ],
-            narrative: narrative.isEmpty ? fallbackNarrative : narrative
-        )
-        let scheduleCount = AmortizationSchedulePages.pageCount(
-            schedule: viewModel.schedule,
-            granularity: scheduleGranularity
-        )
-        let globalTotal = 1 + scheduleCount + 1
-        let schedulePages = amortizationSchedulePages(
+    ) async throws -> URL {
+        let html = AmortizationPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
-            loanSummary: loanSummary,
-            granularity: scheduleGranularity,
-            globalPageStart: 2,
-            globalPageCount: globalTotal
+            narrative: narrative,
+            scheduleGranularity: scheduleGranularity
         )
-        return try buildPDF(
-            profile: profile,
-            borrower: borrower,
-            payload: payload,
-            extraPages: schedulePages
-        )
+        let url = PDFHTMLComposition.temporaryURL(for: "amortization")
+        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        return url
     }
 
     static func buildIncomeQualPDF(
