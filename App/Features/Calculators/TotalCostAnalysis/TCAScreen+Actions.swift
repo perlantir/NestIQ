@@ -11,22 +11,24 @@ extension TCAScreen {
 
     func generatePDFAndShare() {
         guard let profile = profiles.first else { return }
-        do {
-            let url = try PDFBuilder.buildTCAPDF(
-                profile: profile,
-                borrower: viewModel.borrower,
-                viewModel: viewModel,
-                narrative: narrativeText
-            )
-            shareBundle = ShareBundle(
-                url: url,
-                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
-                profile: profile
-            )
-        } catch {
-            #if DEBUG
-            print("[TCAScreen] PDF gen failed: \(error)")
-            #endif
+        Task { @MainActor in
+            do {
+                let url = try await PDFBuilder.buildTCAPDF(
+                    profile: profile,
+                    borrower: viewModel.borrower,
+                    viewModel: viewModel,
+                    narrative: narrativeText
+                )
+                shareBundle = ShareBundle(
+                    url: url,
+                    pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                    profile: profile
+                )
+            } catch {
+                #if DEBUG
+                print("[TCAScreen] PDF gen failed: \(error)")
+                #endif
+            }
         }
     }
 

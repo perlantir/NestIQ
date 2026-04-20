@@ -212,49 +212,24 @@ enum PDFBuilder {
         )
     }
 
+    /// Session 5O.3 — TCA PDF now renders via HTML pipeline.
+    /// Break-even chart is embedded as inline SVG per scenario
+    /// (BreakEvenChartSVG).
     static func buildTCAPDF(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: TCAViewModel,
         narrative: String
-    ) throws -> URL {
-        let loan = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
-        let count = viewModel.inputs.scenarios.count
-        let horizons = viewModel.inputs.horizonsYears.map { "\($0)yr" }.joined(separator: "/")
-        let winnerIndex = viewModel.result?.winnerByHorizon.last ?? 0
-        let winnerName = viewModel.inputs.scenarios.indices.contains(winnerIndex)
-            ? viewModel.inputs.scenarios[winnerIndex].name : "—"
-        let fallback = "Across \(count) scenarios over \(horizons) horizons, "
-            + "\(winnerName) wins on total cost at the longest horizon."
-        let payload = Payload(
-            calculatorSlug: "total-cost",
-            calculatorTitle: "Total cost analysis",
-            complianceScenarioType: .totalCostAnalysis,
-            loanSummary: "\(loan) · \(count) scenarios · \(horizons)",
-            heroLabel: "Scenarios compared",
-            heroValue: "\(count)",
-            heroValuePrefix: "",
-            heroKPIs: [
-                ("Horizons", "\(viewModel.inputs.horizonsYears.count)"),
-                ("Life winner", winnerName),
-                ("Loan", MoneyFormat.shared.dollarsShort(viewModel.inputs.loanAmount)),
-            ],
-            narrative: narrative.isEmpty ? fallback : narrative
-        )
-        // TCA ships cover + 1 comparison + disclaimers → total 3 pages.
-        let comparison = AnyView(tcaComparisonPage(
+    ) async throws -> URL {
+        let html = TCAPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
-            pageIndex: 2,
-            pageCount: 3
-        ))
-        return try buildPDF(
-            profile: profile,
-            borrower: borrower,
-            payload: payload,
-            extraPages: [(comparison, .landscape)]
+            narrative: narrative
         )
+        let url = PDFHTMLComposition.temporaryURL(for: "total-cost")
+        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        return url
     }
 
     static func buildHelocPDF(
