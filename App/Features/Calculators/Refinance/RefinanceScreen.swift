@@ -63,11 +63,7 @@ struct RefinanceScreen: View {
         .background(Palette.surface)
         .scrollIndicators(.hidden)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Eyebrow("03 · Refinance")
-            }
-        }
+        .toolbar { toolbarContent }
         .overlay(alignment: .bottom) { bottomDock }
         .saveScenarioNameAlert(
             isPresented: $showingSaveNamePrompt,
@@ -453,6 +449,36 @@ struct RefinanceScreen: View {
                 #if DEBUG
                 print("[RefinanceScreen] PDF gen failed: \(error)")
                 #endif
+            }
+        }
+    }
+}
+
+// MARK: - Toolbar (5R.6)
+
+extension RefinanceScreen {
+    /// Principal title + conditional Edit trailing button. Extracted to
+    /// an extension so the struct body stays under SwiftLint's
+    /// type_body_length cap. Edit surfaces only when this screen was
+    /// opened from a saved scenario (existingScenario != nil); fresh
+    /// Inputs → Compute flow already has a back-chevron to the Inputs
+    /// screen below.
+    @ToolbarContentBuilder var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            Eyebrow("03 · Refinance")
+        }
+        if existingScenario != nil {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    RefinanceInputsScreen(
+                        borrower: existingScenario?.borrower ?? viewModel.borrower,
+                        initialInputs: viewModel.inputs,
+                        existingScenario: existingScenario
+                    )
+                } label: {
+                    Text("Edit")
+                }
+                .accessibilityIdentifier("refinance.edit")
             }
         }
     }

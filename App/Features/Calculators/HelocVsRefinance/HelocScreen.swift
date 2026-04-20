@@ -169,6 +169,20 @@ struct HelocScreen: View {
             ToolbarItem(placement: .principal) {
                 Eyebrow("05 · HELOC vs Refi")
             }
+            if existingScenario != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        HelocInputsScreen(
+                            borrower: existingScenario?.borrower ?? viewModel.borrower,
+                            initialInputs: viewModel.inputs,
+                            existingScenario: existingScenario
+                        )
+                    } label: {
+                        Text("Edit")
+                    }
+                    .accessibilityIdentifier("heloc.edit")
+                }
+            }
         }
         .overlay(alignment: .bottom) { bottomDock }
         .saveScenarioNameAlert(

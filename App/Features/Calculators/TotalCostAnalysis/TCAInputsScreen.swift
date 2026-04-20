@@ -10,6 +10,7 @@ import QuotientFinance
 
 struct TCAInputsScreen: View {
     let borrower: Borrower?
+    var initialInputs: TCAFormInputs?
     var existingScenario: Scenario?
 
     @State var viewModel: TCAViewModel
@@ -34,12 +35,14 @@ struct TCAInputsScreen: View {
 
     init(
         borrower: Borrower? = nil,
+        initialInputs: TCAFormInputs? = nil,
         existingScenario: Scenario? = nil
     ) {
         self.borrower = borrower
+        self.initialInputs = initialInputs
         self.existingScenario = existingScenario
         _viewModel = State(initialValue: TCAViewModel(
-            inputs: Self.defaultInputs,
+            inputs: initialInputs ?? Self.defaultInputs,
             borrower: borrower
         ))
         _selectedBorrower = State(initialValue: borrower)

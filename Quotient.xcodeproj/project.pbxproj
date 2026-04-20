@@ -78,6 +78,7 @@
 		60182EF407D5FAC2F0FFE49E /* CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2D2E9FC62129DCAE49BA9 /* CurrentMortgage.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
 		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
+		6441226EEEE4A71BA2859D69 /* SmokeEdgeCasesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02224566E7F76FF2685EEFB /* SmokeEdgeCasesTests.swift */; };
 		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
 		666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
@@ -329,6 +330,7 @@
 		BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationDrawer.swift; sourceTree = "<group>"; };
 		BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		BF728446C043F9325CC00B21 /* CurrentMortgageSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMortgageSection.swift; sourceTree = "<group>"; };
+		C02224566E7F76FF2685EEFB /* SmokeEdgeCasesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeEdgeCasesTests.swift; sourceTree = "<group>"; };
 		C09B246AB365C10A2095FE57 /* BorrowerPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowerPicker.swift; sourceTree = "<group>"; };
 		C0F7DDBBB3410FF824B33EF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C38C48023F20605AA323F916 /* CalculatorTCATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTCATests.swift; sourceTree = "<group>"; };
@@ -469,6 +471,7 @@
 				ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */,
 				31E27A013E89A340668FB0C8 /* SchemaMigrationTests.swift */,
 				0C6ADAD9FEBC89B5AF12C194 /* SelfEmploymentPDFHTMLTests.swift */,
+				C02224566E7F76FF2685EEFB /* SmokeEdgeCasesTests.swift */,
 				A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */,
 				95C66169F762F690B67FA770 /* TCACurrentMortgagePersistenceTests.swift */,
 				6A6A5DF786C014291E0DD283 /* TCAPDFHTMLTests.swift */,
@@ -1010,6 +1013,7 @@
 				C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */,
 				F7C0A9188B1D11569443319C /* SchemaMigrationTests.swift in Sources */,
 				CB05EEC863A99CF71C29E643 /* SelfEmploymentPDFHTMLTests.swift in Sources */,
+				6441226EEEE4A71BA2859D69 /* SmokeEdgeCasesTests.swift in Sources */,
 				C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */,
 				874CBC9395A8D34745D050C9 /* TCACurrentMortgagePersistenceTests.swift in Sources */,
 				037E524986F4E7B7D8E6AF26 /* TCAPDFHTMLTests.swift in Sources */,

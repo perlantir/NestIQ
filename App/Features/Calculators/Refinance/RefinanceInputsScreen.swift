@@ -12,6 +12,7 @@ import QuotientFinance
 
 struct RefinanceInputsScreen: View {
     let borrower: Borrower?
+    var initialInputs: RefinanceFormInputs?
     var existingScenario: Scenario?
 
     // `viewModel` is `internal` (not private) so the per-option-card
@@ -23,12 +24,14 @@ struct RefinanceInputsScreen: View {
 
     init(
         borrower: Borrower? = nil,
+        initialInputs: RefinanceFormInputs? = nil,
         existingScenario: Scenario? = nil
     ) {
         self.borrower = borrower
+        self.initialInputs = initialInputs
         self.existingScenario = existingScenario
         _viewModel = State(initialValue: RefinanceViewModel(
-            inputs: Self.defaultInputs,
+            inputs: initialInputs ?? Self.defaultInputs,
             borrower: borrower
         ))
         _selectedBorrower = State(initialValue: borrower)
@@ -114,7 +117,11 @@ struct RefinanceInputsScreen: View {
             .presentationDetents([.large])
         }
         .onAppear {
-            applyBorrowerCurrentMortgage(selectedBorrower)
+            // Skip borrower currentMortgage prefill when editing a saved
+            // scenario — the persisted inputs are the source of truth.
+            if initialInputs == nil {
+                applyBorrowerCurrentMortgage(selectedBorrower)
+            }
         }
     }
 

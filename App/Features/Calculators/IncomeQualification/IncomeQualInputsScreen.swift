@@ -13,6 +13,7 @@ import QuotientFinance
 
 struct IncomeQualInputsScreen: View {
     let borrower: Borrower?
+    var initialInputs: IncomeQualFormInputs?
     var existingScenario: Scenario?
 
     // viewModel, showingSelfEmployment, and selectedBorrower are
@@ -27,12 +28,14 @@ struct IncomeQualInputsScreen: View {
 
     init(
         borrower: Borrower? = nil,
+        initialInputs: IncomeQualFormInputs? = nil,
         existingScenario: Scenario? = nil
     ) {
         self.borrower = borrower
+        self.initialInputs = initialInputs
         self.existingScenario = existingScenario
         _viewModel = State(initialValue: IncomeQualViewModel(
-            inputs: Self.defaultInputs,
+            inputs: initialInputs ?? Self.defaultInputs,
             borrower: borrower
         ))
         _selectedBorrower = State(initialValue: borrower)

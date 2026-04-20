@@ -125,6 +125,20 @@ struct TCAScreen: View {
             ToolbarItem(placement: .principal) {
                 Eyebrow("04 · Total cost")
             }
+            if existingScenario != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        TCAInputsScreen(
+                            borrower: existingScenario?.borrower ?? viewModel.borrower,
+                            initialInputs: viewModel.inputs,
+                            existingScenario: existingScenario
+                        )
+                    } label: {
+                        Text("Edit")
+                    }
+                    .accessibilityIdentifier("tca.edit")
+                }
+            }
         }
         .overlay(alignment: .bottom) { bottomDock }
         .saveScenarioNameAlert(

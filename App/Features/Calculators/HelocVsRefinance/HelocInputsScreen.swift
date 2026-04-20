@@ -15,6 +15,7 @@ import QuotientFinance
 
 struct HelocInputsScreen: View {
     let borrower: Borrower?
+    var initialInputs: HelocFormInputs?
     var existingScenario: Scenario?
 
     @State private var viewModel: HelocViewModel
@@ -24,12 +25,14 @@ struct HelocInputsScreen: View {
 
     init(
         borrower: Borrower? = nil,
+        initialInputs: HelocFormInputs? = nil,
         existingScenario: Scenario? = nil
     ) {
         self.borrower = borrower
+        self.initialInputs = initialInputs
         self.existingScenario = existingScenario
         _viewModel = State(initialValue: HelocViewModel(
-            inputs: Self.defaultInputs,
+            inputs: initialInputs ?? Self.defaultInputs,
             borrower: borrower
         ))
         _selectedBorrower = State(initialValue: borrower)

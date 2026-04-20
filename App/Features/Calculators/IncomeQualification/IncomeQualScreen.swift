@@ -66,11 +66,7 @@ struct IncomeQualScreen: View {
         .background(Palette.surface)
         .scrollIndicators(.hidden)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Eyebrow("02 · Income qualification")
-            }
-        }
+        .toolbar { toolbarContent }
         .overlay(alignment: .bottom) { bottomDock }
         .saveScenarioNameAlert(
             isPresented: $showingSaveNamePrompt,
@@ -450,6 +446,35 @@ struct IncomeQualScreen: View {
                 #if DEBUG
                 print("[IncomeQualScreen] PDF gen failed: \(error)")
                 #endif
+            }
+        }
+    }
+}
+
+// MARK: - Toolbar (5R.6)
+
+extension IncomeQualScreen {
+    /// Principal title + conditional Edit trailing button. Extracted to
+    /// an extension so the struct body stays under SwiftLint's
+    /// type_body_length cap. Edit surfaces only when this screen was
+    /// opened from a saved scenario (existingScenario != nil); the fresh
+    /// Inputs → Compute flow already has a back-chevron to Inputs.
+    @ToolbarContentBuilder var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            Eyebrow("02 · Income qualification")
+        }
+        if existingScenario != nil {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    IncomeQualInputsScreen(
+                        borrower: existingScenario?.borrower ?? viewModel.borrower,
+                        initialInputs: viewModel.inputs,
+                        existingScenario: existingScenario
+                    )
+                } label: {
+                    Text("Edit")
+                }
+                .accessibilityIdentifier("incomeQual.edit")
             }
         }
     }
