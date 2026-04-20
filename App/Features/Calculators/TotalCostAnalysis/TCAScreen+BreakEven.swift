@@ -30,6 +30,10 @@ extension TCAScreen {
         let closingLabel: String
         let points: [BreakEvenPoint]
         let crossover: BreakEvenCrossover?
+        /// Session 5O.9 — each series carries its own term so the
+        /// chart's x-axis can clamp to the longest included term,
+        /// not the 360-month global fallback.
+        let termMonths: Int
     }
 
     // MARK: - Section
@@ -37,12 +41,16 @@ extension TCAScreen {
     /// Refinance-mode break-even section: per-scenario "Month N"
     /// summary rows + a Swift Charts line chart with crossover markers
     /// + per-scenario description paragraph. Baseline scenario (index
-    /// 0) is excluded — it IS the reference.
+    /// 0) is excluded — it IS the reference. Session 5O.9 — chart is
+    /// hidden entirely when no non-baseline scenario crosses closing
+    /// costs within its term; description paragraph covers the text
+    /// fallback per scenario.
     @ViewBuilder var breakEvenSection: some View {
         if viewModel.inputs.mode == .refinance,
            viewModel.inputs.scenarios.count > 1,
            let metrics = viewModel.result?.scenarioMetrics {
             let monthlyPayments = metrics.map(\.payment)
+            let series = breakEvenSeries(monthlyPayments: monthlyPayments)
             VStack(alignment: .leading, spacing: Spacing.s4) {
                 Text("Estimated break-even · refinance")
                     .textStyle(Typography.section)
@@ -56,9 +64,11 @@ extension TCAScreen {
                     .padding(.bottom, Spacing.s12)
 
                 breakEvenSummaryRows(monthlyPayments: monthlyPayments)
-                breakEvenChart(monthlyPayments: monthlyPayments)
-                    .frame(height: 200)
-                    .padding(.top, Spacing.s12)
+                if !series.isEmpty {
+                    breakEvenChart(series: series)
+                        .frame(height: 200)
+                        .padding(.top, Spacing.s12)
+                }
                 breakEvenDescription(monthlyPayments: monthlyPayments)
             }
         }
@@ -111,15 +121,19 @@ extension TCAScreen {
     /// neutral dashed reference at closing costs, crossover PointMark
     /// with "Break-even · Month N" annotation. Per-scenario color
     /// preserved so multiple refi options stay distinguishable.
+    /// Session 5O.9 — x-axis hard-clamped to the longest included
+    /// scenario's term (fixes the -500…+500 auto-domain bug when
+    /// all data points were positive-small).
     @ViewBuilder
-    func breakEvenChart(monthlyPayments: [Decimal]) -> some View {
-        let series = breakEvenSeries(monthlyPayments: monthlyPayments)
+    func breakEvenChart(series: [BreakEvenSeries]) -> some View {
         let yMax = breakEvenYMax(series: series)
+        let xMax = series.map(\.termMonths).max() ?? 360
         Chart {
             ForEach(series) { item in
                 breakEvenMarks(for: item)
             }
         }
+        .chartXScale(domain: 0...xMax)
         .chartYScale(domain: 0...yMax)
         .chartYAxis { AxisMarks(position: .leading) }
         .chartXAxisLabel("Months")
@@ -169,37 +183,59 @@ extension TCAScreen {
     }
 
     /// Pre-compute the chart's data so the Chart body stays within
-    /// Swift's type-checker budget. Each returned item corresponds to
-    /// one non-baseline scenario that produces monthly savings.
+    /// Swift's type-checker budget. Session 5O.9 — each returned item
+    /// corresponds to a non-baseline scenario that produces positive
+    /// monthly savings AND crosses its closing costs within its term.
+    /// Scenarios that don't cross are excluded from the chart data but
+    /// still surface a text line via `breakEvenDescription`.
     func breakEvenSeries(monthlyPayments: [Decimal]) -> [BreakEvenSeries] {
-        let nonBaseline = Array(viewModel.inputs.scenarios.enumerated()).dropFirst()
+        Self.breakEvenSeries(
+            inputs: viewModel.inputs,
+            monthlyPayments: monthlyPayments,
+            colorForIndex: { breakdownColor($0) }
+        )
+    }
+
+    /// Testable pure form. The @escaping color closure lets tests
+    /// pass a constant color so they can construct series without
+    /// spinning up a SwiftUI Screen.
+    static func breakEvenSeries(
+        inputs: TCAFormInputs,
+        monthlyPayments: [Decimal],
+        colorForIndex: (Int) -> Color
+    ) -> [BreakEvenSeries] {
+        let nonBaseline = Array(inputs.scenarios.enumerated()).dropFirst()
         let baselinePayment = monthlyPayments.first ?? 0
-        let maxMonths = nonBaseline.map { $1.termYears * 12 }.max() ?? 360
-        let windowMonths = min(maxMonths, 360)
         var items: [BreakEvenSeries] = []
         for (idx, scenario) in nonBaseline {
             guard monthlyPayments.indices.contains(idx),
                   monthlyPayments[idx] < baselinePayment else { continue }
-            let rawPoints = viewModel.inputs.breakEvenGraphData(
+            let crossoverMonth = inputs.breakEvenMonth(
+                scenarioIndex: idx,
+                monthlyPayments: monthlyPayments
+            )
+            // 5O.9: only include scenarios that break even within
+            // their own term. Otherwise the chart shows a flat line
+            // below the closing-costs reference, which is confusing.
+            guard let crossoverMonth else { continue }
+            let termMonths = scenario.termYears * 12
+            let rawPoints = inputs.breakEvenGraphData(
                 scenarioIndex: idx,
                 monthlyPayments: monthlyPayments,
-                maxMonths: windowMonths
+                maxMonths: termMonths
             )
             let points = rawPoints.map { raw in
                 BreakEvenPoint(month: raw.month, yValue: max(0, raw.cumulative.asDouble))
             }
-            let crossoverMonth = viewModel.inputs.breakEvenMonth(
-                scenarioIndex: idx,
-                monthlyPayments: monthlyPayments
-            )
             items.append(BreakEvenSeries(
                 id: idx,
                 seriesKey: scenario.label,
-                color: breakdownColor(idx),
+                color: colorForIndex(idx),
                 closingCosts: scenario.closingCosts.asDouble,
                 closingLabel: MoneyFormat.shared.dollarsShort(scenario.closingCosts),
                 points: points,
-                crossover: crossoverMonth.map { BreakEvenCrossover(month: $0) }
+                crossover: BreakEvenCrossover(month: crossoverMonth),
+                termMonths: termMonths
             ))
         }
         return items
@@ -224,12 +260,22 @@ extension TCAScreen {
     }
 
     func breakEvenDescriptionLines(monthlyPayments: [Decimal]) -> [String] {
+        Self.breakEvenDescriptionLines(
+            inputs: viewModel.inputs,
+            monthlyPayments: monthlyPayments
+        )
+    }
+
+    static func breakEvenDescriptionLines(
+        inputs: TCAFormInputs,
+        monthlyPayments: [Decimal]
+    ) -> [String] {
         let baselinePayment = monthlyPayments.first ?? 0
-        return viewModel.inputs.scenarios.enumerated().compactMap { idx, s in
+        return inputs.scenarios.enumerated().compactMap { idx, s in
             guard idx > 0,
                   monthlyPayments.indices.contains(idx),
                   monthlyPayments[idx] < baselinePayment else { return nil }
-            let month = viewModel.inputs.breakEvenMonth(
+            let month = inputs.breakEvenMonth(
                 scenarioIndex: idx,
                 monthlyPayments: monthlyPayments
             )
