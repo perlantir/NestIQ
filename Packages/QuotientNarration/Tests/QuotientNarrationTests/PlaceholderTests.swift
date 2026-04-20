@@ -82,6 +82,57 @@ struct NarrationTests {
         #expect(flagged.isEmpty)
     }
 
+    /// Session 5K.2 root cause: narration copy renders compact-currency
+    /// values like "$732K" (dollarsShort), but the extractor's regex
+    /// stopped at the "K", producing "$732" — which then failed exact
+    /// match against the "$732K" allowlist entry and was flagged.
+    @Test("Hallucination guard matches compact-currency K/M/B suffix")
+    func testGuardMatchesCompactSuffix() {
+        let text = "Across the life of the loan, interest totals roughly $732K. "
+            + "Lifetime savings scale to $1.24M under extended terms."
+        let allow = ["$732K", "$1.24M"]
+        let flagged = HallucinationGuard.flagUnknownNumbers(in: text, allowlist: allow)
+        #expect(flagged.isEmpty, "K/M suffix must be captured as part of the token")
+    }
+
+    /// Normalized comparison absorbs rounding between the narration's
+    /// compact-currency display and the allowlist's precise value —
+    /// e.g. "$732K" in copy vs "$732,456" in the fact allowlist.
+    @Test("Hallucination guard tolerates ±1% normalized delta")
+    func testGuardNormalizedTolerance() {
+        let text = "Total interest $732K."
+        let allow = ["$732,456"]
+        let flagged = HallucinationGuard.flagUnknownNumbers(in: text, allowlist: allow)
+        #expect(flagged.isEmpty, "values within 1% should match via normalization")
+    }
+
+    @Test("Hallucination guard still flags genuinely wrong compact values")
+    func testGuardFlagsWrongCompactValue() {
+        let text = "Total interest $732K."
+        let allow = ["$999K"] // ~36% off — well outside tolerance
+        let flagged = HallucinationGuard.flagUnknownNumbers(in: text, allowlist: allow)
+        #expect(flagged.contains("$732K"))
+    }
+
+    /// Property-ish sweep: every rendered format the calculator screens
+    /// produce must round-trip through the extractor + normalizer so the
+    /// allowlist match succeeds.
+    @Test("Hallucination guard normalizes every rendered money format")
+    func testNormalizedRoundTrip() {
+        let cases: [(rendered: String, expectedValue: Double)] = [
+            ("$732K", 732_000),
+            ("$1.24M", 1_240_000),
+            ("$4,231", 4_231),
+            ("$4,231.50", 4_231.5),
+            ("6.750%", 6.75),
+            ("$2B", 2_000_000_000),
+        ]
+        for c in cases {
+            let v = HallucinationGuard.normalizedValue(c.rendered)
+            #expect(v == c.expectedValue, "failed on \(c.rendered)")
+        }
+    }
+
     @Test("Narrator streams non-empty content through template path")
     func testNarratorStreamsTemplates() async throws {
         let facts = ScenarioFacts(

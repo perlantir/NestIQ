@@ -91,26 +91,73 @@ public enum NarrationCapability {
 // MARK: - Hallucination guard
 
 public enum HallucinationGuard {
-    /// Any numeric substring in `text` that isn't exactly present in
-    /// `allowlist` is returned. `allowlist` entries should already be
-    /// rendered (e.g. "$3,284", "6.750%").
+    /// Any numeric substring in `text` that isn't present in `allowlist`
+    /// (either by exact string match, or — as a fallback — by normalized
+    /// numeric value within a ±1% tolerance) is returned. `allowlist`
+    /// entries should already be rendered (e.g. "$3,284", "6.750%",
+    /// "$732K").
     public static func flagUnknownNumbers(in text: String, allowlist: [String]) -> [String] {
-        // Match integer, decimal, percent, currency strings.
-        let pattern = #"\$?\d{1,3}(?:,\d{3})*(?:\.\d+)?%?|\d+(?:\.\d+)?%?"#
+        // Match integer, decimal, percent, currency strings — including
+        // K/M/B compact-currency suffixes so "$732K" extracts as one
+        // token instead of a bare "$732" that would miss the allowlist.
+        // Session 5K.2 root cause: the prior regex stopped at the "K",
+        // flagging the fragment and undermining narration trust.
+        let pattern = #"\$?\d{1,3}(?:,\d{3})*(?:\.\d+)?[KMB]?%?|\d+(?:\.\d+)?[KMB]?%?"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
         let ns = text as NSString
         let matches = regex.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        let normalizedAllowlist = allowlist.compactMap(normalizedValue)
         var flagged: [String] = []
         for m in matches {
             let token = ns.substring(with: m.range)
             // Trivial fragments (1-2 digit standalones) are usually
-            // counts or dates — skip unless they carry $ / % context.
-            if token.count <= 2 && !token.contains("$") && !token.contains("%") { continue }
-            if !allowlist.contains(token) && !flagged.contains(token) {
-                flagged.append(token)
+            // counts or dates — skip unless they carry $ / % / K / M / B
+            // context.
+            if token.count <= 2 && !hasContextSigil(token) { continue }
+            if allowlist.contains(token) { continue }
+            if let tokenValue = normalizedValue(token),
+               matchesWithinTolerance(tokenValue, normalizedAllowlist) {
+                continue
             }
+            if !flagged.contains(token) { flagged.append(token) }
         }
         return flagged
+    }
+
+    private static func hasContextSigil(_ token: String) -> Bool {
+        token.contains("$") || token.contains("%")
+            || token.hasSuffix("K") || token.hasSuffix("M") || token.hasSuffix("B")
+    }
+
+    /// Parses a rendered money/percent string into a canonical Double.
+    /// `$732K` → `732_000`, `$1.24M` → `1_240_000`, `$4,231` → `4231`,
+    /// `6.750%` → `6.75`. Returns `nil` if the string has no extractable
+    /// numeric core.
+    static func normalizedValue(_ raw: String) -> Double? {
+        var s = raw
+        s.removeAll { $0 == "$" || $0 == "," }
+        var multiplier: Double = 1
+        if s.hasSuffix("%") { s.removeLast() }
+        if s.hasSuffix("K") { s.removeLast(); multiplier = 1_000 }
+        else if s.hasSuffix("M") { s.removeLast(); multiplier = 1_000_000 }
+        else if s.hasSuffix("B") { s.removeLast(); multiplier = 1_000_000_000 }
+        guard let base = Double(s) else { return nil }
+        return base * multiplier
+    }
+
+    /// A token is considered "known" if its numeric value matches any
+    /// allowlist entry within ±1% (or exact match when both are zero).
+    /// The tolerance absorbs the dollarsShort/decimalString rounding
+    /// delta: narration copy may use "$732K" while the allowlist carries
+    /// "$732,456".
+    private static func matchesWithinTolerance(_ value: Double, _ allowlist: [Double]) -> Bool {
+        for entry in allowlist {
+            if value == entry { return true }
+            let scale = max(abs(entry), abs(value))
+            if scale == 0 { continue }
+            if abs(value - entry) / scale <= 0.01 { return true }
+        }
+        return false
     }
 }
 
