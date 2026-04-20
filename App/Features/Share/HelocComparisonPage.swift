@@ -6,6 +6,7 @@
 
 import SwiftUI
 import QuotientCompliance
+import QuotientFinance
 
 struct HelocComparisonPage: View {
     struct Row {
@@ -253,9 +254,14 @@ extension HelocComparisonPage {
             inputs.firstLienBalance + inputs.helocAmount
         )
         let helocAmt = MoneyFormat.shared.currency(inputs.helocAmount)
-        let refiRate = String(format: "%.3f%%", inputs.refiRate)
-        let introRate = String(format: "%.3f%%", inputs.helocIntroRate)
-        let fullIdx = String(format: "%.3f%%", inputs.helocFullyIndexedRate)
+        // Session 5N.6 APR audit: route every rate cell through the
+        // shared displayRateAndAPR helper so per-row APR renders as
+        // "6.750% / 6.812% APR" when it diverges from the rate and
+        // falls back to a bare rate when blank or within display
+        // precision (per D2).
+        let refiRate = displayRateAndAPR(rate: inputs.refiRate, decimalAPR: inputs.refiAPR)
+        let introRate = displayRateAndAPR(rate: inputs.helocIntroRate, decimalAPR: inputs.helocAPR)
+        let fullIdx = displayRateAndAPR(rate: inputs.helocFullyIndexedRate, decimalAPR: inputs.helocAPR)
         let primeMargin = max(0, inputs.helocFullyIndexedRate - 7.50)
         let marginDisplay = String(format: "Prime + %.2f%%", primeMargin)
         var rows: [Row] = [

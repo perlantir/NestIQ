@@ -215,7 +215,11 @@ struct TCAComparisonPage: View {
                     Text(String(format: "%.3f%% · %d yr", s.rate, s.termYears))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(inkPrimary)
-                    if let apr = s.aprRate {
+                    // Session 5N.6 APR audit: render APR only when it
+                    // differs from the rate by more than display
+                    // precision (0.0005%) per D2. Matches
+                    // displayRateAndAPR semantics.
+                    if let apr = s.aprRate, abs(apr.asDouble - s.rate) > 0.0005 {
                         Text(String(format: "%.3f%% APR", apr.asDouble))
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundStyle(inkSecondary)
