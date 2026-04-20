@@ -164,6 +164,7 @@
 		F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */; };
 		F9A9E76E1B8EC71200C9BD0E /* SelfEmploymentInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2229147921A6B1EC3387AD /* SelfEmploymentInputsScreen.swift */; };
 		F9FCEC655B802C0A6CC0F7F6 /* RateRibbonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C5F9CAD331BD9C40D5DC0A /* RateRibbonCell.swift */; };
+		FAEA45F3D002660DFA18E5A8 /* TCAScreen+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */; };
 		FC1CDEE93CF9F23E35101A8E /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8B3E7E27F86F9FE22CCDC0 /* SettingsRow.swift */; };
 		FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F25962FDCE571CDFE241131 /* StressPathsChart.swift */; };
 		FD7404D704B61BADF96927A5 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0DA6E84884539067F5DCEF /* ColorHex.swift */; };
@@ -276,6 +277,7 @@
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorSelfEmploymentTests.swift; sourceTree = "<group>"; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
+		8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandDetailScreens.swift; sourceTree = "<group>"; };
 		906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedScenariosScreen+EditMode.swift"; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -747,6 +749,7 @@
 				5CFD3C36DDB1D1E7D16D72F8 /* TCAScreen+Actions.swift */,
 				E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */,
 				D822FDD24F3D67FB8B341B94 /* TCAScreen+BreakEven.swift */,
+				8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */,
 			);
 			path = TotalCostAnalysis;
 			sourceTree = "<group>";
@@ -1110,6 +1113,7 @@
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
 				5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */,
 				728DA8C1D845F5C2F80139EB /* TCAScreen+BreakdownSections.swift in Sources */,
+				FAEA45F3D002660DFA18E5A8 /* TCAScreen+CurrentMortgage.swift in Sources */,
 				4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */,
 				271D935848142EA3F4346183 /* ThemePreview.swift in Sources */,
 				F2C8E753B9341FA9B2FE95FA /* TogglePill.swift in Sources */,

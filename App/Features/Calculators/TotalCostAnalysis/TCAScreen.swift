@@ -61,6 +61,10 @@ struct TCAScreen: View {
                     .padding(.top, Spacing.s8)
                     .padding(.bottom, Spacing.s16)
 
+                currentMortgageCard
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.bottom, Spacing.s16)
+
                 legendChips
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s16)
