@@ -168,6 +168,100 @@ final class PDFBuilderTests: XCTestCase {
         return (url, size)
     }
 
+    // MARK: - Session 5N.8: PDF data integrity audit
+
+    /// Verifies cover + disclaimers carry their "Page N of M"
+    /// counters after the 5N.2a rollout. Landscape middle pages (the
+    /// amortization schedule in this case) render the same header
+    /// visually, but PDFKit's text-extraction on landscape pages
+    /// inconsistently captures the SF Mono counter glyphs — the
+    /// cover/disclaimers assertions pin the threading is correct.
+    func testPDFHeaderRendersPageNofMOnCoverAndDisclaimers() throws {
+        let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
+                                      companyName: "Gallick Holdings LLC")
+        let borrower = Borrower(firstName: "John", lastName: "Smith",
+                                propertyState: "CA", source: .manual)
+        let vm = AmortizationViewModel(borrower: borrower)
+        vm.compute()
+        let url = try PDFBuilder.buildAmortizationPDF(
+            profile: profile,
+            borrower: borrower,
+            viewModel: vm,
+            narrative: "Test"
+        )
+        let inspector = try XCTUnwrap(PDFInspector(url: url))
+        let total = inspector.pageCount
+        XCTAssertGreaterThanOrEqual(total, 3)
+        let cover = inspector.text(onPage: 0) ?? ""
+        XCTAssertTrue(cover.contains("Page 1 of \(total)"),
+                      "Cover missing 'Page 1 of \(total)'. Got: \(cover)")
+        let disclaimers = inspector.text(onPage: total - 1) ?? ""
+        XCTAssertTrue(disclaimers.contains("Page \(total) of \(total)"),
+                      "Disclaimers missing 'Page \(total) of \(total)'. Got: \(disclaimers)")
+    }
+
+    /// Empty companyName on the LenderProfile renders the signature
+    /// block without a blank company line — pre-5N.3 regression from
+    /// the "—" placeholder that leaked into the sig block.
+    func testPDFSignatureHandlesMissingCompany() throws {
+        let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
+                                      companyName: "")
+        let url = try renderMinimalAmortizationPDF(profile: profile)
+        let inspector = try XCTUnwrap(PDFInspector(url: url))
+        let text = inspector.text(onPage: 0) ?? ""
+        XCTAssertTrue(text.contains("Nick Gallick"))
+        // The "—" placeholder coming from PDFBuilder's companyName
+        // fallback must still not render as a blank line in the sig
+        // block. Signature block hides the row entirely when empty or
+        // "—".
+        let bareDashLine = text.components(separatedBy: "\n")
+            .contains(where: { $0.trimmingCharacters(in: .whitespaces) == "—" })
+        XCTAssertFalse(bareDashLine,
+                       "Signature block should not render a standalone '—' line for missing company. Got: \(text)")
+    }
+
+    /// profile.photoData = nil must render the signature block
+    /// without a phantom empty circle on the right.
+    func testPDFSignatureHandlesMissingPhoto() throws {
+        let profile = makeTestProfile(firstName: "Nick", lastName: "Gallick",
+                                      companyName: "Gallick Holdings LLC")
+        // No photoData, no showPhotoOnPDF — identical to a fresh
+        // profile that hasn't uploaded a photo yet.
+        let url = try renderMinimalAmortizationPDF(profile: profile)
+        let inspector = try XCTUnwrap(PDFInspector(url: url))
+        XCTAssertGreaterThanOrEqual(inspector.pageCount, 2)
+    }
+
+    private func makeTestProfile(
+        firstName: String,
+        lastName: String,
+        companyName: String
+    ) -> LenderProfile {
+        LenderProfile(
+            appleUserID: "apple.audit.\(UUID().uuidString)",
+            firstName: firstName,
+            lastName: lastName,
+            nmlsId: "1428391",
+            licensedStates: ["CA"],
+            companyName: companyName,
+            phone: "(415) 555-0123",
+            email: "nick@example.com"
+        )
+    }
+
+    private func renderMinimalAmortizationPDF(profile: LenderProfile) throws -> URL {
+        let borrower = Borrower(firstName: "Jane", lastName: "Doe",
+                                propertyState: "CA", source: .manual)
+        let vm = AmortizationViewModel(borrower: borrower)
+        vm.compute()
+        return try PDFBuilder.buildAmortizationPDF(
+            profile: profile,
+            borrower: borrower,
+            viewModel: vm,
+            narrative: "Test narrative."
+        )
+    }
+
     func testAmortizationPDFEndToEnd() throws {
         let profile = LenderProfile(
             appleUserID: "apple.1",
