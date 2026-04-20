@@ -320,10 +320,13 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
+        // HELOC ships cover + 1 comparison + disclaimers → 3 pages.
         let comparison = AnyView(helocComparisonPage(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel
+            viewModel: viewModel,
+            pageIndex: 2,
+            pageCount: 3
         ))
         return try buildPDF(
             profile: profile,
@@ -339,11 +342,11 @@ enum PDFBuilder {
     private static func helocComparisonPage(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: HelocViewModel
+        viewModel: HelocViewModel,
+        pageIndex: Int,
+        pageCount: Int
     ) -> some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
+        let generated = PDFPageHeader.formatDate(Date())
         let rows = HelocComparisonPage.rows(for: viewModel)
         let state = resolveState(borrower: borrower)
         let disclosures = requiredDisclosures(
@@ -372,7 +375,9 @@ enum PDFBuilder {
             accentHex: profile.brandColorHex,
             blendedRate10yr: blended10yr,
             refiRate: viewModel.inputs.refiRate,
-            verdict: verdict
+            verdict: verdict,
+            pageIndex: pageIndex,
+            pageCount: pageCount
         )
     }
 
