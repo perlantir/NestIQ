@@ -15,7 +15,10 @@ struct RootTabBar: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            HomeScreen(profile: profile)
+            HomeScreen(
+                profile: profile,
+                onSeeAllRecent: { selection = .scenarios }
+            )
                 .tabItem { Label("Calculators", systemImage: "list.number") }
                 .tag(RootTab.calculators)
 

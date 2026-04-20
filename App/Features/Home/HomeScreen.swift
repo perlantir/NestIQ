@@ -11,6 +11,10 @@ import SwiftData
 
 struct HomeScreen: View {
     let profile: LenderProfile
+    /// Invoked by the Recent scenarios "See all" affordance. RootTabBar
+    /// wires this to flip `selection` to `.scenarios`. Optional so
+    /// previews / tests that don't need tab-switching can omit it.
+    var onSeeAllRecent: (() -> Void)?
 
     @Environment(\.modelContext)
     private var modelContext
@@ -70,7 +74,7 @@ struct HomeScreen: View {
         Image("Wordmark-A")
             .resizable()
             .scaledToFit()
-            .frame(height: 24)
+            .frame(height: 29)
             .frame(maxWidth: .infinity, alignment: .center)
             .accessibilityIdentifier("home.brand.wordmark")
             .accessibilityLabel("NestIQ")
@@ -264,12 +268,15 @@ struct HomeScreen: View {
                 Eyebrow("Recent scenarios")
                 Spacer()
                 if !recentScenarios.isEmpty {
-                    NavigationLink(value: "all") {
+                    Button {
+                        onSeeAllRecent?()
+                    } label: {
                         Text("See all")
                             .textStyle(Typography.body.withWeight(.medium))
                             .foregroundStyle(Palette.accent)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("home.recent.seeAll")
                 }
             }
             if recentScenarios.isEmpty {
@@ -281,9 +288,6 @@ struct HomeScreen: View {
                     }
                 }
             }
-        }
-        .navigationDestination(for: String.self) { _ in
-            SavedScenariosScreen()
         }
     }
 
