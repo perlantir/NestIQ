@@ -166,6 +166,79 @@ final class TCAViewModelTests: XCTestCase {
         )
     }
 
+    // MARK: - Session 5M.7 — break-even
+
+    /// Known values: baseline 7%/$300k/30yr vs scenario 5%/$300k/30yr
+    /// with $5k closing. Monthly P&I @ 7% on 300k/30yr is ~$1,995.91.
+    /// @5%: ~$1,610.46. Monthly savings ~$385.45. Break-even: ceil(5000
+    /// / 385.45) = 13 months.
+    func testBreakEvenMonthKnownValues() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        let baseline = TCAScenario(
+            label: "A", name: "Current", rate: 7.0, termYears: 30,
+            closingCosts: 0, loanAmount: 300_000
+        )
+        let alt = TCAScenario(
+            label: "B", name: "Refi 5%", rate: 5.0, termYears: 30,
+            closingCosts: 5_000, loanAmount: 300_000
+        )
+        inputs.scenarios = [baseline, alt]
+        // Build monthlyPayments from fresh schedules (mirror compute()).
+        let payments: [Decimal] = inputs.scenarios.map { s in
+            let loan = Loan(
+                principal: 300_000,
+                annualRate: s.rate / 100,
+                termMonths: s.termYears * 12,
+                startDate: Date(timeIntervalSince1970: 1_767_225_600)
+            )
+            return amortize(loan: loan).scheduledPeriodicPayment
+        }
+        let month = inputs.breakEvenMonth(scenarioIndex: 1, monthlyPayments: payments)
+        XCTAssertNotNil(month)
+        XCTAssertEqual(month, 13)
+    }
+
+    /// If the refi scenario has a higher monthly payment than baseline,
+    /// there is no break-even — return nil.
+    func testBreakEvenNeverWhenNoSavings() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Current", rate: 5.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 300_000),
+            TCAScenario(label: "B", name: "Worse refi", rate: 7.0, termYears: 30,
+                        closingCosts: 5_000, loanAmount: 300_000),
+        ]
+        // Monthly P&I @ 5% is ~$1,610; @ 7% is ~$1,996 — scenario B
+        // costs MORE monthly. Savings is negative; no break-even.
+        let payments: [Decimal] = [Decimal(1_610), Decimal(1_996)]
+        XCTAssertNil(inputs.breakEvenMonth(scenarioIndex: 1, monthlyPayments: payments))
+    }
+
+    /// Graph data: monthlyPayments fed in, cumulative grows linearly.
+    /// At month 12 with savings of $100/mo, cumulative should be $1,200.
+    func testBreakEvenGraphDataPointsCorrect() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Baseline", rate: 7.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 300_000),
+            TCAScenario(label: "B", name: "Refi", rate: 5.0, termYears: 30,
+                        closingCosts: 5_000, loanAmount: 300_000),
+        ]
+        // Inject flat payments so cumulative math is deterministic.
+        let payments: [Decimal] = [Decimal(1_500), Decimal(1_400)]  // 100/mo savings
+        let data = inputs.breakEvenGraphData(
+            scenarioIndex: 1,
+            monthlyPayments: payments,
+            maxMonths: 12
+        )
+        XCTAssertEqual(data.count, 13)  // months 0…12 inclusive
+        XCTAssertEqual(data[0].cumulative, 0)
+        XCTAssertEqual(data[12].cumulative, 1_200)
+    }
+
     /// Credits exceeding costs clamp at 0 (not negative).
     func testCashToCloseClampsAtZeroWhenCreditsExceedCosts() {
         var inputs = TCAFormInputs.sampleDefault

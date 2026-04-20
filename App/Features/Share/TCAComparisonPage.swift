@@ -34,6 +34,8 @@ struct TCAComparisonPage: View {
                 .padding(.top, 10)
             unrecoverableSummary
                 .padding(.top, 10)
+            breakEvenSummary
+                .padding(.top, 8)
             Spacer(minLength: 0)
             footer
         }
@@ -130,31 +132,42 @@ struct TCAComparisonPage: View {
         }
     }
 
-    private func unrecoverableDollar(
-        scenarioIndex: Int,
-        scenario: TCAScenario,
-        years: Int,
-        schedules: [AmortizationSchedule]
-    ) -> String {
-        guard scenarioIndex < schedules.count else { return "—" }
-        let unrecoverable = viewModel.inputs.unrecoverableCost(
-            scenario: scenario,
-            schedule: schedules[scenarioIndex],
-            years: years
-        )
-        return MoneyFormat.shared.dollarsShort(unrecoverable)
+    /// Session 5M.7: refinance-mode break-even summary per scenario.
+    /// Compact one-liner (full graph lives on the in-app Results view —
+    /// the comparison PDF page is already dense). Only rendered in
+    /// refi mode with > 1 scenario; otherwise an empty view.
+    @ViewBuilder private var breakEvenSummary: some View {
+        if viewModel.inputs.mode == .refinance,
+           viewModel.inputs.scenarios.count > 1,
+           let metrics = viewModel.result?.scenarioMetrics {
+            let payments = metrics.map(\.payment)
+            let parts = Array(viewModel.inputs.scenarios.enumerated()).compactMap { idx, s -> String? in
+                guard idx > 0 else { return nil }
+                if let month = viewModel.inputs.breakEvenMonth(
+                    scenarioIndex: idx,
+                    monthlyPayments: payments
+                ) {
+                    let years = Double(month) / 12.0
+                    return String(format: "%@: mo %d (~%.1fyr)", s.label, month, years)
+                }
+                return "\(s.label): never (within \(s.termYears)yr)"
+            }
+            HStack(spacing: 6) {
+                Text("Break-even")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(0.6)
+                    .foregroundStyle(inkTertiary)
+                Text(parts.joined(separator: "  ·  "))
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(inkPrimary)
+            }
+            .padding(.leading, 16)
+        }
     }
 
-    private func interestPrincipalSplit(schedule: AmortizationSchedule, years: Int) -> String {
-        let month = years * 12
-        let interest = schedule.cumulativeInterest(throughMonth: month)
-        let principal = schedule.cumulativePrincipal(throughMonth: month)
-        let total = interest + principal
-        guard total > 0 else { return "—" }
-        let intPct = (interest.asDouble / total.asDouble) * 100
-        let prinPct = 100 - intPct
-        return String(format: "%.0f%% int / %.0f%% prin", intPct, prinPct)
-    }
+    // unrecoverableDollar + interestPrincipalSplit live in
+    // TCAComparisonPage+Helpers.swift (extracted 5M.7 to keep the main
+    // struct under type_body_length).
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {

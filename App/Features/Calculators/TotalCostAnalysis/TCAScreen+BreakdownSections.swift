@@ -4,6 +4,7 @@
 // extension so TCAScreen stays under SwiftLint's type_body_length cap.
 
 import SwiftUI
+import Charts
 import QuotientFinance
 
 extension TCAScreen {
@@ -181,6 +182,110 @@ extension TCAScreen {
         guard totalPaid > 0 else { return dollar }
         let pct = (unrecoverable.asDouble / totalPaid.asDouble) * 100
         return String(format: "%@ (%.0f%%)", dollar, pct)
+    }
+
+    // MARK: - 5M.7 Break-even analysis (refinance mode)
+
+    /// Refinance-mode break-even section: per-scenario "Month N"
+    /// summary rows + a Swift Charts line chart showing cumulative
+    /// monthly savings vs. the scenario's closing cost (crossover).
+    /// Baseline scenario (index 0) is excluded — it IS the reference.
+    @ViewBuilder var breakEvenSection: some View {
+        if viewModel.inputs.mode == .refinance,
+           viewModel.inputs.scenarios.count > 1,
+           let metrics = viewModel.result?.scenarioMetrics {
+            let monthlyPayments = metrics.map(\.payment)
+            VStack(alignment: .leading, spacing: Spacing.s4) {
+                Text("Estimated break-even · refinance")
+                    .textStyle(Typography.section)
+                    .foregroundStyle(Palette.ink)
+                Text(
+                    "When cumulative monthly savings equal the scenario's closing costs. "
+                    + "Actual break-even may vary with tax, insurance, or escrow changes."
+                )
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+                    .padding(.bottom, Spacing.s12)
+
+                breakEvenSummaryRows(monthlyPayments: monthlyPayments)
+                breakEvenChart(monthlyPayments: monthlyPayments)
+                    .frame(height: 180)
+                    .padding(.top, Spacing.s12)
+            }
+        }
+    }
+
+    private func breakEvenSummaryRows(monthlyPayments: [Decimal]) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.s4) {
+            ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
+                if idx > 0 {
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.s8) {
+                        Circle()
+                            .fill(breakdownColor(idx))
+                            .frame(width: 8, height: 8)
+                        Text(s.label.uppercased() + " · " + s.name)
+                            .textStyle(Typography.num.withSize(12, weight: .semibold))
+                            .foregroundStyle(Palette.ink)
+                        Spacer()
+                        Text(breakEvenLabel(
+                            scenarioIndex: idx,
+                            monthlyPayments: monthlyPayments,
+                            termYears: s.termYears
+                        ))
+                        .textStyle(Typography.num.withSize(12, design: .monospaced))
+                        .foregroundStyle(Palette.ink)
+                    }
+                }
+            }
+        }
+    }
+
+    func breakEvenLabel(
+        scenarioIndex: Int,
+        monthlyPayments: [Decimal],
+        termYears: Int
+    ) -> String {
+        let month = viewModel.inputs.breakEvenMonth(
+            scenarioIndex: scenarioIndex,
+            monthlyPayments: monthlyPayments
+        )
+        guard let month else { return "Never (within \(termYears)-yr term)" }
+        let years = Double(month) / 12.0
+        return String(format: "Month %d (~%.1f years)", month, years)
+    }
+
+    @ViewBuilder
+    private func breakEvenChart(monthlyPayments: [Decimal]) -> some View {
+        let nonBaseline = Array(viewModel.inputs.scenarios.enumerated()).dropFirst()
+        // Longest x-axis extent: max of scenario terms in months, capped
+        // so the chart stays readable when a scenario hasn't broken even.
+        let maxMonths = nonBaseline.map { $1.termYears * 12 }.max() ?? 360
+        let windowMonths = min(maxMonths, 360)
+        Chart {
+            ForEach(Array(nonBaseline), id: \.offset) { idx, scenario in
+                let points = viewModel.inputs.breakEvenGraphData(
+                    scenarioIndex: idx,
+                    monthlyPayments: monthlyPayments,
+                    maxMonths: windowMonths
+                )
+                ForEach(Array(points.enumerated()), id: \.offset) { _, pt in
+                    LineMark(
+                        x: .value("Month", pt.month),
+                        y: .value("Cumulative savings", pt.cumulative.asDouble),
+                        series: .value("Scenario", scenario.label)
+                    )
+                    .foregroundStyle(breakdownColor(idx))
+                }
+                RuleMark(y: .value("Closing", scenario.closingCosts.asDouble))
+                    .foregroundStyle(breakdownColor(idx).opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading)
+        }
+        .chartXAxisLabel("Months")
+        .chartYAxisLabel("$ saved")
     }
 
     // MARK: - Narrative (moved from TCAScreen in 5M.5)

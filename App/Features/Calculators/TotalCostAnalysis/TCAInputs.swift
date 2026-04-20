@@ -245,6 +245,63 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         }
     }
 
+    /// Session 5M.7: estimated break-even month for a non-baseline
+    /// refinance scenario against the baseline (scenario index 0).
+    /// Returns `nil` when break-even is never reached within the
+    /// scenario's term (baseline is cheaper monthly, or savings don't
+    /// offset closing costs before payoff).
+    ///
+    /// `monthlyPayments` expects `viewModel.result.scenarioMetrics.map
+    /// { $0.payment }` so callers reuse the already-computed P&I from
+    /// the main ComparisonResult. Refinance-mode only — purchase mode
+    /// doesn't have a "baseline" in the TCA sense.
+    func breakEvenMonth(
+        scenarioIndex: Int,
+        monthlyPayments: [Decimal]
+    ) -> Int? {
+        guard mode == .refinance,
+              scenarioIndex > 0,
+              scenarioIndex < scenarios.count,
+              scenarioIndex < monthlyPayments.count,
+              !monthlyPayments.isEmpty
+        else { return nil }
+        let baseline = monthlyPayments[0]
+        let scenarioPmt = monthlyPayments[scenarioIndex]
+        let monthlySavings = baseline - scenarioPmt
+        guard monthlySavings > 0 else { return nil }
+        let closing = scenarios[scenarioIndex].closingCosts
+        guard closing > 0 else { return 0 }
+        // Integer ceiling division: smallest M where M × savings >= closing.
+        let monthsDouble = (closing.asDouble / monthlySavings.asDouble).rounded(.up)
+        let months = Int(monthsDouble)
+        let maxTerm = scenarios[scenarioIndex].termYears * 12
+        guard months <= maxTerm else { return nil }
+        return months
+    }
+
+    /// Session 5M.7: sampled points for the break-even Swift Chart.
+    /// Returns (month, cumulativeSavings) pairs at each integer month
+    /// from 0 through `maxMonths`. Cumulative savings is a flat linear
+    /// growth (monthlySavings × M) because the math assumes constant
+    /// P&I differential month-to-month. Callers chart this against a
+    /// horizontal reference line at `scenario.closingCosts`.
+    func breakEvenGraphData(
+        scenarioIndex: Int,
+        monthlyPayments: [Decimal],
+        maxMonths: Int
+    ) -> [(month: Int, cumulative: Decimal)] {
+        guard scenarioIndex > 0,
+              scenarioIndex < scenarios.count,
+              scenarioIndex < monthlyPayments.count
+        else { return [] }
+        let baseline = monthlyPayments[0]
+        let scenarioPmt = monthlyPayments[scenarioIndex]
+        let monthlySavings = baseline - scenarioPmt
+        return (0...maxMonths).map { m in
+            (month: m, cumulative: monthlySavings * Decimal(m))
+        }
+    }
+
     /// Session 5M.6: cumulative unrecoverable cost at horizon — the
     /// portion of total mortgage payments that doesn't build equity or
     /// transfer to the borrower. Definition per D4 (5M): interest paid

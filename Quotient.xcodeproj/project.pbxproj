@@ -107,6 +107,7 @@
 		B2988F0373843D1A0553B89B /* SettingsScreen+Compliance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */; };
 		B56C34E50BE98BBE02B240FC /* PropertyDownPaymentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */; };
 		B867A917622C9C8DD4DAD497 /* BrandDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */; };
+		BA349AE56749A956C4877109 /* TCAComparisonPage+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14311F0A4AC1E38A5416C9EB /* TCAComparisonPage+Helpers.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
 		BBC30D3D783551C8047A2AE4 /* ScenarioSaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */; };
 		BBDD23BA9E669DE12DF02763 /* ShareBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */; };
@@ -179,6 +180,7 @@
 		0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDownPaymentConfig.swift; sourceTree = "<group>"; };
 		0F740E91156398C886E507D3 /* NarrationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationSheet.swift; sourceTree = "<group>"; };
 		0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceInputsScreen.swift; sourceTree = "<group>"; };
+		14311F0A4AC1E38A5416C9EB /* TCAComparisonPage+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAComparisonPage+Helpers.swift"; sourceTree = "<group>"; };
 		1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorAmortTests.swift; sourceTree = "<group>"; };
 		1866228FFAF9C7A0CCC95764 /* AmortizationInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputs.swift; sourceTree = "<group>"; };
 		19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualListViews.swift; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 				659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */,
 				36C1D4825AF59A035A76E125 /* SharePreview.swift */,
 				DCCA418EB2A9FFB0B32BB7AB /* TCAComparisonPage.swift */,
+				14311F0A4AC1E38A5416C9EB /* TCAComparisonPage+Helpers.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -1016,6 +1019,7 @@
 				3A41B4E5CE7B4B39E65BEB86 /* StackedHorizontalBar.swift in Sources */,
 				FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */,
 				8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */,
+				BA349AE56749A956C4877109 /* TCAComparisonPage+Helpers.swift in Sources */,
 				595BDC055ADC5AF57CE8CBF5 /* TCAComparisonPage.swift in Sources */,
 				4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */,
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
