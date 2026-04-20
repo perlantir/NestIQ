@@ -245,6 +245,40 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         }
     }
 
+    // MARK: - Session 5M.9 — equity buildup
+
+    /// Home equity at horizon month = home value − remaining loan
+    /// balance. Flat home value (no appreciation modeled — label
+    /// clearly reflects this). Purchase mode uses the scenario's own
+    /// purchasePrice; refinance mode uses the form-level homeValue.
+    /// Returns 0 when neither is set.
+    func equityAtHorizon(
+        scenarioIndex: Int,
+        schedule: AmortizationSchedule,
+        years: Int
+    ) -> Decimal {
+        guard scenarioIndex < scenarios.count else { return 0 }
+        let scenario = scenarios[scenarioIndex]
+        let homeValueForScenario: Decimal
+        switch mode {
+        case .purchase:
+            homeValueForScenario = scenario.propertyDP.purchasePrice
+        case .refinance:
+            homeValueForScenario = homeValue
+        }
+        guard homeValueForScenario > 0 else { return 0 }
+        let month = Swift.max(0, years * 12)
+        let remaining: Decimal
+        if month == 0 {
+            remaining = schedule.loan.principal
+        } else if month >= schedule.payments.count {
+            remaining = 0
+        } else {
+            remaining = schedule.payments[month - 1].balance
+        }
+        return (homeValueForScenario - remaining).clampedNonNegative
+    }
+
     // MARK: - Session 5M.8 — reinvestment strategy
 
     /// "Invest the savings" — future value of baseline-minus-scenario

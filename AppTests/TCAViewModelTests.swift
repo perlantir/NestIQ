@@ -332,6 +332,79 @@ final class TCAViewModelTests: XCTestCase {
         XCTAssertNil(pathB)  // no savings to apply
     }
 
+    // MARK: - Session 5M.9 — equity buildup
+
+    /// Known equity: 500k home, 400k loan, month 120. Remaining balance
+    /// at month 120 on a 30yr/6% schedule is ~$334,732. Equity ≈ 500k −
+    /// 334,732 = 165,268. Invariant-only check: equity should be > 0
+    /// and < home value.
+    func testEquityAtHorizonKnownLoan() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.homeValue = 500_000
+        let scenario = TCAScenario(
+            label: "A", name: "Conv 30", rate: 6.0, termYears: 30,
+            closingCosts: 0, loanAmount: 400_000
+        )
+        inputs.scenarios = [scenario]
+        let schedule = amortize(loan: Loan(
+            principal: 400_000, annualRate: 0.06, termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        let equity = inputs.equityAtHorizon(scenarioIndex: 0, schedule: schedule, years: 10)
+        XCTAssertTrue(equity > 150_000 && equity < 180_000,
+                      "Expected ~165k equity, got \(equity)")
+    }
+
+    /// Same principal / home value, shorter term pays down principal
+    /// faster → higher equity at any mid-schedule horizon.
+    func testEquityGreaterForFasterAmortization() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.homeValue = 500_000
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "15yr", rate: 5.0, termYears: 15,
+                        closingCosts: 0, loanAmount: 400_000),
+            TCAScenario(label: "B", name: "30yr", rate: 5.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 400_000),
+        ]
+        let loan15 = amortize(loan: Loan(
+            principal: 400_000, annualRate: 0.05, termMonths: 180,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        let loan30 = amortize(loan: Loan(
+            principal: 400_000, annualRate: 0.05, termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        let eq15 = inputs.equityAtHorizon(scenarioIndex: 0, schedule: loan15, years: 5)
+        let eq30 = inputs.equityAtHorizon(scenarioIndex: 1, schedule: loan30, years: 5)
+        XCTAssertTrue(eq15 > eq30)
+    }
+
+    /// Purchase mode uses scenario.propertyDP.purchasePrice rather
+    /// than the form-level homeValue.
+    func testEquityUsesScenarioPriceInPurchaseMode() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .purchase
+        inputs.homeValue = 0  // deliberately unset
+        var propertyDP = PropertyDownPaymentConfig.empty
+        propertyDP.purchasePrice = 600_000
+        propertyDP.downPaymentDollar = 120_000
+        propertyDP.useDownPaymentDollar = true
+        let scenario = TCAScenario(
+            label: "A", name: "Conv 30", rate: 6.0, termYears: 30,
+            loanAmount: 0, propertyDP: propertyDP
+        )
+        inputs.scenarios = [scenario]
+        let schedule = amortize(loan: Loan(
+            principal: 480_000, annualRate: 0.06, termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        // At month 0 equity = price - full principal = 600k - 480k = 120k.
+        let equityAtZero = inputs.equityAtHorizon(scenarioIndex: 0, schedule: schedule, years: 0)
+        XCTAssertEqual(equityAtZero, 120_000)
+    }
+
     /// Credits exceeding costs clamp at 0 (not negative).
     func testCashToCloseClampsAtZeroWhenCreditsExceedCosts() {
         var inputs = TCAFormInputs.sampleDefault

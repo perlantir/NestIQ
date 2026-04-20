@@ -38,6 +38,8 @@ struct TCAComparisonPage: View {
                 .padding(.top, 8)
             reinvestmentSummary
                 .padding(.top, 6)
+            equitySummary
+                .padding(.top, 6)
             Spacer(minLength: 0)
             footer
         }

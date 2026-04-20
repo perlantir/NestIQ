@@ -40,6 +40,40 @@ extension TCAComparisonPage {
         }
     }
 
+    /// Session 5M.9: compact equity summary for the PDF — one line of
+    /// per-scenario longest-horizon equity values. Full per-horizon
+    /// matrix lives on the in-app Results view.
+    @ViewBuilder var equitySummary: some View {
+        if !viewModel.scenarioSchedules.isEmpty {
+            let longest = viewModel.inputs.horizonsYears.max() ?? 30
+            let parts = equityParts(longest: longest)
+            if !parts.isEmpty {
+                HStack(spacing: 6) {
+                    Text("Equity @ \(longest)yr")
+                        .font(.system(size: 9.5, weight: .semibold))
+                        .tracking(0.6)
+                        .foregroundStyle(Color(red: 0x85 / 255, green: 0x81 / 255, blue: 0x6F / 255))
+                    Text(parts.joined(separator: "  ·  "))
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255))
+                }
+                .padding(.leading, 16)
+            }
+        }
+    }
+
+    private func equityParts(longest: Int) -> [String] {
+        Array(viewModel.inputs.scenarios.enumerated()).compactMap { idx, s -> String? in
+            guard idx < viewModel.scenarioSchedules.count else { return nil }
+            let equity = viewModel.inputs.equityAtHorizon(
+                scenarioIndex: idx,
+                schedule: viewModel.scenarioSchedules[idx],
+                years: longest
+            )
+            return "\(s.label): " + MoneyFormat.shared.dollarsShort(equity)
+        }
+    }
+
     private func reinvestmentParts(longest: Int, monthlyPayments: [Decimal]) -> [String] {
         Array(viewModel.inputs.scenarios.enumerated()).compactMap { idx, s -> String? in
             guard idx > 0 else { return nil }

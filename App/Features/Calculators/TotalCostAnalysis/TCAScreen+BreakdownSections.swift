@@ -402,6 +402,54 @@ extension TCAScreen {
         }
     }
 
+    // MARK: - 5M.9 Equity buildup
+
+    /// "Equity at horizon" matrix — home value minus remaining loan
+    /// balance per scenario per horizon. Flat home value (no
+    /// appreciation modeling per the session scope note); the caption
+    /// calls this out explicitly so LOs don't over-promise.
+    @ViewBuilder var equityBuildupSection: some View {
+        if !viewModel.scenarioSchedules.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.s4) {
+                Text("Equity at horizon")
+                    .textStyle(Typography.section)
+                    .foregroundStyle(Palette.ink)
+                Text("Home value minus remaining loan balance. Assumes flat home value — appreciation not modeled.")
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+                    .padding(.bottom, Spacing.s12)
+
+                breakdownHeader
+                ForEach(Array(viewModel.inputs.horizonsYears.enumerated()), id: \.offset) { _, years in
+                    equityRow(years: years)
+                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                }
+            }
+        }
+    }
+
+    private func equityRow(years: Int) -> some View {
+        HStack(spacing: 0) {
+            Text("\(years)yr")
+                .textStyle(Typography.num.withSize(12, design: .monospaced))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(width: 52, alignment: .leading)
+            ForEach(Array(viewModel.scenarioSchedules.enumerated()), id: \.offset) { idx, schedule in
+                Text(MoneyFormat.shared.dollarsShort(
+                    viewModel.inputs.equityAtHorizon(
+                        scenarioIndex: idx,
+                        schedule: schedule,
+                        years: years
+                    )
+                ))
+                .textStyle(Typography.num.withSize(11, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+        }
+        .padding(.vertical, Spacing.s8)
+    }
+
     // MARK: - Narrative (moved from TCAScreen in 5M.5)
 
     var narrative: some View {

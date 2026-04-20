@@ -89,6 +89,10 @@ struct TCAScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s24)
 
+                equityBuildupSection
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.bottom, Spacing.s24)
+
                 narrative
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s24)
