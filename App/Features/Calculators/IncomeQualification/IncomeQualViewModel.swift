@@ -32,19 +32,20 @@ final class IncomeQualViewModel {
         return Double(truncating: (cushion / piti) as NSNumber)
     }
 
+    /// Front-end DTI at max qualification — share of qualifying income
+    /// that goes to housing only (PITI). Session 5R.2: comment is the
+    /// source of truth; no "netting" happens — `maxPITI` is housing
+    /// only (qualifyingIncome × backEndCap − debts = room for housing).
     var frontEndDTI: Double {
         guard qualifyingIncome > 0 else { return 0 }
-        let piti = maxPITI
-        let housing = piti
-        return Double(truncating: (housing / qualifyingIncome) as NSNumber)
+        return Double(truncating: (maxPITI / qualifyingIncome) as NSNumber)
     }
 
-    var backEndDTI: Double {
-        guard qualifyingIncome > 0 else { return 0 }
-        let total = maxPITI + 0 // maxPITI already nets debts
-        return Double(truncating: (total / qualifyingIncome) as NSNumber)
-    }
-
+    /// Back-end DTI at max qualification = (housing + existing debts) /
+    /// qualifying income. By construction this equals `backEndLimit`
+    /// exactly — that's the cap maxPITI was derived against. Useful
+    /// only as a display confirmation ("qualified at 43.0%"); it can't
+    /// exceed the cap without the inputs becoming inconsistent.
     var backEndDTIIncludingDebts: Double {
         guard qualifyingIncome > 0 else { return 0 }
         let total = maxPITI + totalDebt

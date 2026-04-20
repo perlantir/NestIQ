@@ -265,15 +265,10 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         qualifyingIncome * Decimal(backEndLimit) - totalMonthlyDebt
     }
 
-    var frontEndDTI: Double {
-        guard qualifyingIncome > 0 else { return 0 }
-        let piti = maxPITI > 0 ? (maxPITI - totalMonthlyDebt) : 0
-        return Double(truncating: (piti / qualifyingIncome) as NSNumber)
-    }
-
-    var backEndDTI: Double {
-        guard qualifyingIncome > 0 else { return 0 }
-        let total = maxPITI
-        return Double(truncating: (total / qualifyingIncome) as NSNumber)
-    }
+    // Session 5R.2 — the DTI display helpers live on `IncomeQualViewModel`
+    // (`frontEndDTI`, `backEndDTIIncludingDebts`). The stale `frontEndDTI`
+    // + `backEndDTI` properties that used to live here were (a) never
+    // called from the UI, and (b) `frontEndDTI` double-subtracted debts
+    // (`maxPITI − totalMonthlyDebt` where `maxPITI` already nets them).
+    // Removed to eliminate a trap for future reviewers.
 }

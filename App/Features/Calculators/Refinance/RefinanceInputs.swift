@@ -218,6 +218,12 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
     }
 
     func scenarioInputs() -> [ScenarioInput] {
+        // Session 5R.2 — plumb per-scenario MI into the engine's
+        // amortization options. Previously collected on the Inputs
+        // screen + displayed in the comparison table, but never
+        // forwarded to `compareScenarios`, so MI was silently absent
+        // from cumulative-interest / unrecoverable / total-cost
+        // computations.
         let current = ScenarioInput(
             name: "Current",
             loan: Loan(
@@ -229,7 +235,8 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
             closingCosts: 0,
             monthlyTaxes: monthlyTaxes,
             monthlyInsurance: monthlyInsurance,
-            monthlyHOA: monthlyHOA
+            monthlyHOA: monthlyHOA,
+            options: miOptions(monthlyMI: currentMonthlyMI, loanAmount: currentBalance)
         )
         let opts = options.map { opt in
             ScenarioInput(
@@ -243,9 +250,37 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
                 closingCosts: opt.closingCosts,
                 monthlyTaxes: monthlyTaxes,
                 monthlyInsurance: monthlyInsurance,
-                monthlyHOA: monthlyHOA
+                monthlyHOA: monthlyHOA,
+                options: miOptions(monthlyMI: opt.monthlyMI, loanAmount: effectiveLoanAmount(for: opt))
             )
         }
         return [current] + opts
+    }
+
+    /// Build AmortizationOptions carrying a PMI schedule when
+    /// `monthlyMI > 0`. Uses HPA 78% dropoff when `homeValue` is set;
+    /// treats MI as permanent when no home value is available.
+    private func miOptions(monthlyMI: Decimal, loanAmount: Decimal) -> AmortizationOptions {
+        guard monthlyMI > 0 else { return .none }
+        if homeValue > 0 {
+            return AmortizationOptions(
+                pmiSchedule: PMISchedule(
+                    monthlyAmount: monthlyMI,
+                    originalValue: homeValue,
+                    dropAtLTV: 0.78,
+                    minimumPeriods: 0,
+                    isPermanent: false
+                )
+            )
+        }
+        return AmortizationOptions(
+            pmiSchedule: PMISchedule(
+                monthlyAmount: monthlyMI,
+                originalValue: 0,
+                dropAtLTV: 0.78,
+                minimumPeriods: 0,
+                isPermanent: true
+            )
+        )
     }
 }

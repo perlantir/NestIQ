@@ -648,6 +648,70 @@ final class TCAViewModelTests: XCTestCase {
     /// Reinvestment savings: path-A and path-B baselines now resolve
     /// via `breakEvenBaselinePayment`, so they agree with the break-
     /// even math. Without currentMortgage + idx==0 stays skipped.
+    // MARK: - Session 5R.2 — double-points bug fix
+
+    /// Regression: `scenarioInputs()` must not add `principal × points`
+    /// back into closing costs — points are already baked into the
+    /// all-in `closingCosts` value per the 5B.5 convention. Pre-5R.2
+    /// the helper double-charged, inflating engine closingCosts by
+    /// the point dollar value and throwing off break-even /
+    /// unrecoverable / total-cost math.
+    /// Regression for the 5R.2 MI plumbing: scenario.monthlyMI is now
+    /// forwarded to the engine via an AmortizationOptions.pmiSchedule.
+    /// Pre-5R.2 the field was displayed but dropped silently, so
+    /// `cumulativeMI(throughMonth:)` returned 0 and unrecoverable
+    /// cost understated by the MI dollar amount.
+    func testScenarioInputsPlumbsMIIntoEngine() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.loanAmount = 400_000
+        inputs.homeValue = 500_000
+        inputs.scenarios = [
+            TCAScenario(
+                label: "A",
+                name: "Conv 30 w/ MI",
+                rate: 6.5,
+                termYears: 30,
+                points: 0,
+                closingCosts: 8_000,
+                loanAmount: 400_000,
+                monthlyMI: 180
+            )
+        ]
+        let engineInputs = inputs.scenarioInputs()
+        let schedule = amortize(
+            loan: engineInputs[0].loan,
+            options: engineInputs[0].options
+        )
+        // 12 months × $180/mo = $2,160 — barring HPA dropoff within
+        // the first year. Starting LTV is 400/500 = 0.80 vs drop at
+        // 0.78 threshold × 500 = $390. Balance at month 12 is still
+        // well above $390K, so MI applies every month.
+        let firstYearMI = schedule.cumulativeMI(throughMonth: 12)
+        XCTAssertEqual(firstYearMI, 2_160,
+            "Expected 12 × $180 = $2,160 of MI in year 1")
+    }
+
+    func testScenarioInputsDoesNotDoubleChargePoints() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.loanAmount = 400_000
+        inputs.scenarios = [
+            TCAScenario(
+                label: "A",
+                name: "Conv 30 w/ 1.5 pts",
+                rate: 6.0,
+                termYears: 30,
+                points: 1.5,              // 1.5% of $400K = $6,000
+                closingCosts: 12_000,     // ALL-IN amount (includes the $6K points)
+                loanAmount: 400_000
+            )
+        ]
+        let engineInputs = inputs.scenarioInputs()
+        XCTAssertEqual(engineInputs.first?.closingCosts, 12_000,
+            "scenarioInputs() must pass closingCosts through unchanged — points are already in the all-in value")
+    }
+
     func testPathBSkipsScenarioAWhenNoCurrentMortgage() {
         var inputs = TCAFormInputs.sampleDefault
         inputs.mode = .refinance

@@ -570,23 +570,6 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         horizonsYears: [5, 7, 10, 15, 30]
     )
 
-    func scenarioInputs() -> [ScenarioInput] {
-        scenarios.map { s in
-            let principal = effectiveLoanAmount(for: s)
-            let pointsCost = principal * Decimal(s.points) / 100
-            return ScenarioInput(
-                name: s.label,
-                loan: Loan(
-                    principal: principal,
-                    annualRate: s.rate / 100,
-                    termMonths: s.termYears * 12,
-                    startDate: Date()
-                ),
-                closingCosts: s.closingCosts + pointsCost,
-                monthlyTaxes: monthlyTaxes,
-                monthlyInsurance: monthlyInsurance,
-                monthlyHOA: monthlyHOA
-            )
-        }
-    }
+    // `scenarioInputs()` + MI plumbing moved to TCAInputs+Engine.swift
+    // in 5R.2 so this file stays under SwiftLint's 600-line cap.
 }
