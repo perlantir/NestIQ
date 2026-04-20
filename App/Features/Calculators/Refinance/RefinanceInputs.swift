@@ -20,10 +20,13 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
     /// because different lenders quote different MI for the same
     /// borrower/property even at the same loan amount.
     var monthlyMI: Decimal
+    /// Session 5M.1: optional per-option APR. Display-only (D1); `nil`
+    /// collapses display to the note rate alone (D2).
+    var aprRate: Decimal?
 
     enum CodingKeys: String, CodingKey {
         case id, label, rate, termYears, points, closingCosts
-        case newLoanAmount, monthlyMI
+        case newLoanAmount, monthlyMI, aprRate
     }
 
     init(
@@ -34,7 +37,8 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         points: Double = 0,
         closingCosts: Decimal = 0,
         newLoanAmount: Decimal = 0,
-        monthlyMI: Decimal = 0
+        monthlyMI: Decimal = 0,
+        aprRate: Decimal? = nil
     ) {
         self.id = id
         self.label = label
@@ -44,6 +48,7 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         self.closingCosts = closingCosts
         self.newLoanAmount = newLoanAmount
         self.monthlyMI = monthlyMI
+        self.aprRate = aprRate
     }
 
     init(from decoder: any Decoder) throws {
@@ -56,6 +61,7 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         self.closingCosts = try c.decode(Decimal.self, forKey: .closingCosts)
         self.newLoanAmount = try c.decodeIfPresent(Decimal.self, forKey: .newLoanAmount) ?? 0
         self.monthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .monthlyMI) ?? 0
+        self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
     }
 }
 
@@ -79,12 +85,15 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
     /// Kept in sync with `options.count` when the user changes the
     /// selector on the Inputs screen.
     var scenarioCount: Int
+    /// Session 5M.1: optional APR on the existing loan. Display-only.
+    var currentAPR: Decimal?
 
     enum CodingKeys: String, CodingKey {
         case currentBalance, currentRate, currentRemainingYears
         case currentMonthlyMI, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
         case options, horizonsYears, stressTestHorizonYears, scenarioCount
+        case currentAPR
     }
 
     init(
@@ -99,7 +108,8 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         options: [RefiOption],
         horizonsYears: [Int],
         stressTestHorizonYears: Int,
-        scenarioCount: Int? = nil
+        scenarioCount: Int? = nil,
+        currentAPR: Decimal? = nil
     ) {
         self.currentBalance = currentBalance
         self.currentRate = currentRate
@@ -113,6 +123,7 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.horizonsYears = horizonsYears
         self.stressTestHorizonYears = stressTestHorizonYears
         self.scenarioCount = scenarioCount ?? options.count
+        self.currentAPR = currentAPR
     }
 
     init(from decoder: any Decoder) throws {
@@ -130,6 +141,7 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.stressTestHorizonYears = try c.decode(Int.self, forKey: .stressTestHorizonYears)
         self.scenarioCount = try c.decodeIfPresent(Int.self, forKey: .scenarioCount)
             ?? self.options.count
+        self.currentAPR = try c.decodeIfPresent(Decimal.self, forKey: .currentAPR)
     }
 
     /// Effective new loan amount for an option. Falls back to

@@ -95,6 +95,9 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
     /// Surfaced on the Results view as "Reserves: $X (N months × PITI)"
     /// using the max qualifying PITI as the month.
     var reservesMonths: Int
+    /// Session 5M.1: optional APR on `annualRate`. Display-only (D1).
+    /// `nil` means "same as rate" — display shows the rate alone (D2).
+    var aprRate: Decimal?
 
     enum CodingKeys: String, CodingKey {
         case mode
@@ -102,7 +105,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         case annualRate, termYears, annualTaxes, annualInsurance, monthlyHOA
         case downPaymentPercent, incomes, debts, propertyDP
         case currentHomeValue, currentLoanBalance, refiMonthlyMI
-        case reservesMonths
+        case reservesMonths, aprRate
     }
 
     init(
@@ -123,7 +126,8 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         currentHomeValue: Decimal = 0,
         currentLoanBalance: Decimal = 0,
         refiMonthlyMI: Decimal = 0,
-        reservesMonths: Int = 2
+        reservesMonths: Int = 2,
+        aprRate: Decimal? = nil
     ) {
         self.mode = mode
         self.loanType = loanType
@@ -143,6 +147,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         self.currentLoanBalance = currentLoanBalance
         self.refiMonthlyMI = refiMonthlyMI
         self.reservesMonths = reservesMonths
+        self.aprRate = aprRate
     }
 
     init(from decoder: any Decoder) throws {
@@ -175,6 +180,7 @@ struct IncomeQualFormInputs: Codable, Hashable, Sendable {
         } else {
             self.reservesMonths = 2
         }
+        self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
     }
 
     /// Live current LTV in refinance mode. 0 when home value unset.

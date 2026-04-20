@@ -32,6 +32,10 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     var extraPrincipalMonthly: Decimal
     var biweekly: Bool
     var propertyDP: PropertyDownPaymentConfig
+    /// Session 5M.1: optional APR on the note rate. Display-only; never
+    /// drives math (D1). `nil` means "same as annualRate" — display
+    /// collapses to the note rate alone per D2.
+    var aprRate: Decimal?
 
     // Legacy decodes won't carry newer keys. Defaults below.
     enum CodingKeys: String, CodingKey {
@@ -40,6 +44,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         case annualTaxes, annualInsurance, monthlyHOA
         case includePMI, manualMonthlyPMI
         case extraPrincipalMonthly, biweekly, propertyDP
+        case aprRate
     }
 
     init(
@@ -55,7 +60,8 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         manualMonthlyPMI: Decimal = 0,
         extraPrincipalMonthly: Decimal,
         biweekly: Bool,
-        propertyDP: PropertyDownPaymentConfig = .empty
+        propertyDP: PropertyDownPaymentConfig = .empty,
+        aprRate: Decimal? = nil
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -70,6 +76,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         self.extraPrincipalMonthly = extraPrincipalMonthly
         self.biweekly = biweekly
         self.propertyDP = propertyDP
+        self.aprRate = aprRate
     }
 
     init(from decoder: any Decoder) throws {
@@ -89,6 +96,7 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         self.propertyDP = try c.decodeIfPresent(
             PropertyDownPaymentConfig.self, forKey: .propertyDP
         ) ?? .empty
+        self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
     }
 
     static let sampleDefault = AmortizationFormInputs(

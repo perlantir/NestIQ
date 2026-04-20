@@ -21,11 +21,20 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
     /// render against this.
     var homeValue: Decimal
     var stressShockBps: Int             // e.g. 200 for +2pt
+    /// Session 5M.1: optional APR on the existing first lien.
+    /// Display-only (D1); `nil` collapses display to rate alone (D2).
+    var firstLienAPR: Decimal?
+    /// Session 5M.1: optional APR on the HELOC. One APR reflects the
+    /// fully-indexed cost over time; not paired to intro vs indexed.
+    var helocAPR: Decimal?
+    /// Session 5M.1: optional APR on the cash-out refi alternative.
+    var refiAPR: Decimal?
 
     enum CodingKeys: String, CodingKey {
         case firstLienBalance, firstLienRate, firstLienRemainingYears
         case helocAmount, helocIntroRate, helocIntroMonths, helocFullyIndexedRate
         case refiRate, refiTermYears, refiMonthlyMI, homeValue, stressShockBps
+        case firstLienAPR, helocAPR, refiAPR
     }
 
     init(
@@ -40,7 +49,10 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         refiTermYears: Int,
         refiMonthlyMI: Decimal = 0,
         homeValue: Decimal = 0,
-        stressShockBps: Int
+        stressShockBps: Int,
+        firstLienAPR: Decimal? = nil,
+        helocAPR: Decimal? = nil,
+        refiAPR: Decimal? = nil
     ) {
         self.firstLienBalance = firstLienBalance
         self.firstLienRate = firstLienRate
@@ -54,6 +66,9 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         self.refiMonthlyMI = refiMonthlyMI
         self.homeValue = homeValue
         self.stressShockBps = stressShockBps
+        self.firstLienAPR = firstLienAPR
+        self.helocAPR = helocAPR
+        self.refiAPR = refiAPR
     }
 
     init(from decoder: any Decoder) throws {
@@ -70,6 +85,9 @@ struct HelocFormInputs: Codable, Hashable, Sendable {
         self.refiMonthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .refiMonthlyMI) ?? 0
         self.homeValue = try c.decodeIfPresent(Decimal.self, forKey: .homeValue) ?? 0
         self.stressShockBps = try c.decode(Int.self, forKey: .stressShockBps)
+        self.firstLienAPR = try c.decodeIfPresent(Decimal.self, forKey: .firstLienAPR)
+        self.helocAPR = try c.decodeIfPresent(Decimal.self, forKey: .helocAPR)
+        self.refiAPR = try c.decodeIfPresent(Decimal.self, forKey: .refiAPR)
     }
 
     static let sampleDefault = HelocFormInputs(

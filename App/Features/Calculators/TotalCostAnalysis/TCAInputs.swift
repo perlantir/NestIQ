@@ -33,10 +33,20 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
     /// payment after this scenario's cash-out consolidates some/all
     /// of the borrower's current other debts. nil in purchase mode.
     var otherDebts: OtherDebts?
+    /// Session 5M.1: optional per-scenario APR. Display-only.
+    var aprRate: Decimal?
+    /// Session 5M.3 input: prepaids (taxes + insurance escrow at close).
+    /// Feeds cash-to-close computation; defaults to 0 for scenarios
+    /// saved before the field existed.
+    var prepaids: Decimal
+    /// Session 5M.3 input: seller / lender credits applied at close.
+    /// Reduces cash-to-close.
+    var credits: Decimal
 
     enum CodingKeys: String, CodingKey {
         case id, label, name, rate, termYears, points, closingCosts
         case loanAmount, monthlyMI, propertyDP, otherDebts
+        case aprRate, prepaids, credits
     }
 
     init(
@@ -50,7 +60,10 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         loanAmount: Decimal = 0,
         monthlyMI: Decimal = 0,
         propertyDP: PropertyDownPaymentConfig = .empty,
-        otherDebts: OtherDebts? = nil
+        otherDebts: OtherDebts? = nil,
+        aprRate: Decimal? = nil,
+        prepaids: Decimal = 0,
+        credits: Decimal = 0
     ) {
         self.id = id
         self.label = label
@@ -63,6 +76,9 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
         self.monthlyMI = monthlyMI
         self.propertyDP = propertyDP
         self.otherDebts = otherDebts
+        self.aprRate = aprRate
+        self.prepaids = prepaids
+        self.credits = credits
     }
 
     init(from decoder: any Decoder) throws {
@@ -80,10 +96,18 @@ struct TCAScenario: Codable, Hashable, Sendable, Identifiable {
             PropertyDownPaymentConfig.self, forKey: .propertyDP
         ) ?? .empty
         self.otherDebts = try c.decodeIfPresent(OtherDebts.self, forKey: .otherDebts)
+        self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
+        self.prepaids = try c.decodeIfPresent(Decimal.self, forKey: .prepaids) ?? 0
+        self.credits = try c.decodeIfPresent(Decimal.self, forKey: .credits) ?? 0
     }
 }
 
 struct TCAFormInputs: Codable, Hashable, Sendable {
+    /// 7% annualized. String-initialized so the stored Decimal is
+    /// exactly `0.07` (the Decimal literal `0.07` routes through
+    /// Double and stores `0.07000000000000001024`).
+    static let defaultReinvestmentRate: Decimal = Decimal(string: "0.07") ?? 0
+
     var mode: TCAMode
     /// Refinance-mode fallback loan amount. Scenarios that set their
     /// own `loanAmount` override this; scenarios at 0 use it.
@@ -113,12 +137,16 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// Default is 2. Kept in sync with `scenarios.count` when the user
     /// changes the selector on the Inputs screen. Mirrors Refi 5F.3.
     var scenarioCount: Int
+    /// Session 5M.1 (5M.8 consumer): annualized reinvestment rate used
+    /// by the reinvestment-strategy section on Results. 0.07 (7%) is a
+    /// conservative S&P long-run default; LO-editable per analysis.
+    var reinvestmentRate: Decimal
 
     enum CodingKeys: String, CodingKey {
         case mode, loanAmount, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
         case scenarios, horizonsYears, currentOtherDebts, includeDebts
-        case scenarioCount
+        case scenarioCount, reinvestmentRate
     }
 
     init(
@@ -132,7 +160,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         horizonsYears: [Int],
         currentOtherDebts: OtherDebts? = nil,
         includeDebts: Bool = true,
-        scenarioCount: Int? = nil
+        scenarioCount: Int? = nil,
+        reinvestmentRate: Decimal = TCAFormInputs.defaultReinvestmentRate
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -145,6 +174,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.currentOtherDebts = currentOtherDebts
         self.includeDebts = includeDebts
         self.scenarioCount = scenarioCount ?? scenarios.count
+        self.reinvestmentRate = reinvestmentRate
     }
 
     init(from decoder: any Decoder) throws {
@@ -161,6 +191,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.includeDebts = try c.decodeIfPresent(Bool.self, forKey: .includeDebts) ?? true
         self.scenarioCount = try c.decodeIfPresent(Int.self, forKey: .scenarioCount)
             ?? self.scenarios.count
+        self.reinvestmentRate = try c.decodeIfPresent(Decimal.self, forKey: .reinvestmentRate)
+            ?? Self.defaultReinvestmentRate
     }
 
     /// Blank scenario with the term defaulted to 30 yr and every other

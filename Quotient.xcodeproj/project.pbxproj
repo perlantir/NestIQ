@@ -136,6 +136,7 @@
 		F2C8E753B9341FA9B2FE95FA /* TogglePill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */; };
 		F4D60EBD3F46067B5F5DC7FA /* CalculatorAmortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */; };
 		F6FA742417C9D80C5C72FBE9 /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19EB3913BF810BA0A9EA1AF /* ComponentGallery.swift */; };
+		F7C0A9188B1D11569443319C /* SchemaMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E27A013E89A340668FB0C8 /* SchemaMigrationTests.swift */; };
 		F86A92346F133FB1E4B354B5 /* SelfEmploymentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8237B3292075F160E64146D2 /* SelfEmploymentViewModel.swift */; };
 		F9453A1760F6439E60BDEEAF /* QuotientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7452F3C3AE5CE22D1C5D188D /* QuotientApp.swift */; };
 		F9A9E76E1B8EC71200C9BD0E /* SelfEmploymentInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2229147921A6B1EC3387AD /* SelfEmploymentInputsScreen.swift */; };
@@ -193,6 +194,7 @@
 		2B6DDD5E48E86450B2850339 /* AmortizationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationViewModelTests.swift; sourceTree = "<group>"; };
 		316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorListRow.swift; sourceTree = "<group>"; };
 		31BA9637847BD8C6534C750E /* BalanceOverTimeChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceOverTimeChart.swift; sourceTree = "<group>"; };
+		31E27A013E89A340668FB0C8 /* SchemaMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaMigrationTests.swift; sourceTree = "<group>"; };
 		34D979C5D7DE4FB6B7BCC812 /* SourceSerif4-It.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-It.ttf"; sourceTree = "<group>"; };
 		3544DE01D8235962D2B98659 /* CalculatorDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorDock.swift; sourceTree = "<group>"; };
 		36C1D4825AF59A035A76E125 /* SharePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePreview.swift; sourceTree = "<group>"; };
@@ -394,6 +396,7 @@
 				0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */,
 				26567951086061287C748DAC /* PDFBuilderTests.swift */,
 				ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */,
+				31E27A013E89A340668FB0C8 /* SchemaMigrationTests.swift */,
 				A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */,
 				63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */,
 			);
@@ -894,6 +897,7 @@
 				64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */,
 				730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */,
 				C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */,
+				F7C0A9188B1D11569443319C /* SchemaMigrationTests.swift in Sources */,
 				C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */,
 				71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */,
 			);
