@@ -205,49 +205,22 @@ enum PDFBuilder {
         return url
     }
 
+    /// Session 5O.5 — HELOC PDF now renders via HTML pipeline.
     static func buildHelocPDF(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: HelocViewModel,
         narrative: String
-    ) throws -> URL {
-        let blend = String(format: "%.2f", viewModel.blendedRate)
-        let refi = String(format: "%.3f", viewModel.inputs.refiRate)
-        let firstLien = MoneyFormat.shared.dollarsShort(viewModel.inputs.firstLienBalance)
-        let helocAmt = MoneyFormat.shared.dollarsShort(viewModel.inputs.helocAmount)
-        let verdict = viewModel.blendedRate < viewModel.inputs.refiRate ? "keep 1st" : "refi wins"
-        let fallback = "Keeping the first mortgage and taking a HELOC blends to \(blend)% — "
-            + "vs a cash-out refi at \(refi)%. Verdict: \(verdict)."
-        let payload = Payload(
-            calculatorSlug: "heloc",
-            calculatorTitle: "HELOC vs refinance",
-            complianceScenarioType: .helocVsRefinance,
-            loanSummary: "1st \(firstLien) + HELOC \(helocAmt)",
-            heroLabel: "Blended rate · HELOC path",
-            heroValue: blend,
-            heroValuePrefix: "",
-            heroValueSuffix: "%",
-            heroKPIs: [
-                ("vs refi", "\(refi)%"),
-                ("Verdict", verdict),
-                ("1st rate", String(format: "%.3f%%", viewModel.inputs.firstLienRate)),
-            ],
-            narrative: narrative.isEmpty ? fallback : narrative
-        )
-        // HELOC ships cover + 1 comparison + disclaimers → 3 pages.
-        let comparison = AnyView(helocComparisonPage(
+    ) async throws -> URL {
+        let html = HelocPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
-            pageIndex: 2,
-            pageCount: 3
-        ))
-        return try buildPDF(
-            profile: profile,
-            borrower: borrower,
-            payload: payload,
-            extraPages: [(comparison, .landscape)]
+            narrative: narrative
         )
+        let url = PDFHTMLComposition.temporaryURL(for: "heloc")
+        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        return url
     }
 
     // `buildSelfEmploymentPDF` lives in PDFBuilder+SelfEmployment.swift

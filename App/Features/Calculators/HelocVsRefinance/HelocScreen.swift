@@ -478,22 +478,24 @@ struct HelocScreen: View {
 
     private func generatePDFAndShare() {
         guard let profile = profiles.first else { return }
-        do {
-            let url = try PDFBuilder.buildHelocPDF(
-                profile: profile,
-                borrower: viewModel.borrower,
-                viewModel: viewModel,
-                narrative: verdictCopy
-            )
-            shareBundle = ShareBundle(
-                url: url,
-                pageCount: PDFInspector(url: url)?.pageCount ?? 1,
-                profile: profile
-            )
-        } catch {
-            #if DEBUG
-            print("[HelocScreen] PDF gen failed: \(error)")
-            #endif
+        Task { @MainActor in
+            do {
+                let url = try await PDFBuilder.buildHelocPDF(
+                    profile: profile,
+                    borrower: viewModel.borrower,
+                    viewModel: viewModel,
+                    narrative: verdictCopy
+                )
+                shareBundle = ShareBundle(
+                    url: url,
+                    pageCount: PDFInspector(url: url)?.pageCount ?? 1,
+                    profile: profile
+                )
+            } catch {
+                #if DEBUG
+                print("[HelocScreen] PDF gen failed: \(error)")
+                #endif
+            }
         }
     }
 
