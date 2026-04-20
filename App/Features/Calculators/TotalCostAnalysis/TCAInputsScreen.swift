@@ -15,8 +15,13 @@ struct TCAInputsScreen: View {
     @State var viewModel: TCAViewModel
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
-    @State private var selectedBorrower: Borrower?
+    @State var selectedBorrower: Borrower?
     @State private var activeTab: Int = 0
+    // 5P.8: Current Mortgage draft lives as view-local state because
+    // partial entries shouldn't corrupt viewModel.inputs.currentMortgage
+    // until the draft is either fully valid or fully blank.
+    @State var currentMortgageDraft = CurrentMortgageDraft()
+    @State var currentMortgageExpanded: Bool = false
 
     init(
         borrower: Borrower? = nil,
@@ -64,6 +69,9 @@ struct TCAInputsScreen: View {
                     .padding(.top, Spacing.s16)
 
                 if viewModel.inputs.mode == .refinance {
+                    currentMortgageSection
+                        .padding(.horizontal, Spacing.s20)
+                        .padding(.top, Spacing.s16)
                     loanSection.padding(.top, Spacing.s16)
                     homeValueSection.padding(.top, Spacing.s24)
                 }
@@ -118,9 +126,13 @@ struct TCAInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
+                    hydrateCurrentMortgageDraft()
                 }
             )
             .presentationDetents([.large])
+        }
+        .onAppear {
+            hydrateCurrentMortgageDraft()
         }
     }
 

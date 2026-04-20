@@ -141,12 +141,20 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// by the reinvestment-strategy section on Results. 0.07 (7%) is a
     /// conservative S&P long-run default; LO-editable per analysis.
     var reinvestmentRate: Decimal
+    /// Session 5P.8 (D9): refinance-mode snapshot of the borrower's
+    /// current mortgage — stored with the scenario so loading a saved
+    /// scenario restores the status-quo baseline regardless of any
+    /// later edits to the borrower's live currentMortgage. nil for
+    /// purchase-mode scenarios and for refi scenarios saved before
+    /// this field existed (backward-compat).
+    var currentMortgage: CurrentMortgage?
 
     enum CodingKeys: String, CodingKey {
         case mode, loanAmount, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
         case scenarios, horizonsYears, currentOtherDebts, includeDebts
         case scenarioCount, reinvestmentRate
+        case currentMortgage
     }
 
     init(
@@ -161,7 +169,8 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         currentOtherDebts: OtherDebts? = nil,
         includeDebts: Bool = true,
         scenarioCount: Int? = nil,
-        reinvestmentRate: Decimal = TCAFormInputs.defaultReinvestmentRate
+        reinvestmentRate: Decimal = TCAFormInputs.defaultReinvestmentRate,
+        currentMortgage: CurrentMortgage? = nil
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -175,6 +184,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         self.includeDebts = includeDebts
         self.scenarioCount = scenarioCount ?? scenarios.count
         self.reinvestmentRate = reinvestmentRate
+        self.currentMortgage = currentMortgage
     }
 
     init(from decoder: any Decoder) throws {
@@ -193,6 +203,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
             ?? self.scenarios.count
         self.reinvestmentRate = try c.decodeIfPresent(Decimal.self, forKey: .reinvestmentRate)
             ?? Self.defaultReinvestmentRate
+        self.currentMortgage = try c.decodeIfPresent(CurrentMortgage.self, forKey: .currentMortgage)
     }
 
     /// Blank scenario with the term defaulted to 30 yr and every other
@@ -358,17 +369,52 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// { $0.payment }` so callers reuse the already-computed P&I from
     /// the main ComparisonResult. Refinance-mode only — purchase mode
     /// doesn't have a "baseline" in the TCA sense.
+    /// Baseline monthly P&I used for break-even: the borrower's current
+    /// mortgage P&I when available (5P.9 — the status-quo comparison),
+    /// otherwise `monthlyPayments[0]` (scenario A's payment — legacy
+    /// scenario-vs-scenario baseline preserved for saved scenarios
+    /// without a currentMortgage snapshot and for modes without a
+    /// current-mortgage concept).
+    func breakEvenBaselinePayment(monthlyPayments: [Decimal]) -> Decimal {
+        if mode == .refinance, let currentMortgage {
+            return currentMortgage.currentMonthlyPaymentPI
+        }
+        return monthlyPayments.first ?? 0
+    }
+
+    /// Horizon ceiling (in months) for break-even determination. When
+    /// a currentMortgage is available and has months remaining on its
+    /// original term, the proposed scenario only has until the existing
+    /// loan would have been paid off anyway to recoup closing costs —
+    /// that's the correct "within remaining term" horizon Nick called
+    /// out in 5P.9. Without a currentMortgage we fall back to the
+    /// scenario's own term (legacy behavior).
+    func breakEvenTermMonths(scenarioIndex: Int) -> Int {
+        let scenarioTerm = scenarios[scenarioIndex].termYears * 12
+        guard mode == .refinance, let currentMortgage else { return scenarioTerm }
+        let remaining = CurrentMortgageCalculations.monthsRemaining(
+            originalTermYears: currentMortgage.originalTermYears,
+            loanStartDate: currentMortgage.loanStartDate
+        )
+        guard remaining > 0 else { return scenarioTerm }
+        return min(scenarioTerm, remaining)
+    }
+
     func breakEvenMonth(
         scenarioIndex: Int,
         monthlyPayments: [Decimal]
     ) -> Int? {
         guard mode == .refinance,
-              scenarioIndex > 0,
+              scenarioIndex >= 0,
               scenarioIndex < scenarios.count,
               scenarioIndex < monthlyPayments.count,
               !monthlyPayments.isEmpty
         else { return nil }
-        let baseline = monthlyPayments[0]
+        // Legacy (no currentMortgage): scenario A IS the baseline, can't
+        // break even against itself. 5P.9 (currentMortgage set): A is a
+        // proposed refinance like B/C/D, compared against status quo.
+        if currentMortgage == nil, scenarioIndex == 0 { return nil }
+        let baseline = breakEvenBaselinePayment(monthlyPayments: monthlyPayments)
         let scenarioPmt = monthlyPayments[scenarioIndex]
         let monthlySavings = baseline - scenarioPmt
         guard monthlySavings > 0 else { return nil }
@@ -377,7 +423,7 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         // Integer ceiling division: smallest M where M × savings >= closing.
         let monthsDouble = (closing.asDouble / monthlySavings.asDouble).rounded(.up)
         let months = Int(monthsDouble)
-        let maxTerm = scenarios[scenarioIndex].termYears * 12
+        let maxTerm = breakEvenTermMonths(scenarioIndex: scenarioIndex)
         guard months <= maxTerm else { return nil }
         return months
     }
@@ -393,11 +439,12 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         monthlyPayments: [Decimal],
         maxMonths: Int
     ) -> [(month: Int, cumulative: Decimal)] {
-        guard scenarioIndex > 0,
+        guard scenarioIndex >= 0,
               scenarioIndex < scenarios.count,
               scenarioIndex < monthlyPayments.count
         else { return [] }
-        let baseline = monthlyPayments[0]
+        if currentMortgage == nil, scenarioIndex == 0 { return [] }
+        let baseline = breakEvenBaselinePayment(monthlyPayments: monthlyPayments)
         let scenarioPmt = monthlyPayments[scenarioIndex]
         let monthlySavings = baseline - scenarioPmt
         return (0...maxMonths).map { m in

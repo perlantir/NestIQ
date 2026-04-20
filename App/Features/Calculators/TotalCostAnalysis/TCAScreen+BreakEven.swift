@@ -199,15 +199,24 @@ extension TCAScreen {
     /// Testable pure form. The @escaping color closure lets tests
     /// pass a constant color so they can construct series without
     /// spinning up a SwiftUI Screen.
+    ///
+    /// Session 5P.9: when `inputs.currentMortgage` is set, every
+    /// scenario (A/B/C/D) is a candidate — they're all proposed
+    /// refinances compared against the status-quo current mortgage.
+    /// Without a currentMortgage snapshot, fall back to the legacy
+    /// "scenario A is the baseline" behavior and only compare B/C/D.
     static func breakEvenSeries(
         inputs: TCAFormInputs,
         monthlyPayments: [Decimal],
         colorForIndex: (Int) -> Color
     ) -> [BreakEvenSeries] {
-        let nonBaseline = Array(inputs.scenarios.enumerated()).dropFirst()
-        let baselinePayment = monthlyPayments.first ?? 0
+        let hasCurrentMortgage = inputs.currentMortgage != nil
+        let candidates: [(offset: Int, element: TCAScenario)] = hasCurrentMortgage
+            ? Array(inputs.scenarios.enumerated())
+            : Array(inputs.scenarios.enumerated()).dropFirst().map { (offset: $0.offset, element: $0.element) }
+        let baselinePayment = inputs.breakEvenBaselinePayment(monthlyPayments: monthlyPayments)
         var items: [BreakEvenSeries] = []
-        for (idx, scenario) in nonBaseline {
+        for (idx, scenario) in candidates {
             guard monthlyPayments.indices.contains(idx),
                   monthlyPayments[idx] < baselinePayment else { continue }
             let crossoverMonth = inputs.breakEvenMonth(
@@ -218,7 +227,7 @@ extension TCAScreen {
             // their own term. Otherwise the chart shows a flat line
             // below the closing-costs reference, which is confusing.
             guard let crossoverMonth else { continue }
-            let termMonths = scenario.termYears * 12
+            let termMonths = inputs.breakEvenTermMonths(scenarioIndex: idx)
             let rawPoints = inputs.breakEvenGraphData(
                 scenarioIndex: idx,
                 monthlyPayments: monthlyPayments,
@@ -270,10 +279,16 @@ extension TCAScreen {
         inputs: TCAFormInputs,
         monthlyPayments: [Decimal]
     ) -> [String] {
-        let baselinePayment = monthlyPayments.first ?? 0
+        let hasCurrentMortgage = inputs.currentMortgage != nil
+        let baselinePayment = inputs.breakEvenBaselinePayment(
+            monthlyPayments: monthlyPayments
+        )
         return inputs.scenarios.enumerated().compactMap { idx, s in
-            guard idx > 0,
-                  monthlyPayments.indices.contains(idx),
+            // Legacy (no currentMortgage): A is baseline, skip it.
+            // 5P.9 (currentMortgage set): every scenario compares
+            // against status quo — include A.
+            if !hasCurrentMortgage, idx == 0 { return nil }
+            guard monthlyPayments.indices.contains(idx),
                   monthlyPayments[idx] < baselinePayment else { return nil }
             let month = inputs.breakEvenMonth(
                 scenarioIndex: idx,
@@ -289,8 +304,9 @@ extension TCAScreen {
                     years
                 )
             }
+            let termYears = inputs.breakEvenTermMonths(scenarioIndex: idx) / 12
             return "\(label) · savings do not exceed closing costs within the "
-                + "\(s.termYears)-yr term. Consider a shorter horizon or larger rate delta."
+                + "\(termYears)-yr term. Consider a shorter horizon or larger rate delta."
         }
     }
 }

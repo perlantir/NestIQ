@@ -15,7 +15,7 @@
 
 import Foundation
 
-public struct CurrentMortgage: Codable, Equatable, Sendable {
+public struct CurrentMortgage: Codable, Hashable, Sendable {
     public var currentBalance: Decimal
     public var currentRatePercent: Decimal
     public var currentMonthlyPaymentPI: Decimal

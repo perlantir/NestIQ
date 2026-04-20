@@ -129,6 +129,7 @@
 		C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */; };
 		C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */; };
 		C116BD102302052E09BF8651 /* NestIQPrintRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */; };
+		C210B34AE0330D62B08989B6 /* TCAInputsScreen+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC433F27FC7E081201C9EAEC /* TCAInputsScreen+CurrentMortgage.swift */; };
 		C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38C48023F20605AA323F916 /* CalculatorTCATests.swift */; };
 		C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */; };
 		C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */; };
@@ -322,6 +323,7 @@
 		C728ACEFCBFB4C6C8A95F7B7 /* OnboardingMiniatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMiniatures.swift; sourceTree = "<group>"; };
 		C8C5AC11529B03874DFA57FB /* ScenarioDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioDestination.swift; sourceTree = "<group>"; };
 		CB19EEDB2AFF2A92A2514534 /* BottomActionDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomActionDock.swift; sourceTree = "<group>"; };
+		CC433F27FC7E081201C9EAEC /* TCAInputsScreen+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAInputsScreen+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		D00A91D51212853350CE39F8 /* KPITile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KPITile.swift; sourceTree = "<group>"; };
 		D0D1F3B75BEEB2A8E1AF4C00 /* AssumptionsDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssumptionsDrawer.swift; sourceTree = "<group>"; };
 		D381BCE91A0673E2D3CBDA9E /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
@@ -739,6 +741,7 @@
 			children = (
 				A0C1B0601932028F30AD87A8 /* TCAInputs.swift */,
 				4CA85ACF7219CFD229D561CB /* TCAInputsScreen.swift */,
+				CC433F27FC7E081201C9EAEC /* TCAInputsScreen+CurrentMortgage.swift */,
 				EBDE15AA2723626FEE3D9AF4 /* TCAInputsScreen+DebtsAndLTV.swift */,
 				54754A91422D9F8CB7C303A8 /* TCAScreen.swift */,
 				5CFD3C36DDB1D1E7D16D72F8 /* TCAScreen+Actions.swift */,
@@ -1100,6 +1103,7 @@
 				FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */,
 				8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */,
 				4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */,
+				C210B34AE0330D62B08989B6 /* TCAInputsScreen+CurrentMortgage.swift in Sources */,
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				A8A61BF4003C61412F162914 /* TCAPDFHTML.swift in Sources */,

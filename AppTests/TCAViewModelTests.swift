@@ -465,4 +465,108 @@ final class TCAViewModelTests: XCTestCase {
         XCTAssertEqual(inputs.scenarios[1].id, originalB)
         XCTAssertEqual(inputs.scenarios.count, 2)
     }
+
+    // MARK: - 5P.9 break-even uses currentMortgage baseline
+
+    private func mortgageWithPayment(
+        pi: Decimal,
+        termYears: Int = 30,
+        monthsPaid: Int = 24
+    ) -> CurrentMortgage {
+        let calendar = Calendar(identifier: .gregorian)
+        let start = calendar.date(
+            byAdding: .month, value: -monthsPaid, to: Date()
+        ) ?? Date()
+        return CurrentMortgage(
+            currentBalance: 450_000,
+            currentRatePercent: 6.500,
+            currentMonthlyPaymentPI: pi,
+            originalLoanAmount: 500_000,
+            originalTermYears: termYears,
+            loanStartDate: start,
+            propertyValueToday: 600_000
+        )
+    }
+
+    func testBreakEvenBaselineFallsBackToScenarioAWhenNoCurrentMortgage() {
+        let inputs = TCAFormInputs.sampleDefault
+        XCTAssertNil(inputs.currentMortgage)
+        let monthlyPayments: [Decimal] = [3200, 2900, 3000, 2700]
+        XCTAssertEqual(inputs.breakEvenBaselinePayment(monthlyPayments: monthlyPayments), 3200)
+    }
+
+    func testBreakEvenBaselineUsesCurrentMortgageWhenSet() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.currentMortgage = mortgageWithPayment(pi: 2_900)
+        let monthlyPayments: [Decimal] = [3200, 2900, 3000, 2700]
+        XCTAssertEqual(
+            inputs.breakEvenBaselinePayment(monthlyPayments: monthlyPayments),
+            2_900,
+            "Break-even must anchor on the current mortgage's P&I, not scenario A"
+        )
+    }
+
+    func testBreakEvenMonthComputedAgainstCurrentMortgage() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.currentMortgage = mortgageWithPayment(pi: 3_000)
+        inputs.scenarios[0].closingCosts = 6_000
+        // Scenario A payment 2700 → monthly savings 300 → break-even 20 months
+        let monthlyPayments: [Decimal] = [2700, 3200, 2800, 2500]
+        let month = inputs.breakEvenMonth(scenarioIndex: 0, monthlyPayments: monthlyPayments)
+        XCTAssertEqual(month, 20, "6000 closing / 300 monthly = 20 months")
+    }
+
+    func testBreakEvenTermMonthsClampsToCurrentMortgageRemainingTerm() {
+        var inputs = TCAFormInputs.sampleDefault
+        // Current mortgage: 30-yr, 25 years in → 60 months remaining.
+        inputs.currentMortgage = mortgageWithPayment(
+            pi: 3_000, termYears: 30, monthsPaid: 25 * 12
+        )
+        inputs.scenarios[0].termYears = 30
+        // 30-yr scenario would nominally allow 360 months; remaining-term clamp drops it.
+        let clamped = inputs.breakEvenTermMonths(scenarioIndex: 0)
+        XCTAssertLessThanOrEqual(clamped, 60,
+                                 "New loan only has the remaining term of the old loan to recoup closing")
+        XCTAssertGreaterThan(clamped, 0)
+    }
+
+    func testBreakEvenTermMonthsWithoutCurrentMortgageUsesScenarioTerm() {
+        let inputs = TCAFormInputs.sampleDefault
+        let scenarioTerm = inputs.scenarios[0].termYears * 12
+        XCTAssertEqual(inputs.breakEvenTermMonths(scenarioIndex: 0), scenarioTerm)
+    }
+
+    // MARK: - 5P.8 currentMortgage Codable round-trip on TCAFormInputs
+
+    func testTCAFormInputsCurrentMortgageRoundtrip() throws {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.currentMortgage = mortgageWithPayment(pi: 2_900)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(inputs)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(TCAFormInputs.self, from: data)
+        XCTAssertEqual(decoded.currentMortgage?.currentMonthlyPaymentPI, 2_900)
+    }
+
+    func testTCAFormInputsLoadsCurrentMortgageAsNilForLegacyJSON() throws {
+        // JSON without currentMortgage — backward compat for 5M/5N/5O scenarios.
+        let json = """
+        {
+            "mode": "refinance",
+            "loanAmount": 400000,
+            "homeValue": 600000,
+            "monthlyTaxes": 500,
+            "monthlyInsurance": 120,
+            "monthlyHOA": 0,
+            "scenarios": [],
+            "horizonsYears": [5, 10, 30],
+            "includeDebts": true,
+            "scenarioCount": 2
+        }
+        """.data(using: .utf8) ?? Data()
+        let inputs = try JSONDecoder().decode(TCAFormInputs.self, from: json)
+        XCTAssertNil(inputs.currentMortgage)
+    }
 }
