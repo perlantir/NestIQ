@@ -62,6 +62,7 @@
 		591DF199503D955148834182 /* BorrowerPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09B246AB365C10A2095FE57 /* BorrowerPicker.swift */; };
 		593C6FF305B2FC26F777FE5A /* LanguageDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */; };
 		595BDC055ADC5AF57CE8CBF5 /* TCAComparisonPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCA418EB2A9FFB0B32BB7AB /* TCAComparisonPage.swift */; };
+		5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */ = {isa = PBXBuildFile; fileRef = D822FDD24F3D67FB8B341B94 /* TCAScreen+BreakEven.swift */; };
 		5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */; };
 		5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381BCE91A0673E2D3CBDA9E /* Buttons.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
@@ -303,6 +304,7 @@
 		D381BCE91A0673E2D3CBDA9E /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocInputs.swift; sourceTree = "<group>"; };
 		D7BEADBEAC2EA40C63E71FF7 /* SegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedControl.swift; sourceTree = "<group>"; };
+		D822FDD24F3D67FB8B341B94 /* TCAScreen+BreakEven.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+BreakEven.swift"; sourceTree = "<group>"; };
 		D89633E5BC5BB72C10F311C0 /* QuotientCompliance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientCompliance; path = Packages/QuotientCompliance; sourceTree = SOURCE_ROOT; };
 		D8A910FE79E1FB0706776507 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Semibold.ttf"; sourceTree = "<group>"; };
@@ -694,6 +696,7 @@
 				54754A91422D9F8CB7C303A8 /* TCAScreen.swift */,
 				5CFD3C36DDB1D1E7D16D72F8 /* TCAScreen+Actions.swift */,
 				E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */,
+				D822FDD24F3D67FB8B341B94 /* TCAScreen+BreakEven.swift */,
 			);
 			path = TotalCostAnalysis;
 			sourceTree = "<group>";
@@ -1041,6 +1044,7 @@
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
+				5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */,
 				728DA8C1D845F5C2F80139EB /* TCAScreen+BreakdownSections.swift in Sources */,
 				4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */,
 				271D935848142EA3F4346183 /* ThemePreview.swift in Sources */,
