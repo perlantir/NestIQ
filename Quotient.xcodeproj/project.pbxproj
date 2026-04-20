@@ -29,6 +29,7 @@
 		1920B2C218E438EDB7836498 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 860BC6C292C49CFEF58A6ECF /* Card.swift */; };
 		1AC23E91FFC93AB2345EA303 /* AmortizationPDFHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8CCAC18874B861863C4FD7 /* AmortizationPDFHTML.swift */; };
 		1B0DABF95C12733B55FD1537 /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371105E1BFEFCBB484FEEA6F /* Motion.swift */; };
+		1CFD9C5973AEB1915D778C2A /* SelfEmploymentPDFHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DC6F46646562001BF919CB9 /* SelfEmploymentPDFHTML.swift */; };
 		1E2B00EB6830D2F826CBF7CF /* QuotientNarration in Frameworks */ = {isa = PBXBuildFile; productRef = 3AA26F96351EAF95C04CA8AF /* QuotientNarration */; };
 		1FCE99C2E172CDD2D5C5FC9C /* HTMLPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B3C748DBC880DC729B8468 /* HTMLPDFRenderer.swift */; };
 		20845D217FC80E35439704CC /* Fields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1338A4AF409B28F384750A /* Fields.swift */; };
@@ -139,6 +140,7 @@
 		C62A0FBA3E8D64F8C99DCC4C /* DeleteAccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */; };
 		C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */; };
 		C84F0EA0D8C40CE980C83952 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A9CA1B8E8F599E34F73A31 /* Models.swift */; };
+		CB05EEC863A99CF71C29E643 /* SelfEmploymentPDFHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C6ADAD9FEBC89B5AF12C194 /* SelfEmploymentPDFHTMLTests.swift */; };
 		CD028AF8682D3C98BA8656EB /* CalculatorNewScenarioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B001B321FAB543828487B6D /* CalculatorNewScenarioView.swift */; };
 		D2192B5BE2D47B78B7100984 /* SignatureBlock.html in Resources */ = {isa = PBXBuildFile; fileRef = 59D416855FC744765B2EA79B /* SignatureBlock.html */; };
 		D2C3880F855DA44A1D6A69A5 /* SelfEmploymentResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250BF7806116C37EE4F1CA9B /* SelfEmploymentResultsScreen.swift */; };
@@ -198,6 +200,7 @@
 		087A4176AB52858B2BB38CDD /* IncomeQualPDFHTMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualPDFHTMLTests.swift; sourceTree = "<group>"; };
 		0880A10EFCCC0FE0CD4EB6D8 /* TogglePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogglePill.swift; sourceTree = "<group>"; };
 		099A45DD977D77B495AD52F6 /* MockRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRateService.swift; sourceTree = "<group>"; };
+		0C6ADAD9FEBC89B5AF12C194 /* SelfEmploymentPDFHTMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEmploymentPDFHTMLTests.swift; sourceTree = "<group>"; };
 		0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocInputsScreen.swift; sourceTree = "<group>"; };
 		0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDownPaymentConfig.swift; sourceTree = "<group>"; };
 		0F4E4635C56FE4C0AE554983 /* PDFHTMLComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFHTMLComposition.swift; sourceTree = "<group>"; };
@@ -290,6 +293,7 @@
 		9970C1F47C6727A6C8329F5F /* RefinanceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceScreen.swift; sourceTree = "<group>"; };
 		99CF5C8486900EF955F9BEE3 /* AmortizationSchedulePages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationSchedulePages.swift; sourceTree = "<group>"; };
 		9D700970F563C30DE8182925 /* PropertyDownPaymentSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDownPaymentSection.swift; sourceTree = "<group>"; };
+		9DC6F46646562001BF919CB9 /* SelfEmploymentPDFHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEmploymentPDFHTML.swift; sourceTree = "<group>"; };
 		9F3309B12E1C10B89F8808E8 /* RefinancePDFHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinancePDFHTML.swift; sourceTree = "<group>"; };
 		9F99BC61424AA8DF3FF82690 /* PDFPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPages.swift; sourceTree = "<group>"; };
 		9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorIncomeTests.swift; sourceTree = "<group>"; };
@@ -451,6 +455,7 @@
 				7A9A74D901D79F2806466627 /* RefinancePDFHTMLTests.swift */,
 				ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */,
 				31E27A013E89A340668FB0C8 /* SchemaMigrationTests.swift */,
+				0C6ADAD9FEBC89B5AF12C194 /* SelfEmploymentPDFHTMLTests.swift */,
 				A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */,
 				6A6A5DF786C014291E0DD283 /* TCAPDFHTMLTests.swift */,
 				63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */,
@@ -539,6 +544,7 @@
 				9F99BC61424AA8DF3FF82690 /* PDFPages.swift */,
 				E64C7EF67B2EB437CC1489A0 /* RefinanceComparisonPage.swift */,
 				9F3309B12E1C10B89F8808E8 /* RefinancePDFHTML.swift */,
+				9DC6F46646562001BF919CB9 /* SelfEmploymentPDFHTML.swift */,
 				2A6BEF2F808AC0CCAC874E71 /* SelfEmploymentPDFPages.swift */,
 				659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */,
 				36C1D4825AF59A035A76E125 /* SharePreview.swift */,
@@ -985,6 +991,7 @@
 				B96031C64FC3C88A4FD10FE1 /* RefinancePDFHTMLTests.swift in Sources */,
 				C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */,
 				F7C0A9188B1D11569443319C /* SchemaMigrationTests.swift in Sources */,
+				CB05EEC863A99CF71C29E643 /* SelfEmploymentPDFHTMLTests.swift in Sources */,
 				C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */,
 				037E524986F4E7B7D8E6AF26 /* TCAPDFHTMLTests.swift in Sources */,
 				71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */,
@@ -1096,6 +1103,7 @@
 				EF76BAD6C4966AA84448E2B3 /* SelfEmploymentInputs.swift in Sources */,
 				53EA91F48F530018D8FAB5C4 /* SelfEmploymentInputsScreen+Cards.swift in Sources */,
 				F9A9E76E1B8EC71200C9BD0E /* SelfEmploymentInputsScreen.swift in Sources */,
+				1CFD9C5973AEB1915D778C2A /* SelfEmploymentPDFHTML.swift in Sources */,
 				FB16EB7E4FAE3573AF55BC32 /* SelfEmploymentPDFPages.swift in Sources */,
 				666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */,
 				D2C3880F855DA44A1D6A69A5 /* SelfEmploymentResultsScreen.swift in Sources */,
