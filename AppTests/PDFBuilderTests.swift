@@ -35,12 +35,17 @@ final class PDFBuilderTests: XCTestCase {
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         XCTAssertEqual(inspector.pageCount, 1)
         let text = inspector.text(onPage: 0) ?? ""
-        // Post-rebrand (5I.4.d): the "Quotient" serif wordmark text on
-        // the cover was replaced with an image (Masthead-PDF + Wordmark-A
-        // imagesets), so a PDFKit text-layer extraction no longer finds
-        // it. The footer string carries the NestIQ brand as text.
-        XCTAssertTrue(text.contains("NestIQ Mortgage Intelligence"))
-        XCTAssertTrue(text.contains("Smith"))
+        // Post-5N.2a: the NestIQ brand is now an image (PDFPageHeader's
+        // Wordmark-A) on every page, so PDFKit's text layer no longer
+        // carries the wordmark string. Assert on stable text anchors
+        // that don't depend on tracked/uppercased glyphs: the
+        // signature block's NMLS line + borrower name + page counter.
+        XCTAssertTrue(text.contains("Smith"),
+                      "Borrower name missing from extracted PDF text. Got: \(text)")
+        XCTAssertTrue(text.contains("NMLS"),
+                      "Signature block NMLS missing from PDF. Got: \(text)")
+        XCTAssertTrue(text.contains("Page 1 of 1"),
+                      "PDFPageHeader page counter missing from PDF. Got: \(text)")
     }
 
     // MARK: - Session 5I.3: profile photo on PDF cover

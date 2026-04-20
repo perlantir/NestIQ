@@ -59,14 +59,22 @@ enum PDFBuilder {
         extraPages: [(AnyView, PDFRenderer.Orientation)] = []
     ) throws -> URL {
         let url = temporaryURL(for: payload.calculatorSlug)
-        let cover = AnyView(coverPage(profile: profile, borrower: borrower, payload: payload))
-        let disclaimers = AnyView(
-            disclaimersPage(
-                profile: profile,
-                borrower: borrower,
-                scenarioType: payload.complianceScenarioType
-            )
-        )
+        // Total pages known up front: cover + extras + disclaimers.
+        let total = 1 + extraPages.count + 1
+        let cover = AnyView(coverPage(
+            profile: profile,
+            borrower: borrower,
+            payload: payload,
+            pageIndex: 1,
+            pageCount: total
+        ))
+        let disclaimers = AnyView(disclaimersPage(
+            profile: profile,
+            borrower: borrower,
+            scenarioType: payload.complianceScenarioType,
+            pageIndex: total,
+            pageCount: total
+        ))
         var pages: [(AnyView, PDFRenderer.Orientation)] = [(cover, .portrait)]
         pages.append(contentsOf: extraPages)
         pages.append((disclaimers, .portrait))
@@ -355,64 +363,7 @@ enum PDFBuilder {
         )
     }
 
-    // MARK: Page composition
-
-    private static func coverPage(
-        profile: LenderProfile,
-        borrower: Borrower?,
-        payload: Payload
-    ) -> some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
-        return PDFCoverPage(
-            borrowerName: borrower?.fullName ?? "Client",
-            loFullName: profile.fullName.isEmpty ? "Loan Officer" : profile.fullName,
-            loNMLS: profile.nmlsId.isEmpty ? "—" : profile.nmlsId,
-            loCompany: profile.companyName.isEmpty ? "—" : profile.companyName,
-            loEmail: profile.email,
-            loPhone: profile.phone,
-            calculatorTitle: payload.calculatorTitle,
-            generatedDate: generated,
-            loanSummary: payload.loanSummary,
-            heroPITI: payload.heroValue,
-            heroKPIs: payload.heroKPIs,
-            narrative: payload.narrative,
-            accentHex: profile.brandColorHex,
-            logoData: profile.companyLogoData,
-            signatureLine: profile.tagline,
-            loPhotoData: profile.showPhotoOnPDF ? profile.photoData : nil,
-            heroLabel: payload.heroLabel,
-            heroValuePrefix: payload.heroValuePrefix,
-            heroValueSuffix: payload.heroValueSuffix
-        )
-    }
-
-    private static func disclaimersPage(
-        profile: LenderProfile,
-        borrower: Borrower?,
-        scenarioType: ScenarioType
-    ) -> some View {
-        let state = resolveState(borrower: borrower)
-        let disclosures = requiredDisclosures(
-            for: scenarioType,
-            propertyState: state ?? .CA
-        )
-        let body = disclosures.map(\.textEN).joined(separator: "\n\n")
-        let dateString: String = {
-            let f = DateFormatter()
-            f.dateFormat = "MMM d, yyyy · HH:mm"
-            return f.string(from: Date())
-        }()
-        return PDFDisclaimersPage(
-            disclosureText: body.isEmpty ? defaultDisclaimer() : body,
-            loFullName: profile.fullName.isEmpty ? "Loan Officer" : profile.fullName,
-            loNMLS: profile.nmlsId.isEmpty ? "—" : profile.nmlsId,
-            loCompany: profile.companyName.isEmpty ? "—" : profile.companyName,
-            licensedStates: profile.licensedStates,
-            generatedAt: dateString
-        )
-    }
+    // Page composition helpers live in PDFBuilder+Pages.swift.
 
     static func defaultDisclaimer() -> String {
         "This illustration is not a commitment to lend. Rates reflect pricing "

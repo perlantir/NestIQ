@@ -25,6 +25,8 @@ public struct PDFCoverPage: View {
     public let heroLabel: String
     public let heroValuePrefix: String
     public let heroValueSuffix: String
+    public let pageIndex: Int
+    public let pageCount: Int
 
     public init(
         borrowerName: String,
@@ -45,7 +47,9 @@ public struct PDFCoverPage: View {
         loPhotoData: Data? = nil,
         heroLabel: String = "Monthly payment · PITI",
         heroValuePrefix: String = "$",
-        heroValueSuffix: String = ""
+        heroValueSuffix: String = "",
+        pageIndex: Int = 1,
+        pageCount: Int = 1
     ) {
         self.borrowerName = borrowerName
         self.loFullName = loFullName
@@ -66,6 +70,8 @@ public struct PDFCoverPage: View {
         self.heroLabel = heroLabel
         self.heroValuePrefix = heroValuePrefix
         self.heroValueSuffix = heroValueSuffix
+        self.pageIndex = pageIndex
+        self.pageCount = pageCount
     }
 
     private let inkPrimary = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
@@ -76,6 +82,8 @@ public struct PDFCoverPage: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: generatedDate)
+                .padding(.bottom, 24)
             brandStrip
             titleBlock
                 .padding(.top, 36)
@@ -87,32 +95,25 @@ public struct PDFCoverPage: View {
             footer
         }
         .padding(.horizontal, 48)
-        .padding(.vertical, 28)
+        .padding(.top, 18)
+        .padding(.bottom, 28)
         .frame(width: 612, height: 792)
         .background(Color.white)
     }
 
     private var brandStrip: some View {
         VStack(alignment: .leading, spacing: 18) {
-            // Cover masthead — full-width NestIQ brand lockup. Shown only
-            // when the LO hasn't supplied a custom company logo; custom
-            // branding takes precedence in the left column so the LO's
-            // own mark gets primary billing.
-            if logoData == nil {
-                Image("Masthead-PDF")
+            // Optional custom company logo on page 1. The NestIQ wordmark
+            // now lives in PDFPageHeader above; this block is only for an
+            // LO's own mark if they've uploaded one.
+            if let logoData, let logo = UIImage(data: logoData) {
+                Image(uiImage: logo)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                    .frame(maxHeight: 36)
             }
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
-                    if let logoData, let logo = UIImage(data: logoData) {
-                        Image(uiImage: logo)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 36)
-                    }
                     Text("Mortgage analysis · prepared for you".uppercased())
                         .font(.system(size: 10.5, weight: .semibold))
                         .tracking(1.05)
@@ -243,20 +244,11 @@ public struct PDFCoverPage: View {
     private var footer: some View {
         VStack(spacing: 4) {
             Rectangle().fill(border).frame(height: 1)
-            HStack {
-                Text("NestIQ Mortgage Intelligence · \(generatedDate)")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-                Spacer()
-                Text("Page 1")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-            }
-            .padding(.top, 8)
             Text("Estimates for educational purposes · not a commitment to lend")
                 .font(.system(size: 9.5, design: .monospaced))
                 .foregroundStyle(inkTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 8)
         }
     }
 }
@@ -270,6 +262,9 @@ public struct PDFDisclaimersPage: View {
     public let loCompany: String
     public let licensedStates: [String]
     public let generatedAt: String
+    public let headerDate: String
+    public let pageIndex: Int
+    public let pageCount: Int
 
     public init(
         disclosureText: String,
@@ -277,7 +272,10 @@ public struct PDFDisclaimersPage: View {
         loNMLS: String,
         loCompany: String,
         licensedStates: [String],
-        generatedAt: String
+        generatedAt: String,
+        headerDate: String? = nil,
+        pageIndex: Int = 2,
+        pageCount: Int = 2
     ) {
         self.disclosureText = disclosureText
         self.loFullName = loFullName
@@ -285,6 +283,12 @@ public struct PDFDisclaimersPage: View {
         self.loCompany = loCompany
         self.licensedStates = licensedStates
         self.generatedAt = generatedAt
+        // Fall back to generatedAt if no explicit header date passed;
+        // most callers supply one matching the cover's "MMMM d, yyyy"
+        // format so the header reads consistently across pages.
+        self.headerDate = headerDate ?? generatedAt
+        self.pageIndex = pageIndex
+        self.pageCount = pageCount
     }
 
     private let ink = Color(red: 0x17 / 255, green: 0x16 / 255, blue: 0x0F / 255)
@@ -295,19 +299,8 @@ public struct PDFDisclaimersPage: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Subsequent-page running header: small wordmark left + page
-            // index right in SF Mono. Per placement guide 5I.4.d.
-            HStack(alignment: .center) {
-                Image("Wordmark-A")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 14)
-                Spacer()
-                Text("Page 2 of 2")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .foregroundStyle(ink3)
-            }
-            .padding(.bottom, 14)
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: headerDate)
+                .padding(.bottom, 24)
             Text("Disclosures".uppercased())
                 .font(.system(size: 10.5, weight: .semibold))
                 .tracking(1.05)
@@ -337,25 +330,15 @@ public struct PDFDisclaimersPage: View {
                 Text("Licensed: \(licensedStates.joined(separator: " · "))")
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(ink2)
-                Text("Equal Housing Opportunity")
+                Text("Equal Housing Opportunity · Generated \(generatedAt)")
                     .font(.system(size: 9.5, design: .monospaced))
                     .foregroundStyle(ink2)
                     .padding(.top, 6)
             }
-
-            HStack {
-                Text("NestIQ Mortgage Intelligence · \(generatedAt)")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .foregroundStyle(ink3)
-                Spacer()
-                Text("Page 2 of 2")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .foregroundStyle(ink3)
-            }
-            .padding(.top, 14)
         }
         .padding(.horizontal, 48)
-        .padding(.vertical, 28)
+        .padding(.top, 18)
+        .padding(.bottom, 28)
         .frame(width: 612, height: 792)
         .background(Color.white)
     }
