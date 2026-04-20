@@ -167,49 +167,22 @@ enum PDFBuilder {
         return try buildPDF(profile: profile, borrower: borrower, payload: payload)
     }
 
+    /// Session 5O.4 — Refinance PDF now renders via HTML pipeline.
     static func buildRefinancePDF(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: RefinanceViewModel,
         narrative: String
-    ) throws -> URL {
-        let savings = MoneyFormat.shared.currency(viewModel.monthlySavings)
-        let be = viewModel.breakEvenMonth.map { "\($0) mo" } ?? "—"
-        let lifetime = MoneyFormat.shared.dollarsShort(abs(viewModel.lifetimeDelta))
-        let npv = MoneyFormat.shared.dollarsShort(abs(viewModel.npvDelta))
-        let currentRate = String(format: "%.3f", viewModel.inputs.currentRate)
-        let currentRateDisplay = displayRateAndAPR(rate: viewModel.inputs.currentRate, decimalAPR: viewModel.inputs.currentAPR)
-        let fallback = "Selected refi saves \(savings)/mo versus the current \(currentRate)% loan. "
-            + "Break-even: \(be)."
-        let payload = Payload(
-            calculatorSlug: "refinance",
-            calculatorTitle: "Refinance comparison",
-            complianceScenarioType: .refinance,
-            loanSummary: "Current \(MoneyFormat.shared.currency(viewModel.inputs.currentBalance)) @ \(currentRateDisplay)",
-            heroLabel: "Monthly savings · selected option",
-            heroValue: savings,
-            heroValuePrefix: "",
-            heroKPIs: [
-                ("Break-even", be),
-                ("Lifetime Δ", lifetime),
-                ("NPV @ 5%", npv),
-            ],
-            narrative: narrative.isEmpty ? fallback : narrative
-        )
-        // Refi ships cover + 1 comparison + disclaimers → 3 pages total.
-        let comparison = AnyView(refinanceComparisonPage(
+    ) async throws -> URL {
+        let html = RefinancePDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
-            pageIndex: 2,
-            pageCount: 3
-        ))
-        return try buildPDF(
-            profile: profile,
-            borrower: borrower,
-            payload: payload,
-            extraPages: [(comparison, .landscape)]
+            narrative: narrative
         )
+        let url = PDFHTMLComposition.temporaryURL(for: "refinance")
+        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        return url
     }
 
     /// Session 5O.3 — TCA PDF now renders via HTML pipeline.
