@@ -235,6 +235,9 @@ struct TCAScreen: View {
                     Text("Close " + closingDisplay(for: s))
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkTertiary)
+                    Text("Approx cash " + cashToCloseDisplay(for: s))
+                        .textStyle(Typography.num.withSize(10.5, weight: .semibold))
+                        .foregroundStyle(Palette.ink)
                 }
                 .padding(.horizontal, Spacing.s8)
                 .padding(.vertical, Spacing.s8)
@@ -256,6 +259,12 @@ struct TCAScreen: View {
 
     private func loanAmountDisplay(for scenario: TCAScenario) -> String {
         MoneyFormat.shared.dollarsShort(viewModel.inputs.effectiveLoanAmount(for: scenario))
+    }
+
+    /// Session 5M.3: approximate cash-to-close per scenario.
+    /// "Approximate" to distinguish from a regulated Loan Estimate.
+    private func cashToCloseDisplay(for scenario: TCAScenario) -> String {
+        MoneyFormat.shared.dollarsShort(viewModel.inputs.approximateCashToClose(for: scenario))
     }
 
     private struct MonthlyImpact {

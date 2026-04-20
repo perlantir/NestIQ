@@ -245,6 +245,30 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         }
     }
 
+    /// Session 5M.3: approximate cash-to-close per scenario. Display-
+    /// only; labeled "Approximate" on surfaces so LOs don't confuse it
+    /// with a regulated Loan Estimate. Earnest money is deliberately
+    /// out of scope (Session 5M decision).
+    ///
+    /// Purchase mode: Price + Closing Costs + Prepaids − Down Payment − Credits
+    /// Refinance mode: Closing Costs + Prepaids − Credits
+    ///
+    /// Clamped to `>= 0` so a credit-heavy scenario doesn't render as
+    /// a negative dollar amount (which isn't semantically "cash to
+    /// close" — it's credit to the borrower; separate line item).
+    func approximateCashToClose(for scenario: TCAScenario) -> Decimal {
+        let base: Decimal
+        switch mode {
+        case .purchase:
+            let price = scenario.propertyDP.purchasePrice
+            let downPayment = scenario.propertyDP.downPaymentAmount
+            base = price + scenario.closingCosts + scenario.prepaids - downPayment - scenario.credits
+        case .refinance:
+            base = scenario.closingCosts + scenario.prepaids - scenario.credits
+        }
+        return base.clampedNonNegative
+    }
+
     /// LTV per scenario against the active mode's denominator.
     func ltv(for scenario: TCAScenario) -> Double {
         switch mode {

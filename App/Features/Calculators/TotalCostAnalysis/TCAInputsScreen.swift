@@ -356,6 +356,26 @@ struct TCAInputsScreen: View {
                     set: { viewModel.inputs.scenarios[index].closingCosts = $0 }
                 )
             )
+            divider
+            FieldRow(
+                label: "Prepaids",
+                prefix: "$",
+                hint: "Tax/ins escrow at close",
+                decimal: Binding(
+                    get: { viewModel.inputs.scenarios[index].prepaids },
+                    set: { viewModel.inputs.scenarios[index].prepaids = $0 }
+                )
+            )
+            divider
+            FieldRow(
+                label: "Credits",
+                prefix: "$",
+                hint: "Seller / lender credits",
+                decimal: Binding(
+                    get: { viewModel.inputs.scenarios[index].credits },
+                    set: { viewModel.inputs.scenarios[index].credits = $0 }
+                )
+            )
             if viewModel.inputs.mode == .refinance, viewModel.inputs.includeDebts {
                 divider
                 scenarioDebtsRows(index: index)

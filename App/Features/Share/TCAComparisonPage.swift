@@ -105,6 +105,10 @@ struct TCAComparisonPage: View {
                                 MoneyFormat.shared.decimalString(s.closingCosts)))
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(inkSecondary)
+                    Text("Approx cash " + MoneyFormat.shared.dollarsShort(
+                        viewModel.inputs.approximateCashToClose(for: s)))
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(inkPrimary)
                     Text("Mo " + pmt)
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(inkSecondary)
