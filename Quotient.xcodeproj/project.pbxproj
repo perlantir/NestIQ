@@ -56,6 +56,7 @@
 		456044E0A90F9CDC6FE3B665 /* HelocViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */; };
 		45BDCF05270984C4D7995217 /* BorrowerPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4A4881C0CA2B982907EC15 /* BorrowerPill.swift */; };
 		45EDBA4287AC65E86FC29A8D /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = F025FA2D597BEFBBC4A3075F /* QuotientFinance */; };
+		477DC1CFABF2F59224D757A0 /* TCAPDFHTML+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4720A5C22F91C757369B64B /* TCAPDFHTML+CurrentMortgage.swift */; };
 		48171DBA746740E34FF70A26 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48FCE5E97C92AFF164AD551A /* Colors.swift */; };
 		4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C1B0601932028F30AD87A8 /* TCAInputs.swift */; };
 		4B615F48190205AD03274239 /* AmortizationMoneyFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */; };
@@ -344,6 +345,7 @@
 		E3A9CA1B8E8F599E34F73A31 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHelpers.swift; sourceTree = "<group>"; };
 		E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+BreakdownSections.swift"; sourceTree = "<group>"; };
+		E4720A5C22F91C757369B64B /* TCAPDFHTML+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAPDFHTML+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveScenarioNamePrompt.swift; sourceTree = "<group>"; };
 		E546EE5E4455799D394A7299 /* HelocScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocScreen.swift; sourceTree = "<group>"; };
 		E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationMoneyFormat.swift; sourceTree = "<group>"; };
@@ -538,6 +540,7 @@
 				659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */,
 				36C1D4825AF59A035A76E125 /* SharePreview.swift */,
 				A0734FF07CB1B1618BF47041 /* TCAPDFHTML.swift */,
+				E4720A5C22F91C757369B64B /* TCAPDFHTML+CurrentMortgage.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -1109,6 +1112,7 @@
 				C210B34AE0330D62B08989B6 /* TCAInputsScreen+CurrentMortgage.swift in Sources */,
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
+				477DC1CFABF2F59224D757A0 /* TCAPDFHTML+CurrentMortgage.swift in Sources */,
 				A8A61BF4003C61412F162914 /* TCAPDFHTML.swift in Sources */,
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
 				5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */,

@@ -32,6 +32,7 @@ enum TCAPDFHTML {
             viewModel: viewModel,
             narrative: narrative
         )
+            + currentMortgageSection(viewModel: viewModel)
             + scenariosSection(viewModel: viewModel)
             + horizonMatrixSection(viewModel: viewModel)
             + interestPrincipalSection(viewModel: viewModel)
