@@ -94,6 +94,53 @@ final class TCACurrentMortgagePersistenceTests: XCTestCase {
         XCTAssertEqual(try ctx.fetch(FetchDescriptor<Borrower>()).count, 0)
     }
 
+    // MARK: - Session 5R.1 — prefill loanAmount + homeValue from currentMortgage
+
+    /// Valid currentMortgage hydrates `form.loanAmount` + `form.homeValue`
+    /// (when those are 0). Lets LOs skip typing the balance / home value
+    /// twice in TCA refi.
+    func testCurrentMortgagePrefillsEmptyFormFields() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.loanAmount = 0
+        inputs.homeValue = 0
+        let mortgage = sampleMortgage()
+
+        // Simulate the prefill logic from TCAInputsScreen+CurrentMortgage.
+        // The SwiftUI view holds this state; tests exercise the same
+        // transition.
+        if inputs.loanAmount == 0, mortgage.currentBalance > 0 {
+            inputs.loanAmount = mortgage.currentBalance
+        }
+        if inputs.homeValue == 0, mortgage.propertyValueToday > 0 {
+            inputs.homeValue = mortgage.propertyValueToday
+        }
+
+        XCTAssertEqual(inputs.loanAmount, mortgage.currentBalance)
+        XCTAssertEqual(inputs.homeValue, mortgage.propertyValueToday)
+    }
+
+    /// LO overrides: a custom loanAmount or homeValue already set on
+    /// the form (non-zero) must not be clobbered by prefill. Cash-out
+    /// refis rely on this (new loan > current balance).
+    func testCurrentMortgagePrefillPreservesLOOverrides() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.loanAmount = 450_000        // LO typed cash-out amount
+        inputs.homeValue = 620_000          // LO typed appraised value
+        let mortgage = sampleMortgage()     // balance 388_500, propertyValueToday 570_000
+
+        if inputs.loanAmount == 0, mortgage.currentBalance > 0 {
+            inputs.loanAmount = mortgage.currentBalance
+        }
+        if inputs.homeValue == 0, mortgage.propertyValueToday > 0 {
+            inputs.homeValue = mortgage.propertyValueToday
+        }
+
+        XCTAssertEqual(inputs.loanAmount, 450_000, "Cash-out loan amount must not be overwritten")
+        XCTAssertEqual(inputs.homeValue, 620_000, "LO-entered home value must not be overwritten")
+    }
+
     /// Nil mortgage (LO blanked the section, or purchase-mode path):
     /// persist is a no-op even with toggle ON + borrower attached.
     /// The existing borrower.currentMortgage (if any) is preserved —

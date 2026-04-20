@@ -90,16 +90,23 @@ extension TCAInputsScreen {
     /// (first pull) or from a loaded scenario's snapshot (when the
     /// Inputs screen opens with an existingScenario whose JSON carries
     /// a currentMortgage). If both are absent, the draft stays blank.
+    ///
+    /// 5R.1: also prefills the form-level loanAmount + homeValue from
+    /// the mortgage so the LO doesn't re-type the balance / value
+    /// they already entered above. Only fires when the form field is
+    /// still 0 — respects any customization the LO has already made.
     func hydrateCurrentMortgageDraft() {
         if let snapshot = viewModel.inputs.currentMortgage {
             currentMortgageDraft = CurrentMortgageDraft(from: snapshot)
             currentMortgageExpanded = true
+            prefillFormFieldsFromCurrentMortgage(snapshot)
             return
         }
         if let borrowerMortgage = selectedBorrower?.currentMortgage {
             currentMortgageDraft = CurrentMortgageDraft(from: borrowerMortgage)
             viewModel.inputs.currentMortgage = borrowerMortgage
             currentMortgageExpanded = true
+            prefillFormFieldsFromCurrentMortgage(borrowerMortgage)
         }
     }
 
@@ -108,11 +115,30 @@ extension TCAInputsScreen {
     /// drafts hold in the local @State without corrupting the inputs
     /// snapshot — break-even math falls back to the legacy
     /// scenario-vs-scenario baseline while the LO is mid-edit.
+    ///
+    /// 5R.1: valid commits also trickle into the form-level loanAmount
+    /// / homeValue (if those are still 0) so the LO sees their current-
+    /// mortgage numbers populate the downstream fields automatically.
     func applyDraftToInputs(_ draft: CurrentMortgageDraft) {
         if draft.isBlank {
             viewModel.inputs.currentMortgage = nil
         } else if let mortgage = draft.toMortgage() {
             viewModel.inputs.currentMortgage = mortgage
+            prefillFormFieldsFromCurrentMortgage(mortgage)
+        }
+    }
+
+    /// Copy `currentBalance` into `form.loanAmount` and
+    /// `propertyValueToday` into `form.homeValue` — but only when the
+    /// form field is still 0. LOs who have already typed a different
+    /// value (cash-out refis setting a custom default, non-standard
+    /// appraised value) keep their override.
+    private func prefillFormFieldsFromCurrentMortgage(_ mortgage: CurrentMortgage) {
+        if viewModel.inputs.loanAmount == 0, mortgage.currentBalance > 0 {
+            viewModel.inputs.loanAmount = mortgage.currentBalance
+        }
+        if viewModel.inputs.homeValue == 0, mortgage.propertyValueToday > 0 {
+            viewModel.inputs.homeValue = mortgage.propertyValueToday
         }
     }
 

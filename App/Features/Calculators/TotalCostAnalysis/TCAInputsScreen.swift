@@ -204,11 +204,18 @@ struct TCAInputsScreen: View {
     // MARK: Loan (refinance-mode fallback)
 
     private var loanSection: some View {
-        fieldGroup(header: "Loan amount · refinance default") {
+        let prefilled = viewModel.inputs.currentMortgage != nil
+        let header = prefilled
+            ? "Default new loan amount · refinance"
+            : "Loan amount · refinance default"
+        let hint = prefilled
+            ? "Pre-filled from current mortgage balance. Scenarios can override below."
+            : "scenarios can override below"
+        return fieldGroup(header: header) {
             FieldRow(
                 label: "Default loan amount",
                 prefix: "$",
-                hint: "scenarios can override below",
+                hint: hint,
                 decimal: Binding(
                     get: { viewModel.inputs.loanAmount },
                     set: { viewModel.inputs.loanAmount = $0 }
@@ -220,11 +227,15 @@ struct TCAInputsScreen: View {
     // MARK: Home value (refinance mode — shared LTV denominator)
 
     private var homeValueSection: some View {
-        fieldGroup(header: "Property") {
+        let prefilled = viewModel.inputs.currentMortgage != nil
+        let hint = prefilled
+            ? "Pre-filled from current mortgage. Shared LTV denominator for all scenarios."
+            : "shared LTV denominator for all scenarios"
+        return fieldGroup(header: "Property") {
             FieldRow(
                 label: "Current home value",
                 prefix: "$",
-                hint: "shared LTV denominator for all scenarios",
+                hint: hint,
                 decimal: Binding(
                     get: { viewModel.inputs.homeValue },
                     set: { viewModel.inputs.homeValue = $0 }
