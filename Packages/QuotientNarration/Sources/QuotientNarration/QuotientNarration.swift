@@ -138,9 +138,12 @@ public enum HallucinationGuard {
         s.removeAll { $0 == "$" || $0 == "," }
         var multiplier: Double = 1
         if s.hasSuffix("%") { s.removeLast() }
-        if s.hasSuffix("K") { s.removeLast(); multiplier = 1_000 }
-        else if s.hasSuffix("M") { s.removeLast(); multiplier = 1_000_000 }
-        else if s.hasSuffix("B") { s.removeLast(); multiplier = 1_000_000_000 }
+        switch s.last {
+        case "K": s.removeLast(); multiplier = 1_000
+        case "M": s.removeLast(); multiplier = 1_000_000
+        case "B": s.removeLast(); multiplier = 1_000_000_000
+        default: break
+        }
         guard let base = Double(s) else { return nil }
         return base * multiplier
     }
