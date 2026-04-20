@@ -19,6 +19,9 @@
   --ink-secondary: #3A382C;
   --paper: #FAF9F5;
   --accent: #1F4D3F;
+  /* --label: mid-tone between ink and muted. Used for primary section
+     labels that were bleeding into cream paper at --muted. */
+  --label: #444038;
   --muted: #85816F;
   --border: rgba(23, 22, 15, 0.08);
   --border-strong: rgba(23, 22, 15, 0.16);
@@ -166,7 +169,7 @@ p { margin: 0 0 10pt; }
   font-size: 9pt;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--label);
   margin: 0 0 4pt;
 }
 
@@ -207,7 +210,7 @@ p { margin: 0 0 10pt; }
   font-size: 8.5pt;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--label);
   margin: 0 0 4pt;
 }
 
@@ -239,7 +242,7 @@ table.data th {
   font-size: 8.5pt;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
+  color: var(--label);
   font-weight: 500;
   border-bottom: 0.5pt solid var(--border-strong);
 }
@@ -315,7 +318,7 @@ table.data tr.winner td {
   font-size: 9pt;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--label);
   margin: 0 0 2pt;
 }
 
