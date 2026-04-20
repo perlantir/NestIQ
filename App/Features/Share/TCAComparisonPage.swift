@@ -30,6 +30,8 @@ struct TCAComparisonPage: View {
                 .padding(.top, 18)
             matrix
                 .padding(.top, 14)
+            interestPrincipalMatrix
+                .padding(.top, 10)
             Spacer(minLength: 0)
             footer
         }
@@ -37,6 +39,68 @@ struct TCAComparisonPage: View {
         .padding(.vertical, 28)
         .frame(width: 792, height: 612)
         .background(Color.white)
+    }
+
+    /// Session 5M.5: "Interest vs principal" compact matrix beneath the
+    /// total-cost matrix on the comparison page. Same row layout; each
+    /// cell renders "XX% int / YY% prin".
+    private var interestPrincipalMatrix: some View {
+        let schedules = viewModel.scenarioSchedules
+        return VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Text("Int vs principal")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(0.6)
+                    .foregroundStyle(inkTertiary)
+                    .frame(width: 92, alignment: .leading)
+                    .padding(.leading, 16)
+                ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, _ in
+                    Color.clear
+                        .frame(height: 1)
+                        .frame(maxWidth: .infinity)
+                        .padding(.trailing, 16)
+                        .id(idx)
+                }
+            }
+            .padding(.vertical, 6)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(border).frame(height: 1)
+            }
+            ForEach(Array(viewModel.inputs.horizonsYears.enumerated()), id: \.offset) { _, years in
+                HStack(spacing: 0) {
+                    Text("\(years)-yr")
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundStyle(inkSecondary)
+                        .frame(width: 92, alignment: .leading)
+                        .padding(.leading, 16)
+                    ForEach(Array(schedules.enumerated()), id: \.offset) { _, schedule in
+                        Text(interestPrincipalSplit(schedule: schedule, years: years))
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(inkPrimary)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.trailing, 16)
+                    }
+                }
+                .padding(.vertical, 6)
+                Rectangle().fill(border).frame(height: 1)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(border, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
+
+    private func interestPrincipalSplit(schedule: AmortizationSchedule, years: Int) -> String {
+        let month = years * 12
+        let interest = schedule.cumulativeInterest(throughMonth: month)
+        let principal = schedule.cumulativePrincipal(throughMonth: month)
+        let total = interest + principal
+        guard total > 0 else { return "—" }
+        let intPct = (interest.asDouble / total.asDouble) * 100
+        let prinPct = 100 - intPct
+        return String(format: "%.0f%% int / %.0f%% prin", intPct, prinPct)
     }
 
     private var header: some View {

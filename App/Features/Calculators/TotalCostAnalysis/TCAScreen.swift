@@ -14,6 +14,11 @@ final class TCAViewModel {
     var inputs: TCAFormInputs
     var borrower: Borrower?
     var result: QuotientFinance.ComparisonResult?
+    /// Session 5M.5: one amortization schedule per scenario, aligned to
+    /// `inputs.scenarios` by index. Populated by `compute()` so the
+    /// interest-vs-principal / unrecoverable / equity sections can read
+    /// horizon-scoped cumulative values without re-running amortize().
+    var scenarioSchedules: [AmortizationSchedule] = []
 
     init(inputs: TCAFormInputs = .sampleDefault, borrower: Borrower? = nil) {
         self.inputs = inputs
@@ -22,6 +27,7 @@ final class TCAViewModel {
 
     func compute() {
         result = compareScenarios(inputs.scenarioInputs(), horizons: inputs.horizonsYears)
+        scenarioSchedules = inputs.scenarioInputs().map { amortize(loan: $0.loan) }
     }
 }
 
@@ -64,6 +70,10 @@ struct TCAScreen: View {
                     .padding(.bottom, Spacing.s24)
 
                 matrix
+                    .padding(.horizontal, Spacing.s20)
+                    .padding(.bottom, Spacing.s24)
+
+                interestPrincipalSection
                     .padding(.horizontal, Spacing.s20)
                     .padding(.bottom, Spacing.s24)
 
@@ -432,24 +442,9 @@ struct TCAScreen: View {
 
     // MARK: Narrative
 
-    private var narrative: some View {
-        VStack(alignment: .leading, spacing: Spacing.s8) {
-            Eyebrow("Narrative")
-            Text(narrativeText)
-                .textStyle(Typography.body.withSize(13.5))
-                .foregroundStyle(Palette.ink)
-                .lineSpacing(3)
-                .padding(.horizontal, Spacing.s16)
-                .padding(.vertical, Spacing.s12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Palette.surfaceRaised)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Radius.listCard)
-                        .stroke(Palette.borderSubtle, lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-        }
-    }
+    // `narrative` + `narrativeText` live in TCAScreen+BreakdownSections
+    // (moved there in 5M.5 to keep TCAScreen under the type_body_length
+    // cap once the interest-vs-principal section landed).
 
     var narrativeText: String {
         guard let result = viewModel.result, !result.winnerByHorizon.isEmpty else {

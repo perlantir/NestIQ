@@ -71,6 +71,7 @@
 		6C0915635C4789C21F950B40 /* AmortizationResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */; };
 		71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */; };
 		725FB68BC501AD2B676E3CB3 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B782FB7D6EF280A7AC6FD31A /* Spacing.swift */; };
+		728DA8C1D845F5C2F80139EB /* TCAScreen+BreakdownSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */; };
 		730C8CC10250F9F1F029C96C /* PDFBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26567951086061287C748DAC /* PDFBuilderTests.swift */; };
 		7549F6B0C6A925A2F108795D /* CalculatorSelfEmploymentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */; };
 		756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */; };
@@ -303,6 +304,7 @@
 		E25E78DDA261CA8CE65A412D /* DatePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePill.swift; sourceTree = "<group>"; };
 		E3A9CA1B8E8F599E34F73A31 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		E40C972A36D6A416D7B126B4 /* UITestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHelpers.swift; sourceTree = "<group>"; };
+		E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+BreakdownSections.swift"; sourceTree = "<group>"; };
 		E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveScenarioNamePrompt.swift; sourceTree = "<group>"; };
 		E546EE5E4455799D394A7299 /* HelocScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocScreen.swift; sourceTree = "<group>"; };
 		E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationMoneyFormat.swift; sourceTree = "<group>"; };
@@ -677,6 +679,7 @@
 				EBDE15AA2723626FEE3D9AF4 /* TCAInputsScreen+DebtsAndLTV.swift */,
 				54754A91422D9F8CB7C303A8 /* TCAScreen.swift */,
 				5CFD3C36DDB1D1E7D16D72F8 /* TCAScreen+Actions.swift */,
+				E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */,
 			);
 			path = TotalCostAnalysis;
 			sourceTree = "<group>";
@@ -1018,6 +1021,7 @@
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
+				728DA8C1D845F5C2F80139EB /* TCAScreen+BreakdownSections.swift in Sources */,
 				4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */,
 				271D935848142EA3F4346183 /* ThemePreview.swift in Sources */,
 				F2C8E753B9341FA9B2FE95FA /* TogglePill.swift in Sources */,

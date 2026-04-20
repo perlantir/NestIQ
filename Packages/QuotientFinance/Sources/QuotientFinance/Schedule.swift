@@ -87,5 +87,25 @@ public struct AmortizationSchedule: Sendable, Hashable, Codable {
         payments.reduce(Decimal(0)) { $0 + $1.pmi }
     }
 
+    /// Cumulative interest paid through the end of month `M` (inclusive,
+    /// 1-indexed). Clamped: month 0 → 0, month > payments.count → full
+    /// total. Session 5M.5 primitive for TCA's horizon-year interest vs
+    /// principal breakdown.
+    public func cumulativeInterest(throughMonth month: Int) -> Decimal {
+        guard month > 0 else { return 0 }
+        let cap = Swift.min(month, payments.count)
+        return payments.prefix(cap).reduce(Decimal(0)) { $0 + $1.interest }
+    }
+
+    /// Cumulative principal paid through the end of month `M` (inclusive,
+    /// 1-indexed). Includes scheduled principal + any extra principal
+    /// applied in that month. Clamped the same way as
+    /// `cumulativeInterest(throughMonth:)`.
+    public func cumulativePrincipal(throughMonth month: Int) -> Decimal {
+        guard month > 0 else { return 0 }
+        let cap = Swift.min(month, payments.count)
+        return payments.prefix(cap).reduce(Decimal(0)) { $0 + $1.principal + $1.extraPrincipal }
+    }
+
     public var payoffDate: Date? { payments.last?.date }
 }
