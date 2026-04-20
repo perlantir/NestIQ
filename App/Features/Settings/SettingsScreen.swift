@@ -22,6 +22,7 @@ struct SettingsScreen: View {
     @State private var showingReplayConfirmation = false
     @State private var showingFeedbackSheet = false
     @State private var showingEraseConfirmation = false
+    @State private var showingDeleteAccount = false
     // `internal` (not private) so SettingsScreen+Compliance can flip
     // the flag from the Licensed states row's onTap closure.
     @State var showingLicensedStatesPicker = false
@@ -42,6 +43,7 @@ struct SettingsScreen: View {
                     appearanceSection
                     languageAndHapticsSection
                     privacyAndDataSection
+                    accountSection
                     supportAndAboutSection
 
                     footer
@@ -61,6 +63,10 @@ struct SettingsScreen: View {
             }
             .sheet(isPresented: $showingLicensedStatesPicker) {
                 LicensedStatesPickerSheet(profile: profile)
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showingDeleteAccount) {
+                DeleteAccountFlow(profile: profile)
                     .presentationDetents([.large])
             }
             .confirmationDialog(
@@ -285,9 +291,25 @@ struct SettingsScreen: View {
                             get: { profile.faceIDEnabled },
                             set: { set(\.faceIDEnabled, $0) }
                         )))
+        }
+    }
+
+    /// Apple Guideline 5.1.1(v) — apps that create accounts must expose
+    /// in-app deletion. "Erase local data" wipes content while leaving
+    /// the SIWA session attached; "Delete account" nukes everything.
+    private var accountSection: some View {
+        settingsGroup(header: "Account") {
             SettingsRow(label: "Erase local data",
                         trailing: .disclosure,
                         onTap: { showingEraseConfirmation = true })
+            divider
+            SettingsRow(
+                label: "Delete account",
+                labelColor: Palette.loss,
+                trailing: .disclosure,
+                onTap: { showingDeleteAccount = true }
+            )
+            .accessibilityIdentifier("settings.deleteAccount")
         }
     }
 

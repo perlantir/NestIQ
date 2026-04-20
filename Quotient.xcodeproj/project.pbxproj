@@ -34,6 +34,7 @@
 		2AF36786E0E1F3388E79D6C3 /* OnboardingMiniatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = C728ACEFCBFB4C6C8A95F7B7 /* OnboardingMiniatures.swift */; };
 		2DF84F1D0C3762652949C70F /* AmortizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */; };
 		2E3AD6A0D7A5A8919784EF89 /* MonoNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */; };
+		2E6E316743AC79A00476566F /* AccountDeletionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C35447BF63D1A8364CA99BE /* AccountDeletionTests.swift */; };
 		2FD76A05179D53E89586EE6B /* CumulativeSavingsChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53977F4FED1CE2F55ED53D59 /* CumulativeSavingsChart.swift */; };
 		308FE7B472CF4653DFC3B735 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F63633A474B6D374D46BAD4 /* Typography.swift */; };
 		389E07F52C6B69E232CAEF64 /* IncomeQualListViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */; };
@@ -119,6 +120,7 @@
 		C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */; };
 		C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */; };
 		C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */ = {isa = PBXBuildFile; productRef = A1197D36724BA39F7185E2D9 /* QuotientPDF */; };
+		C62A0FBA3E8D64F8C99DCC4C /* DeleteAccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */; };
 		C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */; };
 		C84F0EA0D8C40CE980C83952 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A9CA1B8E8F599E34F73A31 /* Models.swift */; };
 		CD028AF8682D3C98BA8656EB /* CalculatorNewScenarioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B001B321FAB543828487B6D /* CalculatorNewScenarioView.swift */; };
@@ -203,6 +205,7 @@
 		3544DE01D8235962D2B98659 /* CalculatorDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorDock.swift; sourceTree = "<group>"; };
 		36C1D4825AF59A035A76E125 /* SharePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePreview.swift; sourceTree = "<group>"; };
 		371105E1BFEFCBB484FEEA6F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
+		3C35447BF63D1A8364CA99BE /* AccountDeletionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionTests.swift; sourceTree = "<group>"; };
 		3D7DED8F6F4DC72144EE869D /* SavedScenariosDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedScenariosDeleteTests.swift; sourceTree = "<group>"; };
 		42266120EAAEE6500B3FC21F /* AmortizationInputsScreen+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AmortizationInputsScreen+Helpers.swift"; sourceTree = "<group>"; };
 		48FCE5E97C92AFF164AD551A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
@@ -220,6 +223,7 @@
 		5CFD3C36DDB1D1E7D16D72F8 /* TCAScreen+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+Actions.swift"; sourceTree = "<group>"; };
 		5D15C026D3869F6E5AF23D67 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 		5D2229147921A6B1EC3387AD /* SelfEmploymentInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEmploymentInputsScreen.swift; sourceTree = "<group>"; };
+		5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountFlow.swift; sourceTree = "<group>"; };
 		5FE0AC5F80F00D95D30E9003 /* SelfEmploymentInputsScreen+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfEmploymentInputsScreen+Cards.swift"; sourceTree = "<group>"; };
 		63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsScreen+Compliance.swift"; sourceTree = "<group>"; };
 		63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAViewModelTests.swift; sourceTree = "<group>"; };
@@ -397,6 +401,7 @@
 		3AE445CC4774944DABF437F7 /* AppTests */ = {
 			isa = PBXGroup;
 			children = (
+				3C35447BF63D1A8364CA99BE /* AccountDeletionTests.swift */,
 				2B6DDD5E48E86450B2850339 /* AmortizationViewModelTests.swift */,
 				F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */,
 				0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */,
@@ -692,6 +697,7 @@
 			children = (
 				8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */,
 				68C37A3C9E5111C9F4BB8353 /* ComplianceDetailScreens.swift */,
+				5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */,
 				209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */,
 				7F288789586295CD7EDEA159 /* ProfileEditor.swift */,
 				6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */,
@@ -901,6 +907,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E6E316743AC79A00476566F /* AccountDeletionTests.swift in Sources */,
 				542E16E580CE378565599400 /* AmortizationViewModelTests.swift in Sources */,
 				456044E0A90F9CDC6FE3B665 /* HelocViewModelTests.swift in Sources */,
 				64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */,
@@ -949,6 +956,7 @@
 				A24D0BB2A052539D1B32309A /* DTIDial.swift in Sources */,
 				BD7A57941289F8ADBA75D608 /* DataRow.swift in Sources */,
 				D95165BA7394D52B7F7340E4 /* DatePill.swift in Sources */,
+				C62A0FBA3E8D64F8C99DCC4C /* DeleteAccountFlow.swift in Sources */,
 				E679D387C757372A59304DF6 /* Eyebrow.swift in Sources */,
 				56D2D6A10F52D801FA1F8412 /* FaceIDUnlock.swift in Sources */,
 				81610761C185084A7E848094 /* FieldRow.swift in Sources */,

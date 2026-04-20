@@ -42,11 +42,18 @@ public struct SettingsRow: View {
     }
 
     let label: String
+    let labelColor: Color
     let trailing: Trailing
     let onTap: (() -> Void)?
 
-    public init(label: String, trailing: Trailing = .disclosure, onTap: (() -> Void)? = nil) {
+    public init(
+        label: String,
+        labelColor: Color = Palette.ink,
+        trailing: Trailing = .disclosure,
+        onTap: (() -> Void)? = nil
+    ) {
         self.label = label
+        self.labelColor = labelColor
         self.trailing = trailing
         self.onTap = onTap
     }
@@ -75,7 +82,7 @@ public struct SettingsRow: View {
         HStack(spacing: Spacing.s16) {
             Text(label)
                 .font(.system(size: 17, weight: .regular))
-                .foregroundStyle(Palette.ink)
+                .foregroundStyle(labelColor)
             Spacer()
             trailingView
         }
