@@ -73,13 +73,19 @@ struct OnboardingFlow: View {
     @ViewBuilder private var stepBody: some View {
         switch OnboardingStepID.allCases[index] {
         case .welcome:
-            VStack(alignment: .center, spacing: Spacing.s8) {
-                Image("Wordmark-A")
+            // Session 5K.3: small NestIQ monogram sits directly above
+            // the WELCOME eyebrow as the only top-of-view identity
+            // anchor. Replaces the earlier 48pt wordmark per Nick's
+            // round-6 QA — the card below already carries the brand
+            // lockup, so a single 40pt monogram keeps the screen
+            // uncluttered.
+            VStack(alignment: .center, spacing: 0) {
+                Image("Monogram-Accent")
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 48)
+                    .frame(height: 40)
                     .padding(.top, Spacing.s8)
-                    .padding(.bottom, Spacing.s16)
+                    .padding(.bottom, Spacing.s24)
             }
             .frame(maxWidth: .infinity)
             stepContent(
