@@ -110,7 +110,6 @@ public final class LenderProfile {
     public var brandColorHex: String
     public var phone: String
     public var email: String
-    public var tagline: String?
     public var preferredLanguage: String
     public var faceIDEnabled: Bool
     public var hapticsEnabled: Bool

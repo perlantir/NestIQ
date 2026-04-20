@@ -32,7 +32,6 @@ extension PDFBuilder {
             narrative: payload.narrative,
             accentHex: profile.brandColorHex,
             logoData: profile.companyLogoData,
-            signatureLine: profile.tagline,
             loPhotoData: profile.showPhotoOnPDF ? profile.photoData : nil,
             heroLabel: payload.heroLabel,
             heroValuePrefix: payload.heroValuePrefix,

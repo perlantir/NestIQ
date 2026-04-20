@@ -7,9 +7,10 @@
 //   - LogoPickerScreen — SwiftUI `PhotosPicker` (iOS 16+, no Info.plist
 //     permission needed since it's out-of-process); persists
 //     `LenderProfile.companyLogoData`.
-//   - SignatureBlockEditor — multi-line text editor that writes to
-//     `LenderProfile.tagline` (a short line the PDF prints beneath the
-//     name + NMLS block).
+//
+// Session 5N.3 removed the Signature Block Editor (LenderProfile.tagline
+// field) — it was rendering as a second signature block on the PDF
+// cover that duplicated the main block.
 //
 // Scope per Session 5A: the accent color tints only the PDF cover and
 // the Home greeting eyebrow. Global CTA tinting is a separate
@@ -346,86 +347,6 @@ struct LogoPickerScreen: View {
 
     private func remove() {
         profile.companyLogoData = nil
-        profile.updatedAt = Date()
-        try? modelContext.save()
-    }
-}
-
-// MARK: - Signature block
-
-struct SignatureBlockEditor: View {
-    @Bindable var profile: LenderProfile
-
-    @Environment(\.modelContext)
-    private var modelContext
-
-    @State private var draft: String = ""
-
-    private let maxLength = 200
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.s16) {
-                Text("A short line printed beneath your name + NMLS on the PDF cover. Often used for a credential or a personal motto.")
-                    .textStyle(Typography.body.withSize(13))
-                    .foregroundStyle(Palette.inkSecondary)
-                    .padding(.horizontal, Spacing.s20)
-
-                editor
-                    .padding(.horizontal, Spacing.s20)
-
-                HStack {
-                    Text("\(draft.count) / \(maxLength)")
-                        .textStyle(Typography.num.withSize(11))
-                        .foregroundStyle(draft.count > maxLength ? Palette.loss : Palette.inkTertiary)
-                    Spacer()
-                    if !draft.isEmpty {
-                        Button("Clear") { draft = "" }
-                            .textStyle(Typography.body.withSize(12, weight: .medium))
-                            .foregroundStyle(Palette.accent)
-                            .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, Spacing.s20)
-            }
-            .padding(.top, Spacing.s16)
-            .padding(.bottom, Spacing.s32)
-        }
-        .background(Palette.surface)
-        .scrollIndicators(.hidden)
-        .navigationTitle("Signature block")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") { save() }
-                    .fontWeight(.semibold)
-                    .disabled(draft.count > maxLength || draft == (profile.tagline ?? ""))
-            }
-        }
-        .onAppear { draft = profile.tagline ?? "" }
-    }
-
-    private var editor: some View {
-        TextField(
-            "e.g. Mortgage advisor · serving the Pacific NW since 2012",
-            text: $draft,
-            axis: .vertical
-        )
-        .lineLimit(3...5)
-        .textStyle(Typography.body)
-        .foregroundStyle(Palette.ink)
-        .padding(Spacing.s12)
-        .background(Palette.surfaceRaised)
-        .overlay(
-            RoundedRectangle(cornerRadius: Radius.listCard)
-                .stroke(Palette.borderSubtle, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
-    }
-
-    private func save() {
-        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        profile.tagline = trimmed.isEmpty ? nil : String(trimmed.prefix(maxLength))
         profile.updatedAt = Date()
         try? modelContext.save()
     }

@@ -20,7 +20,6 @@ public struct PDFCoverPage: View {
     public let narrative: String
     public let accentHex: String
     public let logoData: Data?
-    public let signatureLine: String?
     public let loPhotoData: Data?
     public let heroLabel: String
     public let heroValuePrefix: String
@@ -43,7 +42,6 @@ public struct PDFCoverPage: View {
         narrative: String,
         accentHex: String = "#1F4D3F",
         logoData: Data? = nil,
-        signatureLine: String? = nil,
         loPhotoData: Data? = nil,
         heroLabel: String = "Monthly payment · PITI",
         heroValuePrefix: String = "$",
@@ -65,7 +63,6 @@ public struct PDFCoverPage: View {
         self.narrative = narrative
         self.accentHex = accentHex
         self.logoData = logoData
-        self.signatureLine = signatureLine
         self.loPhotoData = loPhotoData
         self.heroLabel = heroLabel
         self.heroValuePrefix = heroValuePrefix
@@ -102,7 +99,7 @@ public struct PDFCoverPage: View {
     }
 
     private var brandStrip: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 14) {
             // Optional custom company logo on page 1. The NestIQ wordmark
             // now lives in PDFPageHeader above; this block is only for an
             // LO's own mark if they've uploaded one.
@@ -112,46 +109,51 @@ public struct PDFCoverPage: View {
                     .scaledToFit()
                     .frame(maxHeight: 36)
             }
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Mortgage analysis · prepared for you".uppercased())
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .tracking(1.05)
-                        .foregroundStyle(inkTertiary)
-                }
-                Spacer()
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text(loFullName)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(inkPrimary)
-                        Text("Senior Loan Officer · NMLS \(loNMLS)")
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(inkSecondary)
-                        Text("\(loCompany) · \(loEmail)")
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(inkSecondary)
-                        Text(loPhone)
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(inkSecondary)
-                        if let signatureLine, !signatureLine.isEmpty {
-                            Text(signatureLine)
-                                .font(.custom("SourceSerif4-It", size: 10.5))
-                                .foregroundStyle(inkSecondary)
-                                .padding(.top, 2)
-                        }
-                    }
-                    if let loPhotoData, let photo = UIImage(data: loPhotoData) {
-                        Image(uiImage: photo)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 44, height: 44)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(border, lineWidth: 1))
-                    }
+            HStack(alignment: .top, spacing: 14) {
+                signatureBlock
+                Spacer(minLength: 0)
+                if let loPhotoData, let photo = UIImage(data: loPhotoData) {
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 56, height: 56)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(border, lineWidth: 1))
                 }
             }
             Rectangle().fill(inkPrimary).frame(height: 2)
+        }
+    }
+
+    /// Session 5N.3: single-source-of-truth signature block. Four lines
+    /// from one LenderProfile record (no more `tagline` second block).
+    /// Company renders on its own line only when populated; email +
+    /// phone join on one line with a middot separator.
+    private var signatureBlock: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(loFullName)
+                .font(.custom("SourceSerif4", size: 16))
+                .foregroundStyle(inkPrimary)
+            Text("Senior Loan Officer · NMLS \(loNMLS)")
+                .font(.system(size: 10.5))
+                .foregroundStyle(inkSecondary)
+            if !loCompany.isEmpty, loCompany != "—" {
+                Text(loCompany)
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(inkSecondary)
+            }
+            Text(contactLine)
+                .font(.system(size: 10.5))
+                .foregroundStyle(inkSecondary)
+        }
+    }
+
+    private var contactLine: String {
+        switch (loEmail.isEmpty, loPhone.isEmpty) {
+        case (true, true): return ""
+        case (false, true): return loEmail
+        case (true, false): return loPhone
+        case (false, false): return "\(loEmail) · \(loPhone)"
         }
     }
 

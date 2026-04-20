@@ -200,13 +200,6 @@ struct SettingsScreen: View {
                 LogoPickerScreen(profile: profile)
             }
             divider
-            settingsNavRow(
-                label: "Signature block",
-                trailing: profile.tagline?.isEmpty == false ? "Custom" : "Default"
-            ) {
-                SignatureBlockEditor(profile: profile)
-            }
-            divider
             SettingsRow(
                 label: "Show photo on PDF",
                 trailing: .toggle(Binding(

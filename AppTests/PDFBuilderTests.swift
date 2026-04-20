@@ -48,6 +48,42 @@ final class PDFBuilderTests: XCTestCase {
                       "PDFPageHeader page counter missing from PDF. Got: \(text)")
     }
 
+    // MARK: - Session 5N.3: single-source signature block
+
+    /// Regression test for Nick's QA: the PDF was rendering two name
+    /// blocks — the main signature + a second italic block driven by
+    /// `LenderProfile.tagline`. 5N.3 removed the tagline field and
+    /// consolidated to one signature. This test pins that the rendered
+    /// PDF text layer shows the name exactly once.
+    func testPDFSignatureBlockShowsNameOnce() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("quotient-sig-\(UUID()).pdf")
+        let cover = PDFCoverPage(
+            borrowerName: "John Smith",
+            loFullName: "Nick Gallick",
+            loNMLS: "1428391",
+            loCompany: "Gallick Holdings LLC",
+            loEmail: "nick@uberkiwi.com",
+            loPhone: "555-555-0100",
+            calculatorTitle: "Amortization analysis",
+            generatedDate: "April 20, 2026",
+            loanSummary: "$400,000 · 30-yr · 6.750%",
+            heroPITI: "2,594",
+            heroKPIs: [("x", "y")],
+            narrative: "Test."
+        )
+        try PDFRenderer.renderPDF(pages: [AnyView(cover)], to: url)
+        let inspector = try XCTUnwrap(PDFInspector(url: url))
+        let text = inspector.text(onPage: 0) ?? ""
+        let occurrences = text.components(separatedBy: "Nick Gallick").count - 1
+        XCTAssertEqual(occurrences, 1,
+                       "Expected exactly one 'Nick Gallick' in PDF text; got \(occurrences). Full text: \(text)")
+        XCTAssertTrue(text.contains("Gallick Holdings LLC"),
+                      "Company should render on its own line in the signature block")
+        XCTAssertTrue(text.contains("nick@uberkiwi.com"),
+                      "Email should render on the contact line")
+    }
+
     // MARK: - Session 5I.3: profile photo on PDF cover
 
     /// Toggle-ON + photoData set → the rendered PDF carries the JPEG
