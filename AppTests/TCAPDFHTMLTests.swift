@@ -119,6 +119,106 @@ final class TCAPDFHTMLTests: XCTestCase {
         XCTAssertEqual(crossover?.month, 50)
     }
 
+    // MARK: - Session 5Q.4 — Current column in refi mode
+
+    /// When refi mode + borrower.currentMortgage is attached, the PDF's
+    /// horizon matrix adds a "Current" column; purchase mode does not.
+    func testTCAPDFRefiCurrentColumnRenders() async throws {
+        let profile = makeProfile()
+        let borrower = makeBorrower()
+        borrower.currentMortgage = CurrentMortgage(
+            currentBalance: 320_000,
+            currentRatePercent: 6.875,
+            currentMonthlyPaymentPI: 2_101,
+            originalLoanAmount: 360_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 500_000
+        )
+        let vm = TCAViewModel(borrower: borrower)
+        vm.inputs.currentMortgage = borrower.currentMortgage
+        vm.compute()
+
+        let html = TCAPDFHTML.buildHTML(
+            profile: profile,
+            borrower: borrower,
+            viewModel: vm,
+            narrative: ""
+        )
+        // Horizon matrix header carries Current column.
+        XCTAssertTrue(html.contains("<th class=\"num\">Current</th>"),
+                      "Refi-mode PDF missing Current column header")
+        // Caption reflects the status-quo framing.
+        XCTAssertTrue(html.contains("'Current' = staying"),
+                      "Refi-mode caption missing Current-column note")
+        // Unrecoverable + Equity sections carry Current rows.
+        XCTAssertTrue(html.contains("<td>Current</td>"),
+                      "Refi-mode PDF missing Current row in unrecoverable / equity tables")
+        XCTAssertTrue(html.contains("<td>Status quo</td>"),
+                      "Refi-mode PDF missing 'Status quo' program label")
+    }
+
+    func testTCAPDFPurchaseModeHasNoCurrentColumn() async throws {
+        let profile = makeProfile()
+        let borrower = makeBorrower()
+        let vm = TCAViewModel(borrower: borrower)
+        vm.inputs.mode = .purchase
+        vm.compute()
+
+        let html = TCAPDFHTML.buildHTML(
+            profile: profile,
+            borrower: borrower,
+            viewModel: vm,
+            narrative: ""
+        )
+        XCTAssertFalse(html.contains("<th class=\"num\">Current</th>"),
+                       "Purchase-mode PDF should not show Current column")
+        XCTAssertFalse(html.contains("<td>Status quo</td>"),
+                       "Purchase-mode PDF should not show Status quo row")
+    }
+
+    /// Spot-check the helper math: a known current mortgage, compute
+    /// its 5-yr horizon cost. Expected = P&I × 60, bounded by remaining.
+    func testTCAHorizonCurrentCostComputesCorrectly() {
+        let mortgage = CurrentMortgage(
+            currentBalance: 300_000,
+            currentRatePercent: 6.5,
+            currentMonthlyPaymentPI: 2_000,
+            originalLoanAmount: 300_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 450_000
+        )
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.currentMortgage = mortgage
+
+        // 5-yr horizon = 60 months × $2,000 = $120,000 (loan still
+        // running — plenty of remaining term).
+        XCTAssertEqual(inputs.currentHorizonCost(years: 5), 120_000)
+        // 7-yr horizon = 84 months × $2,000 = $168,000.
+        XCTAssertEqual(inputs.currentHorizonCost(years: 7), 168_000)
+    }
+
+    /// Purchase mode: the helper returns 0 even when a currentMortgage
+    /// is set on the inputs (shouldn't happen in practice, but the
+    /// helper's guard makes this explicit).
+    func testTCAHorizonCurrentCostZeroInPurchaseMode() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .purchase
+        inputs.currentMortgage = CurrentMortgage(
+            currentBalance: 300_000,
+            currentRatePercent: 6.5,
+            currentMonthlyPaymentPI: 2_000,
+            originalLoanAmount: 300_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 450_000
+        )
+        XCTAssertEqual(inputs.currentHorizonCost(years: 5), 0)
+        XCTAssertNil(inputs.buildCurrentMortgageSchedule())
+    }
+
     // MARK: - Helpers
 
     private func makeProfile() -> LenderProfile {

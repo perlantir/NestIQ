@@ -97,6 +97,7 @@
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		85CD0D0AD6007ADC806A1377 /* CurrentMortgageSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF728446C043F9325CC00B21 /* CurrentMortgageSection.swift */; };
 		874CBC9395A8D34745D050C9 /* TCACurrentMortgagePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C66169F762F690B67FA770 /* TCACurrentMortgagePersistenceTests.swift */; };
+		88A1A003CD9B68A1E46AA6E3 /* TCAInputs+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */; };
 		88DCBE802DFC175281B5DAD7 /* SaveScenarioNamePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */; };
 		8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */; };
 		90AE9500B9AD21CB149A00BE /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51FF57F0219E07755F31004E /* OFL.txt */; };
@@ -141,6 +142,7 @@
 		C62A0FBA3E8D64F8C99DCC4C /* DeleteAccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */; };
 		C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */; };
 		C84F0EA0D8C40CE980C83952 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A9CA1B8E8F599E34F73A31 /* Models.swift */; };
+		C881B9B8FCB3DD4C1D65F33B /* TCAPDFHTML+HorizonDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF9E471F2C1FDB2B28FED5C /* TCAPDFHTML+HorizonDetails.swift */; };
 		CB05EEC863A99CF71C29E643 /* SelfEmploymentPDFHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C6ADAD9FEBC89B5AF12C194 /* SelfEmploymentPDFHTMLTests.swift */; };
 		CD028AF8682D3C98BA8656EB /* CalculatorNewScenarioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B001B321FAB543828487B6D /* CalculatorNewScenarioView.swift */; };
 		D2192B5BE2D47B78B7100984 /* SignatureBlock.html in Resources */ = {isa = PBXBuildFile; fileRef = 59D416855FC744765B2EA79B /* SignatureBlock.html */; };
@@ -149,6 +151,7 @@
 		D95165BA7394D52B7F7340E4 /* DatePill.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25E78DDA261CA8CE65A412D /* DatePill.swift */; };
 		DCDFB1F53A2008A8AD147888 /* RootTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A2DD798F1884CC41D6E7D3 /* RootTabBar.swift */; };
 		E0B52CDDDB6BF1497223C1CC /* IncomeQualInputsScreen+Reserves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */; };
+		E5DB67D75256990E93F4E860 /* TCAScreen+Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5FA6B72A67690CE9A8857A /* TCAScreen+Matrix.swift */; };
 		E679D387C757372A59304DF6 /* Eyebrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB7F7D261F926F53F6870 /* Eyebrow.swift */; };
 		E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA85ACF7219CFD229D561CB /* TCAInputsScreen.swift */; };
 		E7986402C129C7B006BA7FA2 /* HelocPDFHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821BA232A2889EF6FD4129AE /* HelocPDFHTMLTests.swift */; };
@@ -228,8 +231,10 @@
 		3544DE01D8235962D2B98659 /* CalculatorDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorDock.swift; sourceTree = "<group>"; };
 		36C1D4825AF59A035A76E125 /* SharePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePreview.swift; sourceTree = "<group>"; };
 		371105E1BFEFCBB484FEEA6F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
+		3B5FA6B72A67690CE9A8857A /* TCAScreen+Matrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+Matrix.swift"; sourceTree = "<group>"; };
 		3C35447BF63D1A8364CA99BE /* AccountDeletionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionTests.swift; sourceTree = "<group>"; };
 		3D7DED8F6F4DC72144EE869D /* SavedScenariosDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedScenariosDeleteTests.swift; sourceTree = "<group>"; };
+		3DF9E471F2C1FDB2B28FED5C /* TCAPDFHTML+HorizonDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAPDFHTML+HorizonDetails.swift"; sourceTree = "<group>"; };
 		42266120EAAEE6500B3FC21F /* AmortizationInputsScreen+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AmortizationInputsScreen+Helpers.swift"; sourceTree = "<group>"; };
 		48FCE5E97C92AFF164AD551A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonoNumber.swift; sourceTree = "<group>"; };
@@ -283,6 +288,7 @@
 		892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorSelfEmploymentTests.swift; sourceTree = "<group>"; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
 		8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+CurrentMortgage.swift"; sourceTree = "<group>"; };
+		8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAInputs+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandDetailScreens.swift; sourceTree = "<group>"; };
 		906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedScenariosScreen+EditMode.swift"; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -549,6 +555,7 @@
 				36C1D4825AF59A035A76E125 /* SharePreview.swift */,
 				A0734FF07CB1B1618BF47041 /* TCAPDFHTML.swift */,
 				E4720A5C22F91C757369B64B /* TCAPDFHTML+CurrentMortgage.swift */,
+				3DF9E471F2C1FDB2B28FED5C /* TCAPDFHTML+HorizonDetails.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -754,6 +761,7 @@
 			isa = PBXGroup;
 			children = (
 				A0C1B0601932028F30AD87A8 /* TCAInputs.swift */,
+				8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */,
 				4CA85ACF7219CFD229D561CB /* TCAInputsScreen.swift */,
 				CC433F27FC7E081201C9EAEC /* TCAInputsScreen+CurrentMortgage.swift */,
 				EBDE15AA2723626FEE3D9AF4 /* TCAInputsScreen+DebtsAndLTV.swift */,
@@ -762,6 +770,7 @@
 				E41C3ECBD74B37FC8212A9AA /* TCAScreen+BreakdownSections.swift */,
 				D822FDD24F3D67FB8B341B94 /* TCAScreen+BreakEven.swift */,
 				8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */,
+				3B5FA6B72A67690CE9A8857A /* TCAScreen+Matrix.swift */,
 			);
 			path = TotalCostAnalysis;
 			sourceTree = "<group>";
@@ -1120,16 +1129,19 @@
 				3A41B4E5CE7B4B39E65BEB86 /* StackedHorizontalBar.swift in Sources */,
 				FD050D7B9C60B3DACFB37599 /* StressPathsChart.swift in Sources */,
 				8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */,
+				88A1A003CD9B68A1E46AA6E3 /* TCAInputs+CurrentMortgage.swift in Sources */,
 				4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */,
 				C210B34AE0330D62B08989B6 /* TCAInputsScreen+CurrentMortgage.swift in Sources */,
 				18449380D87482BFDF27938E /* TCAInputsScreen+DebtsAndLTV.swift in Sources */,
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				477DC1CFABF2F59224D757A0 /* TCAPDFHTML+CurrentMortgage.swift in Sources */,
+				C881B9B8FCB3DD4C1D65F33B /* TCAPDFHTML+HorizonDetails.swift in Sources */,
 				A8A61BF4003C61412F162914 /* TCAPDFHTML.swift in Sources */,
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
 				5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */,
 				728DA8C1D845F5C2F80139EB /* TCAScreen+BreakdownSections.swift in Sources */,
 				FAEA45F3D002660DFA18E5A8 /* TCAScreen+CurrentMortgage.swift in Sources */,
+				E5DB67D75256990E93F4E860 /* TCAScreen+Matrix.swift in Sources */,
 				4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */,
 				271D935848142EA3F4346183 /* ThemePreview.swift in Sources */,
 				F2C8E753B9341FA9B2FE95FA /* TogglePill.swift in Sources */,

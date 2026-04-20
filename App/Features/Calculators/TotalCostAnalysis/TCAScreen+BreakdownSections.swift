@@ -35,10 +35,19 @@ extension TCAScreen {
     }
 
     /// Reuses the same header layout as the horizon matrix above —
-    /// 52-pt gutter + column-per-scenario.
+    /// 52-pt gutter + optional Current column + column-per-scenario.
+    /// Session 5Q.4 prepends "CURRENT" when refi mode + currentMortgage
+    /// is attached so every horizon-keyed section aligns on the same
+    /// column grid.
     private var breakdownHeader: some View {
         HStack(spacing: 0) {
             Color.clear.frame(width: 52)
+            if viewModel.showsCurrentColumn {
+                Text("CURRENT")
+                    .textStyle(Typography.micro.withSize(9))
+                    .foregroundStyle(Palette.inkSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
             ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
                 Text(s.label.uppercased())
                     .textStyle(Typography.micro.withSize(9))
@@ -57,6 +66,12 @@ extension TCAScreen {
                 .textStyle(Typography.num.withSize(12, design: .monospaced))
                 .foregroundStyle(Palette.inkSecondary)
                 .frame(width: 52, alignment: .leading)
+            if viewModel.showsCurrentColumn {
+                Text(currentInterestPrincipalSplit(years: years))
+                    .textStyle(Typography.num.withSize(11, design: .monospaced))
+                    .foregroundStyle(Palette.inkSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
             ForEach(Array(viewModel.scenarioSchedules.enumerated()), id: \.offset) { _, schedule in
                 Text(interestPrincipalSplit(schedule: schedule, years: years))
                     .textStyle(Typography.num.withSize(11, design: .monospaced))
@@ -65,6 +80,14 @@ extension TCAScreen {
             }
         }
         .padding(.vertical, Spacing.s8)
+    }
+
+    /// Int/prin split for the status-quo loan through `years`. Same
+    /// presentation as `interestPrincipalSplit` but sourced from
+    /// the current-mortgage amortization (5Q.4).
+    func currentInterestPrincipalSplit(years: Int) -> String {
+        guard let schedule = viewModel.currentMortgageSchedule else { return "—" }
+        return interestPrincipalSplit(schedule: schedule, years: years)
     }
 
     /// "82% int / 18% prin" per D5M.5. Computes cumulative interest and
@@ -130,6 +153,17 @@ extension TCAScreen {
                 .textStyle(Typography.num.withSize(12, design: .monospaced))
                 .foregroundStyle(Palette.inkSecondary)
                 .frame(width: 52, alignment: .leading)
+            if viewModel.showsCurrentColumn {
+                Text(MoneyFormat.shared.dollarsShort(
+                    viewModel.inputs.currentHorizonUnrecoverable(
+                        schedule: viewModel.currentMortgageSchedule,
+                        years: years
+                    )
+                ))
+                .textStyle(Typography.num.withSize(11, design: .monospaced))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
             ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.offset) { idx, scenario in
                 Text(unrecoverableDisplay(scenarioIndex: idx, scenario: scenario, years: years))
                     .textStyle(Typography.num.withSize(11, design: .monospaced))
@@ -377,6 +411,17 @@ extension TCAScreen {
                 .textStyle(Typography.num.withSize(12, design: .monospaced))
                 .foregroundStyle(Palette.inkSecondary)
                 .frame(width: 52, alignment: .leading)
+            if viewModel.showsCurrentColumn {
+                Text(MoneyFormat.shared.dollarsShort(
+                    viewModel.inputs.currentHorizonEquity(
+                        schedule: viewModel.currentMortgageSchedule,
+                        years: years
+                    )
+                ))
+                .textStyle(Typography.num.withSize(11, design: .monospaced))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
             ForEach(Array(viewModel.scenarioSchedules.enumerated()), id: \.offset) { idx, schedule in
                 Text(MoneyFormat.shared.dollarsShort(
                     viewModel.inputs.equityAtHorizon(

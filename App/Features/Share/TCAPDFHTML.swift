@@ -160,7 +160,9 @@ enum TCAPDFHTML {
         let scenarios = viewModel.inputs.scenarios
         let horizons = viewModel.inputs.horizonsYears
         let scenarioLabels = scenarios.map(\.label).map { $0.uppercased() }
+        let showsCurrent = viewModel.showsCurrentColumn
 
+        let currentHeader = showsCurrent ? "<th class=\"num\">Current</th>" : ""
         let headerCells = scenarioLabels.map { "<th class=\"num\">\($0)</th>" }.joined()
         let bodyRows = horizons.enumerated().map { hIdx, years -> String in
             // Mirror TCAComparisonPage.matrixRow: refi-mode debts overlay
@@ -179,108 +181,45 @@ enum TCAPDFHTML {
             }
             guard !costs.isEmpty else { return "" }
             let winner = costs.indices.reduce(0) { costs[$1] < costs[$0] ? $1 : $0 }
+            // Current column (5Q.4) — status-quo cost for the horizon.
+            // Does not participate in winner highlighting.
+            let currentCell: String = {
+                guard showsCurrent else { return "" }
+                let cost = viewModel.inputs.currentHorizonCost(years: years)
+                return "<td class=\"num\">\(MoneyFormat.shared.dollarsShort(cost))</td>"
+            }()
             let cells = costs.enumerated().map { i, cost -> String in
                 let isW = i == winner
                 let value = MoneyFormat.shared.dollarsShort(cost)
                 let marker = isW ? "✓ " : ""
                 return "<td class=\"num\">\(marker)\(value)</td>"
             }.joined()
-            return "<tr><td>\(years)-yr</td>\(cells)</tr>"
+            return "<tr><td>\(years)-yr</td>\(currentCell)\(cells)</tr>"
         }.joined()
+        let caption: String = {
+            let winner = "Winner per row carries a checkmark."
+            let currentNote = showsCurrent
+                ? " 'Current' = staying on the existing mortgage; reference, not a candidate."
+                : ""
+            let costs = " Costs aggregate P&amp;I plus MI; taxes, insurance, and HOA are excluded."
+            return winner + currentNote + costs
+        }()
         return """
         <section>
           <h2>Total cost by horizon</h2>
           <table class="data">
-            <thead><tr><th>Horizon</th>\(headerCells)</tr></thead>
+            <thead><tr><th>Horizon</th>\(currentHeader)\(headerCells)</tr></thead>
             <tbody>\(bodyRows)</tbody>
           </table>
-          <p class="meta">Winner per row carries a checkmark. Costs aggregate P&amp;I plus MI; taxes, insurance, and HOA are excluded.</p>
+          <p class="meta">\(caption)</p>
         </section>
         """
     }
 
-    // MARK: - Interest vs principal split
-
-    private static func interestPrincipalSection(viewModel: TCAViewModel) -> String {
-        let schedules = viewModel.scenarioSchedules
-        guard !schedules.isEmpty else { return "" }
-        let scenarios = viewModel.inputs.scenarios
-        let horizons = viewModel.inputs.horizonsYears
-        let headerCells = scenarios.map { s in
-            "<th class=\"num\">\(PDFHTMLComposition.escape(s.label.uppercased()))</th>"
-        }.joined()
-        let rows = horizons.map { years -> String in
-            let cells = schedules.map { schedule -> String in
-                let split = splitFor(schedule: schedule, years: years)
-                return "<td class=\"num\">\(split)</td>"
-            }.joined()
-            return "<tr><td>\(years)-yr</td>\(cells)</tr>"
-        }.joined()
-        return """
-        <section>
-          <h3>Interest vs principal</h3>
-          <table class="data">
-            <thead><tr><th>Horizon</th>\(headerCells)</tr></thead>
-            <tbody>\(rows)</tbody>
-          </table>
-        </section>
-        """
-    }
-
-    private static func splitFor(schedule: AmortizationSchedule, years: Int) -> String {
-        let month = years * 12
-        let interest = schedule.cumulativeInterest(throughMonth: month)
-        let principal = schedule.cumulativePrincipal(throughMonth: month)
-        let total = interest + principal
-        guard total > 0 else { return "—" }
-        let intPct = (interest.asDouble / total.asDouble) * 100
-        let prinPct = 100 - intPct
-        return String(format: "%.0f%% int / %.0f%% prin", intPct, prinPct)
-    }
-
-    // MARK: - Unrecoverable costs
-
-    private static func unrecoverableSection(viewModel: TCAViewModel) -> String {
-        let schedules = viewModel.scenarioSchedules
-        guard !schedules.isEmpty else { return "" }
-        let longest = viewModel.inputs.horizonsYears.max() ?? 30
-        let monthlyOngoing = viewModel.inputs.monthlyTaxes
-            + viewModel.inputs.monthlyInsurance
-            + viewModel.inputs.monthlyHOA
-        let ongoing = monthlyOngoing * Decimal(longest * 12)
-        let rows = viewModel.inputs.scenarios.enumerated().map { idx, s -> String in
-            let value: String = {
-                guard idx < schedules.count else { return "—" }
-                return MoneyFormat.shared.dollarsShort(
-                    viewModel.inputs.unrecoverableCost(
-                        scenario: s,
-                        schedule: schedules[idx],
-                        years: longest
-                    )
-                )
-            }()
-            return """
-            <tr>
-              <td>\(PDFHTMLComposition.escape(s.label.uppercased()))</td>
-              <td>\(PDFHTMLComposition.escape(s.name))</td>
-              <td class="num">\(value)</td>
-            </tr>
-            """
-        }.joined()
-        return """
-        <section>
-          <h3>Unrecoverable costs @ \(longest)yr</h3>
-          <table class="data">
-            <thead>
-              <tr><th>Scenario</th><th>Program</th><th class="num">Unrecoverable</th></tr>
-            </thead>
-            <tbody>\(rows)</tbody>
-          </table>
-          <p class="meta">Ongoing housing @ \(longest)yr: \(MoneyFormat.shared.dollarsShort(ongoing))
-             (taxes, insurance, HOA — paid regardless of program choice).</p>
-        </section>
-        """
-    }
+    // MARK: - Interest vs principal / Unrecoverable / Equity
+    // Extracted to TCAPDFHTML+HorizonDetails.swift in 5Q.4 so this
+    // enum stays under SwiftLint's type_body_length cap after the
+    // Current-column additions.
 
     // MARK: - Break-even SVG
 
@@ -404,38 +343,5 @@ enum TCAPDFHTML {
         """
     }
 
-    // MARK: - Equity
-
-    private static func equitySection(viewModel: TCAViewModel) -> String {
-        let schedules = viewModel.scenarioSchedules
-        guard !schedules.isEmpty else { return "" }
-        let longest = viewModel.inputs.horizonsYears.max() ?? 30
-        let cells = viewModel.inputs.scenarios.enumerated().compactMap { idx, s -> String? in
-            guard idx < schedules.count else { return nil }
-            let equity = viewModel.inputs.equityAtHorizon(
-                scenarioIndex: idx,
-                schedule: schedules[idx],
-                years: longest
-            )
-            return """
-            <tr>
-              <td>\(PDFHTMLComposition.escape(s.label.uppercased()))</td>
-              <td>\(PDFHTMLComposition.escape(s.name))</td>
-              <td class="num">\(MoneyFormat.shared.dollarsShort(equity))</td>
-            </tr>
-            """
-        }
-        guard !cells.isEmpty else { return "" }
-        return """
-        <section>
-          <h3>Equity buildup @ \(longest)yr</h3>
-          <table class="data">
-            <thead>
-              <tr><th>Scenario</th><th>Program</th><th class="num">Equity</th></tr>
-            </thead>
-            <tbody>\(cells.joined())</tbody>
-          </table>
-        </section>
-        """
-    }
+    // Equity section extracted to TCAPDFHTML+HorizonDetails.swift.
 }
