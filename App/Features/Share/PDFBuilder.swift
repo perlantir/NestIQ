@@ -118,12 +118,19 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallbackNarrative : narrative
         )
+        let scheduleCount = AmortizationSchedulePages.pageCount(
+            schedule: viewModel.schedule,
+            granularity: scheduleGranularity
+        )
+        let globalTotal = 1 + scheduleCount + 1
         let schedulePages = amortizationSchedulePages(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
             loanSummary: loanSummary,
-            granularity: scheduleGranularity
+            granularity: scheduleGranularity,
+            globalPageStart: 2,
+            globalPageCount: globalTotal
         )
         return try buildPDF(
             profile: profile,

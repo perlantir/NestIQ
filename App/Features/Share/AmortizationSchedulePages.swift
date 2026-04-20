@@ -20,10 +20,15 @@ private let miHighlight = Color(red: 0xE8 / 255, green: 0xF5 / 255, blue: 0xEC /
 /// footer.
 private let monthlyRowsPerPage = 30
 
-struct AmortSchedulePageHeader: View {
+/// Page-specific title + borrower band that sits below the shared
+/// PDFPageHeader. Provides the calculator-level context (e.g.
+/// "Amortization schedule · yearly") on top of the global wordmark /
+/// page-counter chrome. Session 5N.2b moved the global NestIQ
+/// wordmark + "Page N of M" + date into PDFPageHeader; this band
+/// retains the loan-specific info.
+struct AmortScheduleTitleBand: View {
     let borrowerName: String
     let loanSummary: String
-    let generatedDate: String
     let pageTitle: String
     let accentHex: String
 
@@ -31,16 +36,10 @@ struct AmortSchedulePageHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(pageTitle.uppercased())
-                    .font(.system(size: 10.5, weight: .semibold))
-                    .tracking(1.1)
-                    .foregroundStyle(accent)
-                Spacer()
-                Text(generatedDate)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-            }
+            Text(pageTitle.uppercased())
+                .font(.system(size: 10.5, weight: .semibold))
+                .tracking(1.1)
+                .foregroundStyle(accent)
             HStack(alignment: .firstTextBaseline) {
                 Text("For ")
                     .font(.custom("SourceSerif4", size: 20))
@@ -60,23 +59,16 @@ struct AmortSchedulePageHeader: View {
 }
 
 struct AmortSchedulePageFooter: View {
-    let pageIndex: Int
-    let pageCount: Int
     let loFullName: String
     let loNMLSLine: String
 
     var body: some View {
         VStack(spacing: 6) {
             Rectangle().fill(amortBorder).frame(height: 1)
-            HStack {
-                Text("\(loFullName) · \(loNMLSLine)")
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-                Spacer()
-                Text("Schedule · page \(pageIndex) of \(pageCount)")
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundStyle(inkTertiary)
-            }
+            Text("\(loFullName) · \(loNMLSLine)")
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundStyle(inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -94,13 +86,16 @@ struct AmortizationYearlyPage: View {
     let rows: [YearlyScheduleRow]
     let startDate: Date
     let accentHex: String
+    let pageIndex: Int
+    let pageCount: Int
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AmortSchedulePageHeader(
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: generatedDate)
+                .padding(.bottom, 20)
+            AmortScheduleTitleBand(
                 borrowerName: borrowerName,
                 loanSummary: loanSummary,
-                generatedDate: generatedDate,
                 pageTitle: "Amortization schedule · yearly",
                 accentHex: accentHex
             )
@@ -108,14 +103,13 @@ struct AmortizationYearlyPage: View {
                 .padding(.top, 16)
             Spacer(minLength: 0)
             AmortSchedulePageFooter(
-                pageIndex: 1,
-                pageCount: 1,
                 loFullName: loFullName,
                 loNMLSLine: loNMLSLine
             )
         }
         .padding(.horizontal, 36)
-        .padding(.vertical, 24)
+        .padding(.top, 18)
+        .padding(.bottom, 24)
         .frame(width: 792, height: 612)
         .background(Color.white)
     }
@@ -200,10 +194,14 @@ struct AmortizationMonthlyPage: View {
     let loFullName: String
     let loNMLSLine: String
     let payments: [AmortizationPayment]
-    /// 1-indexed page number within the monthly schedule pages only.
+    /// Global document page index for this monthly slice.
     let pageIndex: Int
-    /// Total number of monthly schedule pages in the document.
+    /// Total document page count (cover + all extras + disclaimers).
     let pageCount: Int
+    /// Which slice of the monthly schedule this is (1-indexed) — used
+    /// only for the title band's "slice 3 of 12" local framing.
+    let sliceIndex: Int
+    let sliceCount: Int
     /// Payment number where MI drops off; rows < this period show the
     /// highlight tint. nil when MI isn't active.
     let miDropoffPeriod: Int?
@@ -211,25 +209,25 @@ struct AmortizationMonthlyPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AmortSchedulePageHeader(
+            PDFPageHeader(pageIndex: pageIndex, pageCount: pageCount, date: generatedDate)
+                .padding(.bottom, 20)
+            AmortScheduleTitleBand(
                 borrowerName: borrowerName,
                 loanSummary: loanSummary,
-                generatedDate: generatedDate,
-                pageTitle: "Amortization schedule · monthly",
+                pageTitle: "Amortization schedule · monthly (\(sliceIndex) of \(sliceCount))",
                 accentHex: accentHex
             )
             table
                 .padding(.top, 14)
             Spacer(minLength: 0)
             AmortSchedulePageFooter(
-                pageIndex: pageIndex,
-                pageCount: pageCount,
                 loFullName: loFullName,
                 loNMLSLine: loNMLSLine
             )
         }
         .padding(.horizontal, 36)
-        .padding(.vertical, 24)
+        .padding(.top, 18)
+        .padding(.bottom, 24)
         .frame(width: 792, height: 612)
         .background(Color.white)
     }
@@ -340,5 +338,21 @@ enum AmortizationSchedulePages {
             idx = end
         }
         return chunks
+    }
+
+    /// How many PDF pages the schedule will occupy in the given mode.
+    /// Used by PDFBuilder to thread the global "Page N of M" counter
+    /// before the pages are constructed.
+    static func pageCount(
+        schedule: AmortizationSchedule?,
+        granularity: AmortScheduleGranularity
+    ) -> Int {
+        guard let schedule else { return 0 }
+        switch granularity {
+        case .yearly:
+            return 1
+        case .monthly:
+            return monthlyChunks(schedule.payments).count
+        }
     }
 }

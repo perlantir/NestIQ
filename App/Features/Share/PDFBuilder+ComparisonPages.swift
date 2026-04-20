@@ -18,12 +18,12 @@ extension PDFBuilder {
         borrower: Borrower?,
         viewModel: AmortizationViewModel,
         loanSummary: String,
-        granularity: AmortScheduleGranularity
+        granularity: AmortScheduleGranularity,
+        globalPageStart: Int,
+        globalPageCount: Int
     ) -> [(AnyView, PDFRenderer.Orientation)] {
         guard let schedule = viewModel.schedule else { return [] }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
+        let generated = PDFPageHeader.formatDate(Date())
         let borrowerName = borrower?.fullName ?? "Client"
         let loFullName = profile.fullName.isEmpty ? "Loan Officer" : profile.fullName
         let nmlsLine = nmlsLineFor(profile: profile)
@@ -41,7 +41,9 @@ extension PDFBuilder {
                 loNMLSLine: nmlsLine,
                 rows: rows,
                 startDate: viewModel.inputs.startDate,
-                accentHex: profile.brandColorHex
+                accentHex: profile.brandColorHex,
+                pageIndex: globalPageStart,
+                pageCount: globalPageCount
             )
             return [(AnyView(page), .landscape)]
         case .monthly:
@@ -55,8 +57,10 @@ extension PDFBuilder {
                     loFullName: loFullName,
                     loNMLSLine: nmlsLine,
                     payments: chunk,
-                    pageIndex: idx + 1,
-                    pageCount: total,
+                    pageIndex: globalPageStart + idx,
+                    pageCount: globalPageCount,
+                    sliceIndex: idx + 1,
+                    sliceCount: total,
                     miDropoffPeriod: dropoff,
                     accentHex: profile.brandColorHex
                 )
