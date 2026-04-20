@@ -272,10 +272,13 @@ enum PDFBuilder {
             ],
             narrative: narrative.isEmpty ? fallback : narrative
         )
+        // TCA ships cover + 1 comparison + disclaimers → total 3 pages.
         let comparison = AnyView(tcaComparisonPage(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel
+            viewModel: viewModel,
+            pageIndex: 2,
+            pageCount: 3
         ))
         return try buildPDF(
             profile: profile,

@@ -103,11 +103,11 @@ extension PDFBuilder {
     static func tcaComparisonPage(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: TCAViewModel
+        viewModel: TCAViewModel,
+        pageIndex: Int,
+        pageCount: Int
     ) -> some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        let generated = formatter.string(from: Date())
+        let generated = PDFPageHeader.formatDate(Date())
         let state = resolveState(borrower: borrower)
         let disclosures = requiredDisclosures(
             for: .totalCostAnalysis,
@@ -128,7 +128,9 @@ extension PDFBuilder {
             disclaimer: disclaimer,
             ehoStatement: ehoStatement,
             accentHex: profile.brandColorHex,
-            scenarioColors: colors
+            scenarioColors: colors,
+            pageIndex: pageIndex,
+            pageCount: pageCount
         )
     }
 
