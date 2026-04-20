@@ -55,7 +55,7 @@ struct BorrowerPicker: View {
                     case .contacts:
                         contactsPrompt
                     case .new:
-                        NewBorrowerForm { borrower in
+                        BorrowerForm(mode: .create) { borrower in
                             modelContext.insert(borrower)
                             try? modelContext.save()
                             onSelect(borrower)
@@ -284,84 +284,7 @@ struct ContactPickerSheet: UIViewControllerRepresentable {
     }
 }
 
-// MARK: - New borrower form
-
-struct NewBorrowerForm: View {
-    let onCreate: (Borrower) -> Void
-
-    @State private var firstName: String = ""
-    @State private var lastName: String = ""
-    @State private var email: String = ""
-    @State private var phone: String = ""
-    @State private var mortgageDraft = CurrentMortgageDraft()
-    @State private var mortgageExpanded: Bool = false
-    @State private var showMortgageValidation: Bool = false
-
-    var body: some View {
-        Form {
-            Section("Name") {
-                TextField("First name", text: $firstName)
-                TextField("Last name", text: $lastName)
-            }
-            Section("Contact") {
-                TextField("Email", text: $email)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                TextField("Phone", text: $phone)
-                    .keyboardType(.phonePad)
-            }
-            Section {
-                CurrentMortgageSection(
-                    draft: $mortgageDraft,
-                    isExpanded: $mortgageExpanded,
-                    showValidationHint: showMortgageValidation
-                )
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            }
-            Section {
-                Button {
-                    submit()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("Create borrower").fontWeight(.semibold)
-                        Spacer()
-                    }
-                }
-                .disabled(!isValid)
-            }
-        }
-    }
-
-    private var isValid: Bool {
-        guard !firstName.isEmpty, !lastName.isEmpty else { return false }
-        // Mortgage section: blank or fully valid. Partially filled is
-        // rejected so the LO has to either commit to a current mortgage
-        // or leave the section empty.
-        return mortgageDraft.isBlank || mortgageDraft.isValid
-    }
-
-    private func submit() {
-        guard !firstName.isEmpty, !lastName.isEmpty else { return }
-        // If the draft is non-blank but invalid, surface the hint and
-        // abort the submit so the LO can fix it.
-        if !mortgageDraft.isBlank, !mortgageDraft.isValid {
-            showMortgageValidation = true
-            mortgageExpanded = true
-            return
-        }
-        let b = Borrower(
-            firstName: firstName,
-            lastName: lastName,
-            email: email.isEmpty ? nil : email,
-            phone: phone.isEmpty ? nil : phone,
-            source: .manual
-        )
-        if let mortgage = mortgageDraft.toMortgage() {
-            b.currentMortgage = mortgage
-        }
-        onCreate(b)
-    }
-}
+// Session 5Q.1 — NewBorrowerForm absorbed into BorrowerForm (sibling
+// file), which also handles the edit / delete paths the borrower list
+// needs. `BorrowerForm(mode: .create, onSubmit:)` is the drop-in
+// replacement for the old struct.
