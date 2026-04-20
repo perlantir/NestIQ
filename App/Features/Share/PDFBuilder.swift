@@ -106,65 +106,22 @@ enum PDFBuilder {
         return url
     }
 
+    /// Session 5O.6 — IncomeQualification PDF via HTML pipeline.
     static func buildIncomeQualPDF(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: IncomeQualViewModel,
         narrative: String
-    ) throws -> URL {
-        let maxLoan = MoneyFormat.shared.currency(viewModel.maxLoan)
-        let piti = MoneyFormat.shared.currency(viewModel.maxPITI)
-        let purchase = MoneyFormat.shared.currency(viewModel.maxPurchase)
-        let backDTI = String(format: "%.1f%%", viewModel.backEndDTIIncludingDebts * 100)
-        let rate = displayRateAndAPR(rate: viewModel.inputs.annualRate, decimalAPR: viewModel.inputs.aprRate)
-        let isRefi = viewModel.inputs.mode == .refinance
-        let summary = isRefi
-            ? "Refi · \(rate) · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
-            : "at \(rate) · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
-        let secondaryLabel = isRefi ? "Current LTV" : "Max purchase"
-        let secondaryValue: String = {
-            if isRefi {
-                let ltv = viewModel.inputs.currentRefiLTV
-                guard viewModel.inputs.currentHomeValue > 0 else { return "—" }
-                return String(format: "%.1f%%", ltv * 100)
-            }
-            return purchase
-        }()
-        let currentBal = MoneyFormat.shared.currency(viewModel.inputs.currentLoanBalance)
-        let reservesMonths = viewModel.inputs.reservesMonths
-        let reservesTotal = MoneyFormat.shared.currency(
-            viewModel.maxPITI * Decimal(reservesMonths)
+    ) async throws -> URL {
+        let html = IncomeQualPDFHTML.buildHTML(
+            profile: profile,
+            borrower: borrower,
+            viewModel: viewModel,
+            narrative: narrative
         )
-        let reservesSentence = reservesMonths > 0
-            ? " Requires \(reservesMonths)-month reserves: \(reservesTotal) (\(reservesMonths) × PITI)."
-            : ""
-        let refiNarrative = "Qualifies at \(rate)% \(viewModel.inputs.termYears)-yr — max "
-            + "qualifying loan \(maxLoan) vs current balance \(currentBal). "
-            + "Back-end DTI lands at \(backDTI)." + reservesSentence
-        let purchaseNarrative = "Qualifies up to \(maxLoan) at a \(rate)% "
-            + "\(viewModel.inputs.termYears)-yr loan. Back-end DTI lands at \(backDTI)."
-            + reservesSentence
-        let fallback = isRefi ? refiNarrative : purchaseNarrative
-        let reservesValue = reservesMonths > 0
-            ? "\(reservesMonths) mo · \(reservesTotal)"
-            : "—"
-        let payload = Payload(
-            calculatorSlug: "income-qualification",
-            calculatorTitle: isRefi ? "Income qualification · refinance" : "Income qualification",
-            complianceScenarioType: .incomeQualification,
-            loanSummary: summary,
-            heroLabel: "Max loan · qualifying",
-            heroValue: maxLoan,
-            heroValuePrefix: "",
-            heroKPIs: [
-                ("Max PITI", piti),
-                (secondaryLabel, secondaryValue),
-                ("Back-end DTI", backDTI),
-                ("Reserves", reservesValue),
-            ],
-            narrative: narrative.isEmpty ? fallback : narrative
-        )
-        return try buildPDF(profile: profile, borrower: borrower, payload: payload)
+        let url = PDFHTMLComposition.temporaryURL(for: "income-qualification")
+        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        return url
     }
 
     /// Session 5O.4 — Refinance PDF now renders via HTML pipeline.
