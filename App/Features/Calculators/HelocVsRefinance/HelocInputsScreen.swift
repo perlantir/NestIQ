@@ -164,6 +164,11 @@ struct HelocInputsScreen: View {
                 fractionDigits: 3
             )
             divider
+            APRFieldRow(
+                aprRate: $viewModel.inputs.firstLienAPR,
+                hint: "Optional — 1st lien disclosure APR"
+            )
+            divider
             stepperRow(
                 label: "Years remaining",
                 value: Binding(
@@ -255,6 +260,11 @@ struct HelocInputsScreen: View {
                 fractionDigits: 3
             )
             divider
+            APRFieldRow(
+                aprRate: $viewModel.inputs.refiAPR,
+                hint: "Optional — refi disclosure APR"
+            )
+            divider
             stepperRow(
                 label: "Term",
                 value: Binding(
@@ -318,6 +328,11 @@ struct HelocInputsScreen: View {
             )
             divider
             rateMarginRow
+            divider
+            APRFieldRow(
+                aprRate: $viewModel.inputs.helocAPR,
+                hint: "Optional — HELOC disclosure APR"
+            )
         }
     }
 

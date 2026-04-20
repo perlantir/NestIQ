@@ -179,6 +179,8 @@ struct RefinanceInputsScreen: View {
                 fractionDigits: 3
             )
             divider
+            APRFieldRow(aprRate: $viewModel.inputs.currentAPR)
+            divider
             stepperRow(
                 label: "Years remaining",
                 value: Binding(
@@ -451,6 +453,8 @@ extension RefinanceInputsScreen {
                 ),
                 fractionDigits: 3
             )
+            divider
+            APRFieldRow(aprRate: $viewModel.inputs.options[index].aprRate)
             divider
             stepperRow(
                 label: "Term",

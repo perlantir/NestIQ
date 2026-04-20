@@ -18,7 +18,19 @@ struct FieldRow: View {
     var prefix: String?
     var suffix: String?
     var hint: String?
+    /// Empty-state placeholder shown in the TextField. Defaults to
+    /// "—" matching pre-5M behavior. APR fields override to
+    /// "Same as rate" so blank reads as an explicit state rather than
+    /// an unpopulated zero.
+    var placeholder: String = "—"
     @Binding var decimal: Decimal
+    /// When false, the field starts empty regardless of the bound
+    /// `decimal` value — treats `0` as "no value yet" (placeholder
+    /// visible). Used by APR fields whose nil storage maps to 0 on
+    /// the Decimal binding. On external changes the field still
+    /// updates, so loading a saved scenario with an APR value still
+    /// populates the row.
+    var showsInitialValue: Bool = true
     var fractionDigits: Int = 0
     var usesGroupingSeparator: Bool = true
 
@@ -44,7 +56,7 @@ struct FieldRow: View {
                         .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.inkTertiary)
                 }
-                TextField("—", text: $text)
+                TextField(placeholder, text: $text)
                     .focused($focused)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
@@ -67,7 +79,7 @@ struct FieldRow: View {
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)
         .onAppear {
-            if text.isEmpty { text = format(decimal) }
+            if text.isEmpty, showsInitialValue { text = format(decimal) }
         }
         .onChange(of: text) { _, new in
             if let parsed = parse(new) {

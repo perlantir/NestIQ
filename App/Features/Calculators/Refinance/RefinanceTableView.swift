@@ -65,6 +65,7 @@ struct RefinanceTableView: View {
         let opts = inputs.options
         let anyMI = inputs.currentMonthlyMI > 0 || opts.contains { $0.monthlyMI > 0 }
         let hasHomeValue = inputs.homeValue > 0
+        let anyAPR = inputs.currentAPR != nil || opts.contains { $0.aprRate != nil }
         var base: [Row] = [
             Row(label: "Loan amt",
                 values: ["$\(MoneyFormat.shared.decimalString(inputs.currentBalance))"]
@@ -76,6 +77,16 @@ struct RefinanceTableView: View {
                 values: [String(format: "%.3f%%", inputs.currentRate)]
                     + opts.map { String(format: "%.3f%%", $0.rate) },
                 winnerIndex: nil),
+        ]
+        if anyAPR {
+            base.append(
+                Row(label: "APR",
+                    values: [formatAPR(inputs.currentAPR)]
+                        + opts.map { formatAPR($0.aprRate) },
+                    winnerIndex: nil)
+            )
+        }
+        base.append(contentsOf: [
             Row(label: "Term",
                 values: ["\(inputs.currentRemainingYears) yr"]
                     + opts.map { "\($0.termYears) yr" },
@@ -91,7 +102,7 @@ struct RefinanceTableView: View {
             breakEvenRow(),
             npvRow(),
             lifetimeRow(),
-        ]
+        ])
         if hasHomeValue {
             base.append(Row(
                 label: "LTV",
@@ -113,6 +124,16 @@ struct RefinanceTableView: View {
 
     private func miDisplay(_ mi: Decimal) -> String {
         mi > 0 ? "$\(MoneyFormat.shared.decimalString(mi))" : "—"
+    }
+
+    /// Compact APR cell — "6.812%" when set, "—" otherwise. The full
+    /// rate/APR side-by-side display is the per-scenario card (not
+    /// this comparison table). Used only when at least one scenario
+    /// carries an explicit APR so the row doesn't show em-dashes
+    /// everywhere.
+    private func formatAPR(_ apr: Decimal?) -> String {
+        guard let apr else { return "—" }
+        return String(format: "%.3f%%", apr.asDouble)
     }
 
     private func npvRow() -> Row {

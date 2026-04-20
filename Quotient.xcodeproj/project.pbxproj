@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		011B6636497B396E36E49818 /* ProfileEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F288789586295CD7EDEA159 /* ProfileEditor.swift */; };
+		0470534EC993EFB358E1CA76 /* APRFieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EF091DC2D0E5B20015FCA4 /* APRFieldRow.swift */; };
 		0571C8E93B0AC3C8A61748C0 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 906E96F722FBFC9E28E526F3 /* RootView.swift */; };
 		062024066AE2E0158F765884 /* AmortizationScheduleTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E0EFC7F288F0C507A7808F /* AmortizationScheduleTable.swift */; };
 		07778789CCE302AB9FFEF501 /* PropertyDownPaymentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D700970F563C30DE8182925 /* PropertyDownPaymentSection.swift */; };
@@ -230,6 +231,7 @@
 		7600230EF86B01E049D9B9A2 /* HairlineDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HairlineDivider.swift; sourceTree = "<group>"; };
 		7650D9E18E2C67825C8A9156 /* AmortizationResultsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationResultsScreen.swift; sourceTree = "<group>"; };
 		78A2DD798F1884CC41D6E7D3 /* RootTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabBar.swift; sourceTree = "<group>"; };
+		78EF091DC2D0E5B20015FCA4 /* APRFieldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APRFieldRow.swift; sourceTree = "<group>"; };
 		7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationHappyPathTests.swift; sourceTree = "<group>"; };
 		7F25962FDCE571CDFE241131 /* StressPathsChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressPathsChart.swift; sourceTree = "<group>"; };
 		7F288789586295CD7EDEA159 /* ProfileEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditor.swift; sourceTree = "<group>"; };
@@ -583,6 +585,7 @@
 			isa = PBXGroup;
 			children = (
 				58E0EFC7F288F0C507A7808F /* AmortizationScheduleTable.swift */,
+				78EF091DC2D0E5B20015FCA4 /* APRFieldRow.swift */,
 				D0D1F3B75BEEB2A8E1AF4C00 /* AssumptionsDrawer.swift */,
 				5B4A4881C0CA2B982907EC15 /* BorrowerPill.swift */,
 				CB19EEDB2AFF2A92A2514534 /* BottomActionDock.swift */,
@@ -907,6 +910,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0470534EC993EFB358E1CA76 /* APRFieldRow.swift in Sources */,
 				6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */,
 				3B57B68F0D51416615F742CD /* AmortizationInputs.swift in Sources */,
 				A9D05654468F1CE1812861AB /* AmortizationInputsScreen+Helpers.swift in Sources */,

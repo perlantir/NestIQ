@@ -82,6 +82,11 @@ struct TCAComparisonPage: View {
                     Text(String(format: "%.3f%% · %d yr", s.rate, s.termYears))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(inkPrimary)
+                    if let apr = s.aprRate {
+                        Text(String(format: "%.3f%% APR", apr.asDouble))
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(inkSecondary)
+                    }
                     Text("Loan \(loan)")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(inkSecondary)

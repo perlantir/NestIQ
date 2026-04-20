@@ -316,6 +316,8 @@ struct TCAInputsScreen: View {
                 fractionDigits: 3
             )
             divider
+            APRFieldRow(aprRate: $viewModel.inputs.scenarios[index].aprRate)
+            divider
             stepperRow(
                 label: "Term",
                 value: Binding(

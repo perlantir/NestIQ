@@ -197,6 +197,11 @@ struct TCAScreen: View {
                     Text(String(format: "%.3f", s.rate))
                         .textStyle(Typography.num.withSize(15, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.ink)
+                    if let apr = s.aprRate {
+                        Text("\(String(format: "%.3f", apr.asDouble)) APR")
+                            .textStyle(Typography.num.withSize(10.5))
+                            .foregroundStyle(Palette.inkTertiary)
+                    }
                     Text("pts \(String(format: "%.2f", s.points))")
                         .textStyle(Typography.num.withSize(10.5))
                         .foregroundStyle(Palette.inkTertiary)

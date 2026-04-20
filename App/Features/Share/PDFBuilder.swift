@@ -86,6 +86,7 @@ enum PDFBuilder {
         let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
         let totalPaid = MoneyFormat.shared.dollarsShort(viewModel.totalPaid)
         let rate = String(format: "%.3f", viewModel.inputs.annualRate)
+        let rateDisplay = displayRateAndAPR(rate: viewModel.inputs.annualRate, decimalAPR: viewModel.inputs.aprRate)
         let loanMoney = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
         let piti = MoneyFormat.shared.currency(viewModel.monthlyPITI)
         let payoff = viewModel.payoffDate.map { d -> String in
@@ -93,7 +94,7 @@ enum PDFBuilder {
         } ?? "—"
         let fallbackNarrative = "At today's \(rate)% rate, the monthly PITI is \(piti). "
             + "Over the life of the loan, interest totals about \(interest)."
-        let loanSummary = "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rate)%"
+        let loanSummary = "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rateDisplay)"
         let payload = Payload(
             calculatorSlug: "amortization",
             calculatorTitle: "Amortization analysis",
@@ -134,11 +135,11 @@ enum PDFBuilder {
         let piti = MoneyFormat.shared.currency(viewModel.maxPITI)
         let purchase = MoneyFormat.shared.currency(viewModel.maxPurchase)
         let backDTI = String(format: "%.1f%%", viewModel.backEndDTIIncludingDebts * 100)
-        let rate = String(format: "%.3f", viewModel.inputs.annualRate)
+        let rate = displayRateAndAPR(rate: viewModel.inputs.annualRate, decimalAPR: viewModel.inputs.aprRate)
         let isRefi = viewModel.inputs.mode == .refinance
         let summary = isRefi
-            ? "Refi · \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
-            : "at \(rate)% · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
+            ? "Refi · \(rate) · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
+            : "at \(rate) · \(viewModel.inputs.termYears)-yr · DTI \(backDTI)"
         let secondaryLabel = isRefi ? "Current LTV" : "Max purchase"
         let secondaryValue: String = {
             if isRefi {
@@ -196,13 +197,14 @@ enum PDFBuilder {
         let lifetime = MoneyFormat.shared.dollarsShort(abs(viewModel.lifetimeDelta))
         let npv = MoneyFormat.shared.dollarsShort(abs(viewModel.npvDelta))
         let currentRate = String(format: "%.3f", viewModel.inputs.currentRate)
+        let currentRateDisplay = displayRateAndAPR(rate: viewModel.inputs.currentRate, decimalAPR: viewModel.inputs.currentAPR)
         let fallback = "Selected refi saves \(savings)/mo versus the current \(currentRate)% loan. "
             + "Break-even: \(be)."
         let payload = Payload(
             calculatorSlug: "refinance",
             calculatorTitle: "Refinance comparison",
             complianceScenarioType: .refinance,
-            loanSummary: "Current \(MoneyFormat.shared.currency(viewModel.inputs.currentBalance)) @ \(currentRate)%",
+            loanSummary: "Current \(MoneyFormat.shared.currency(viewModel.inputs.currentBalance)) @ \(currentRateDisplay)",
             heroLabel: "Monthly savings · selected option",
             heroValue: savings,
             heroValuePrefix: "",

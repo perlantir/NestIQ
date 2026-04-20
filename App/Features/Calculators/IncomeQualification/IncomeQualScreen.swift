@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import QuotientFinance
 import QuotientNarration
 import QuotientPDF
 
@@ -238,15 +239,18 @@ struct IncomeQualScreen: View {
     }
 
     private var assumptionLine: String {
-        let rate = String(format: "%.3f", viewModel.inputs.annualRate)
+        let rate = displayRateAndAPR(
+            rate: viewModel.inputs.annualRate,
+            decimalAPR: viewModel.inputs.aprRate
+        )
         let down = Int(viewModel.inputs.downPaymentPercent * 100)
         let taxIns = MoneyFormat.shared.decimalString(
             viewModel.inputs.monthlyTax + viewModel.inputs.monthlyInsurance
         )
         if viewModel.inputs.mode == .refinance {
-            return "at \(rate)% · \(viewModel.inputs.termYears)-yr · $\(taxIns)/mo tax & ins"
+            return "at \(rate) · \(viewModel.inputs.termYears)-yr · $\(taxIns)/mo tax & ins"
         }
-        return "at \(rate)% · \(viewModel.inputs.termYears)-yr · \(down)% down · $\(taxIns)/mo tax & ins"
+        return "at \(rate) · \(viewModel.inputs.termYears)-yr · \(down)% down · $\(taxIns)/mo tax & ins"
     }
 
     /// Refi-mode status line shown below the hero value: "Qualified —

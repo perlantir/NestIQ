@@ -6,6 +6,7 @@
 import SwiftUI
 import Charts
 import SwiftData
+import QuotientFinance
 import QuotientNarration
 import QuotientPDF
 
@@ -127,8 +128,8 @@ struct RefinanceScreen: View {
 
     private var currentLine: String {
         let cur = MoneyFormat.shared.decimalString(viewModel.inputs.currentBalance)
-        let rate = String(format: "%.3f", viewModel.inputs.currentRate)
-        return "Current: $\(cur) · \(rate)% · \(viewModel.inputs.currentRemainingYears) yr remaining"
+        let rate = displayRateAndAPR(rate: viewModel.inputs.currentRate, decimalAPR: viewModel.inputs.currentAPR)
+        return "Current: $\(cur) · \(rate) · \(viewModel.inputs.currentRemainingYears) yr remaining"
     }
 
     // MARK: Option tabs
@@ -209,12 +210,14 @@ struct RefinanceScreen: View {
     private var optionHeader: String {
         let idx = viewModel.selectedOptionIndex
         if idx == 0 {
-            return "Current · \(String(format: "%.3f", viewModel.inputs.currentRate))%"
+            let rate = displayRateAndAPR(rate: viewModel.inputs.currentRate, decimalAPR: viewModel.inputs.currentAPR)
+            return "Current · \(rate)"
         }
         guard idx - 1 < viewModel.inputs.options.count else { return "—" }
         let opt = viewModel.inputs.options[idx - 1]
         let closing = MoneyFormat.shared.decimalString(opt.closingCosts)
-        return "Option \(opt.label) · \(String(format: "%.3f", opt.rate))% · \(opt.termYears) yr · $\(closing) closing"
+        let rate = displayRateAndAPR(rate: opt.rate, decimalAPR: opt.aprRate)
+        return "Option \(opt.label) · \(rate) · \(opt.termYears) yr · $\(closing) closing"
     }
 
     private var heroKpiRow: some View {

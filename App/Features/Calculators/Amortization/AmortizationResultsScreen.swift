@@ -129,11 +129,14 @@ struct AmortizationResultsScreen: View {
 
     private var termsSubline: String {
         let money = MoneyFormat.shared.currencyCompact(viewModel.inputs.loanAmount)
-        let rate = String(format: "%.3f", viewModel.inputs.annualRate)
+        let rate = displayRateAndAPR(
+            rate: viewModel.inputs.annualRate,
+            decimalAPR: viewModel.inputs.aprRate
+        )
         let fmt = DateFormatter()
         fmt.dateFormat = "MMM yyyy"
         let start = fmt.string(from: viewModel.inputs.startDate)
-        return "\(money) · \(viewModel.inputs.termYears)-yr · \(rate)% · start \(start)"
+        return "\(money) · \(viewModel.inputs.termYears)-yr · \(rate) · start \(start)"
     }
 
     // MARK: Hero

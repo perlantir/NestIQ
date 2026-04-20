@@ -189,6 +189,8 @@ struct AmortizationInputsScreen: View {
                 fractionDigits: 3
             )
             divider
+            APRFieldRow(aprRate: $viewModel.inputs.aprRate)
+            divider
             termRow
             divider
             biweeklyRow

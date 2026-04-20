@@ -221,9 +221,12 @@ struct HelocScreen: View {
 
     private var currentLine: String {
         let first = MoneyFormat.shared.dollarsShort(viewModel.inputs.firstLienBalance)
-        let rate = String(format: "%.3f", viewModel.inputs.firstLienRate)
+        let rate = displayRateAndAPR(
+            rate: viewModel.inputs.firstLienRate,
+            decimalAPR: viewModel.inputs.firstLienAPR
+        )
         let cash = MoneyFormat.shared.dollarsShort(viewModel.inputs.helocAmount)
-        return "1st: \(first) @ \(rate)% · need \(cash) cash"
+        return "1st: \(first) @ \(rate) · need \(cash) cash"
     }
 
     // MARK: Blended rate hero
