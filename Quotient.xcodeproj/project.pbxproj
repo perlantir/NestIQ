@@ -73,6 +73,7 @@
 		5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */; };
 		5E441476D29769ABA7FE6BCF /* BreakEvenChartSVG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E42D1C8CF032D5FE61DCF1 /* BreakEvenChartSVG.swift */; };
 		5F13D0DDB3E187ADD7A9FB25 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381BCE91A0673E2D3CBDA9E /* Buttons.swift */; };
+		60182EF407D5FAC2F0FFE49E /* CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2D2E9FC62129DCAE49BA9 /* CurrentMortgage.swift */; };
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
 		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
 		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
@@ -241,6 +242,7 @@
 		5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountFlow.swift; sourceTree = "<group>"; };
 		5FE0AC5F80F00D95D30E9003 /* SelfEmploymentInputsScreen+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfEmploymentInputsScreen+Cards.swift"; sourceTree = "<group>"; };
 		63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsScreen+Compliance.swift"; sourceTree = "<group>"; };
+		63C2D2E9FC62129DCAE49BA9 /* CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMortgage.swift; sourceTree = "<group>"; };
 		63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAViewModelTests.swift; sourceTree = "<group>"; };
 		64737CBA7DC296452DB91B72 /* QuotientNarration */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientNarration; path = Packages/QuotientNarration; sourceTree = SOURCE_ROOT; };
 		659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareBundle.swift; sourceTree = "<group>"; };
@@ -535,6 +537,7 @@
 			isa = PBXGroup;
 			children = (
 				D8A910FE79E1FB0706776507 /* AppStorage.swift */,
+				63C2D2E9FC62129DCAE49BA9 /* CurrentMortgage.swift */,
 				E3A9CA1B8E8F599E34F73A31 /* Models.swift */,
 			);
 			path = Storage;
@@ -1010,6 +1013,7 @@
 				9B913174E12A08506176C51D /* ComplianceDetailScreens.swift in Sources */,
 				F6FA742417C9D80C5C72FBE9 /* ComponentGallery.swift in Sources */,
 				2FD76A05179D53E89586EE6B /* CumulativeSavingsChart.swift in Sources */,
+				60182EF407D5FAC2F0FFE49E /* CurrentMortgage.swift in Sources */,
 				A24D0BB2A052539D1B32309A /* DTIDial.swift in Sources */,
 				BD7A57941289F8ADBA75D608 /* DataRow.swift in Sources */,
 				D95165BA7394D52B7F7340E4 /* DatePill.swift in Sources */,

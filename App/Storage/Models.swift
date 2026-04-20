@@ -242,6 +242,14 @@ public final class Borrower {
     public var notes: String?
     public var sourceRaw: String
     public var contactIdentifier: String?
+    /// Session 5P.6 / D9: the borrower's current mortgage stored as a
+    /// JSON blob. SwiftData holds a primitive Data? attribute; the
+    /// computed `currentMortgage` property decodes / encodes it on
+    /// demand. Pattern mirrors `licensedStatesCSV` on LenderProfile —
+    /// non-primitive values go through JSON/primitive storage because
+    /// SwiftData's Objective-C bridge has misfired on richer types
+    /// (5E.1 `[String]` incident). Nil for purchase-only borrowers.
+    public var currentMortgageJSON: Data?
     @Relationship(deleteRule: .cascade, inverse: \Scenario.borrower)
     public var scenarios: [Scenario]
     public var createdAt: Date
@@ -288,6 +296,23 @@ public final class Borrower {
         let first = firstName.first.map(String.init) ?? ""
         let last = lastName.first.map(String.init) ?? ""
         return (first + last).uppercased()
+    }
+
+    /// Decoded current mortgage, or nil when the borrower has none
+    /// (purchase-only). Writes round-trip through JSONEncoder —
+    /// setting nil clears the blob.
+    public var currentMortgage: CurrentMortgage? {
+        get {
+            guard let data = currentMortgageJSON else { return nil }
+            return try? JSONDecoder().decode(CurrentMortgage.self, from: data)
+        }
+        set {
+            if let newValue {
+                currentMortgageJSON = try? JSONEncoder().encode(newValue)
+            } else {
+                currentMortgageJSON = nil
+            }
+        }
     }
 }
 

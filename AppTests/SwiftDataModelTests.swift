@@ -211,4 +211,60 @@ final class SwiftDataModelTests: XCTestCase {
         let decoded = try decoder.decode(AmortizationFormInputs.self, from: data)
         XCTAssertEqual(decoded, inputs)
     }
+
+    // MARK: - 5P.6 Current mortgage on Borrower
+
+    func testCurrentMortgageCodableRoundtrip() throws {
+        let mortgage = CurrentMortgage(
+            currentBalance: 450_000,
+            currentRatePercent: 6.25,
+            currentMonthlyPaymentPI: 2_770,
+            originalLoanAmount: 500_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_700_000_000),
+            propertyValueToday: 625_000
+        )
+        let encoded = try JSONEncoder().encode(mortgage)
+        let decoded = try JSONDecoder().decode(CurrentMortgage.self, from: encoded)
+        XCTAssertEqual(decoded, mortgage)
+    }
+
+    func testBorrowerWithoutCurrentMortgageLoadsAsNil() throws {
+        let ctx = makeContext()
+        let borrower = Borrower(firstName: "Alex", lastName: "Rivera")
+        ctx.insert(borrower)
+        try ctx.save()
+        let fetched = try ctx.fetch(FetchDescriptor<Borrower>()).first
+        XCTAssertNotNil(fetched)
+        XCTAssertNil(fetched?.currentMortgageJSON)
+        XCTAssertNil(fetched?.currentMortgage)
+    }
+
+    func testBorrowerCurrentMortgageJSONBlobRoundtrip() throws {
+        let ctx = makeContext()
+        let borrower = Borrower(firstName: "Sam", lastName: "Okoro")
+        let mortgage = CurrentMortgage(
+            currentBalance: 388_500,
+            currentRatePercent: 5.875,
+            currentMonthlyPaymentPI: 2_462,
+            originalLoanAmount: 420_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 570_000
+        )
+        borrower.currentMortgage = mortgage
+        ctx.insert(borrower)
+        try ctx.save()
+
+        let fetched = try ctx.fetch(FetchDescriptor<Borrower>()).first
+        XCTAssertEqual(fetched?.currentMortgage, mortgage,
+                       "Setter must encode JSON and getter must decode it back bit-for-bit")
+
+        // Clearing sets the blob to nil too.
+        fetched?.currentMortgage = nil
+        try ctx.save()
+        let cleared = try ctx.fetch(FetchDescriptor<Borrower>()).first
+        XCTAssertNil(cleared?.currentMortgage)
+        XCTAssertNil(cleared?.currentMortgageJSON)
+    }
 }
