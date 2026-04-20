@@ -165,7 +165,13 @@ final class ScenarioSaveLoadTests: XCTestCase {
         let recent = app.buttons["home.recent.row.amortization"]
         XCTAssertTrue(recent.waitForExistence(timeout: 5),
                       "Recent-scenario row did not appear on Home")
-        recent.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        // Plain .tap() here (not coordinate-tap) because Home has no
+        // .ultraThinMaterial overlay above the recent row — scroll-to-
+        // visible is the right behavior. 5L.2's brandMark pushes this
+        // row ~56pt down; without scroll-to-visible on iPhone 17 Pro
+        // it lands below the viewport and coordinate-tap misses.
+        // See DECISIONS entry #123 for the overlay-scoped rationale.
+        recent.tap()
 
         // Landing target: the Amortization Inputs screen, which is
         // identified by its Compute CTA.
