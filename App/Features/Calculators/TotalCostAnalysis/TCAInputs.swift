@@ -294,19 +294,27 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
 
     /// "Invest the savings" — future value of baseline-minus-scenario
     /// monthly savings invested at `reinvestmentRate` for `months`.
-    /// Returns 0 when baseline or scenario payment isn't set, when
-    /// scenario index is the baseline (0), or when monthly savings is
-    /// negative (scenario costs more per month than baseline).
+    /// Returns 0 when baseline or scenario payment isn't set, when the
+    /// scenario is the baseline (pre-5P.9: index 0 with no
+    /// currentMortgage), or when monthly savings are non-positive.
+    ///
+    /// Session 5Q.6: when `currentMortgage` is set, scenario A is a
+    /// proposed refinance, not the baseline — its savings are measured
+    /// against the status-quo monthly P&I just like B/C/D. The legacy
+    /// "scenario 0 is baseline" exclusion only fires when no
+    /// currentMortgage snapshot is attached.
     func pathAInvestmentBalance(
         scenarioIndex: Int,
         months: Int,
         monthlyPayments: [Decimal]
     ) -> Decimal {
         guard mode == .refinance,
-              scenarioIndex > 0,
+              scenarioIndex >= 0,
               scenarioIndex < monthlyPayments.count
         else { return 0 }
-        let savings = monthlyPayments[0] - monthlyPayments[scenarioIndex]
+        if currentMortgage == nil, scenarioIndex == 0 { return 0 }
+        let baseline = breakEvenBaselinePayment(monthlyPayments: monthlyPayments)
+        let savings = baseline - monthlyPayments[scenarioIndex]
         guard savings > 0 else { return 0 }
         return futureValueOfMonthlyDeposits(
             deposit: savings,
@@ -336,11 +344,17 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         monthlyPayments: [Decimal]
     ) -> PathBResult? {
         guard mode == .refinance,
-              scenarioIndex > 0,
+              scenarioIndex >= 0,
               scenarioIndex < monthlyPayments.count,
               scenarioIndex < scenarios.count
         else { return nil }
-        let savings = monthlyPayments[0] - monthlyPayments[scenarioIndex]
+        // 5Q.6: scenario A is a baseline only when there's no
+        // currentMortgage to anchor against. With currentMortgage set,
+        // A is a proposed refinance like B/C/D and measured against
+        // status quo.
+        if currentMortgage == nil, scenarioIndex == 0 { return nil }
+        let baseline = breakEvenBaselinePayment(monthlyPayments: monthlyPayments)
+        let savings = baseline - monthlyPayments[scenarioIndex]
         guard savings > 0 else { return nil }
         let accelerated = applyExtraPrincipal(
             schedule: schedule,

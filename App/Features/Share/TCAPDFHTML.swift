@@ -234,9 +234,13 @@ enum TCAPDFHTML {
             .dropFirst()
             .map { $0.termYears * 12 }
             .max() ?? 360
+        // 5Q.6: with currentMortgage set, scenario A is also a
+        // proposed refi candidate, not the baseline. Matches the
+        // on-screen 5P.9 behavior.
+        let hasCurrent = viewModel.inputs.currentMortgage != nil
 
         let chartParts = viewModel.inputs.scenarios.enumerated().compactMap { idx, s -> String? in
-            guard idx > 0 else { return nil }
+            guard hasCurrent || idx > 0 else { return nil }
             let termMonths = s.termYears * 12
             let series = viewModel.inputs.breakEvenGraphData(
                 scenarioIndex: idx,
@@ -294,9 +298,15 @@ enum TCAPDFHTML {
         let payments = metrics.map(\.payment)
         let longest = viewModel.inputs.horizonsYears.max() ?? 30
         let ratePct = viewModel.inputs.reinvestmentRate.asDouble * 100
-        let baseline = payments.first ?? 0
+        // 5Q.6: use the break-even baseline (currentMortgage P&I when
+        // set, else scenario A). Mirrors the on-screen reinvestment
+        // fix and keeps PDF + screen consistent.
+        let hasCurrent = viewModel.inputs.currentMortgage != nil
+        let baseline = viewModel.inputs.breakEvenBaselinePayment(
+            monthlyPayments: payments
+        )
         let parts = viewModel.inputs.scenarios.enumerated().compactMap { idx, s -> String? in
-            guard idx > 0, payments.indices.contains(idx) else { return nil }
+            guard hasCurrent || idx > 0, payments.indices.contains(idx) else { return nil }
             let diff = baseline - payments[idx]
             let row: String
             if abs(diff.asDouble) < 0.01 {

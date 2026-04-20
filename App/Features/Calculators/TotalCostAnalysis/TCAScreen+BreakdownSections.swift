@@ -247,8 +247,13 @@ extension TCAScreen {
                 .foregroundStyle(Palette.inkSecondary)
                 .padding(.bottom, Spacing.s12)
 
+                // 5Q.6: scenario A renders when currentMortgage is
+                // set — it's a proposed refinance compared against
+                // status quo, like B/C/D. Only skipped in the legacy
+                // "no currentMortgage → A is baseline" path.
+                let hasCurrent = viewModel.inputs.currentMortgage != nil
                 ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
-                    if idx > 0 {
+                    if hasCurrent || idx > 0 {
                         reinvestmentScenarioCard(idx: idx, scenario: s, monthlyPayments: monthlyPayments)
                     }
                 }
@@ -316,10 +321,14 @@ extension TCAScreen {
         idx: Int,
         monthlyPayments: [Decimal]
     ) -> ReinvestmentDelta {
-        guard monthlyPayments.indices.contains(idx),
-              let baseline = monthlyPayments.first else {
-            return .zero
-        }
+        guard monthlyPayments.indices.contains(idx) else { return .zero }
+        // 5Q.6: use `breakEvenBaselinePayment` — currentMortgage's
+        // P&I when set, else scenario A. Keeps the reinvestment math
+        // consistent with break-even (they answer the same "savings
+        // vs what you'd otherwise pay" question).
+        let baseline = viewModel.inputs.breakEvenBaselinePayment(
+            monthlyPayments: monthlyPayments
+        )
         let scenario = monthlyPayments[idx]
         let diff = baseline - scenario  // savings (positive when cheaper)
         // Sub-penny difference is "equivalent" — avoids displaying a

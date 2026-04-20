@@ -77,9 +77,13 @@ extension TCAScreen {
     // MARK: - Summary rows (per-scenario "Month N" labels)
 
     private func breakEvenSummaryRows(monthlyPayments: [Decimal]) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
+        // 5Q.6: scenario A renders as a candidate when currentMortgage
+        // is set (matches the chart + description-line behavior 5P.9
+        // already landed for the same section).
+        let hasCurrent = viewModel.inputs.currentMortgage != nil
+        return VStack(alignment: .leading, spacing: Spacing.s4) {
             ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
-                if idx > 0 {
+                if hasCurrent || idx > 0 {
                     HStack(alignment: .firstTextBaseline, spacing: Spacing.s8) {
                         Circle()
                             .fill(breakdownColor(idx))

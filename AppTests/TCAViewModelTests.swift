@@ -569,4 +569,100 @@ final class TCAViewModelTests: XCTestCase {
         let inputs = try JSONDecoder().decode(TCAFormInputs.self, from: json)
         XCTAssertNil(inputs.currentMortgage)
     }
+
+    // MARK: - Session 5Q.6 — reinvestment + break-even with currentMortgage
+
+    /// Build a refi scenario with a currentMortgage costing $3000/mo in
+    /// P&I against a proposed scenario A at $2400/mo. With
+    /// currentMortgage set, A is a candidate — pathAInvestmentBalance
+    /// should return > 0. Without currentMortgage, A is the baseline
+    /// and path-A returns 0.
+    func testPathAUsesCurrentMortgageBaselineWhenSet() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        let mortgage = CurrentMortgage(
+            currentBalance: 400_000,
+            currentRatePercent: 7.5,
+            currentMonthlyPaymentPI: 3_000,
+            originalLoanAmount: 450_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 600_000
+        )
+        // Payments: [A=2400, B=2300] — both cheaper than $3000 current.
+        let payments: [Decimal] = [2_400, 2_300]
+
+        // Without currentMortgage: pre-5Q.6 legacy behavior — A is
+        // the baseline and returns 0.
+        inputs.currentMortgage = nil
+        XCTAssertEqual(inputs.pathAInvestmentBalance(
+            scenarioIndex: 0, months: 60, monthlyPayments: payments
+        ), 0, "Without currentMortgage, scenario A is baseline → 0")
+
+        // With currentMortgage: A is a candidate with $600/mo savings.
+        inputs.currentMortgage = mortgage
+        let path = inputs.pathAInvestmentBalance(
+            scenarioIndex: 0, months: 60, monthlyPayments: payments
+        )
+        XCTAssertGreaterThan(path, 0,
+            "With currentMortgage, scenario A's $600/mo savings should produce a non-zero future value")
+    }
+
+    /// Break-even chart series includes scenario A when currentMortgage
+    /// is set and A saves vs status quo. 5P.9 established this for
+    /// `breakEvenSeries`; 5Q.6 didn't change this helper but pins the
+    /// contract while we're adjusting related code paths.
+    func testBreakEvenSeriesIncludesScenarioAWhenCurrentMortgageSet() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.currentMortgage = CurrentMortgage(
+            currentBalance: 400_000,
+            currentRatePercent: 7.5,
+            currentMonthlyPaymentPI: 3_000,
+            originalLoanAmount: 450_000,
+            originalTermYears: 30,
+            loanStartDate: Date(timeIntervalSince1970: 1_650_000_000),
+            propertyValueToday: 600_000
+        )
+        // Set A and B to known closing / payments.
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Conv 30",
+                        rate: 6.0, termYears: 30, closingCosts: 6_000,
+                        loanAmount: 400_000),
+            TCAScenario(label: "B", name: "Conv 15",
+                        rate: 5.5, termYears: 15, closingCosts: 8_000,
+                        loanAmount: 400_000),
+        ]
+        let payments: [Decimal] = [2_398, 3_267]  // A < current, B > current
+
+        let series = TCAScreen.breakEvenSeries(
+            inputs: inputs,
+            monthlyPayments: payments,
+            colorForIndex: { _ in .black }
+        )
+        let ids = series.map(\.id)
+        XCTAssertTrue(ids.contains(0),
+            "Scenario A must appear in break-even series when currentMortgage is set and A saves vs status quo")
+    }
+
+    /// Reinvestment savings: path-A and path-B baselines now resolve
+    /// via `breakEvenBaselinePayment`, so they agree with the break-
+    /// even math. Without currentMortgage + idx==0 stays skipped.
+    func testPathBSkipsScenarioAWhenNoCurrentMortgage() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.currentMortgage = nil
+        let loan = Loan(
+            principal: 400_000, annualRate: 0.06,
+            termMonths: 360, startDate: Date()
+        )
+        let schedule = amortize(loan: loan)
+        let result = inputs.pathBExtraPrincipal(
+            scenarioIndex: 0,
+            schedule: schedule,
+            monthlyPayments: [2_398, 2_300]
+        )
+        XCTAssertNil(result,
+            "Without currentMortgage, scenario A is the baseline — pathB must return nil")
+    }
 }
