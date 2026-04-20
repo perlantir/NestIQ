@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+/*
+ * NestIQ PDF — body-only template. Header + footer are drawn per page
+ * by NestIQPrintRenderer in Core Graphics (UIPrintPageRenderer does the
+ * pagination; header/footer rects are reserved via headerHeight /
+ * footerHeight and drawn in drawHeaderForPage / drawFooterForPage).
+ *
+ * Do not add @page rules with running elements or counter(page) —
+ * WebKit's PDF pipeline does not implement CSS Paged Media running
+ * elements.
+ */
+
+:root {
+  --ink: #17160F;
+  --ink-secondary: #3A382C;
+  --paper: #FAF9F5;
+  --accent: #1F4D3F;
+  --muted: #85816F;
+  --border: rgba(23, 22, 15, 0.08);
+  --border-strong: rgba(23, 22, 15, 0.16);
+  --card: #FFFFFF;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-family: Georgia, "Source Serif 4", serif;
+  font-size: 32pt;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 8pt;
+  color: var(--ink);
+}
+
+h1 em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+h2 {
+  font-family: Georgia, "Source Serif 4", serif;
+  font-size: 20pt;
+  font-weight: 400;
+  margin: 28pt 0 10pt;
+  color: var(--ink);
+}
+
+h3 {
+  font-family: Georgia, "Source Serif 4", serif;
+  font-size: 14pt;
+  font-weight: 400;
+  margin: 18pt 0 6pt;
+  color: var(--ink);
+}
+
+p { margin: 0 0 10pt; }
+
+.eyebrow {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 9.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10pt;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 10pt;
+  margin: 0 0 8pt;
+}
+
+.mono { font-family: "SF Mono", Menlo, monospace; }
+
+.num {
+  font-family: "SF Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Signature block ---------- */
+
+.signature-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 16pt 0 24pt;
+  padding-bottom: 16pt;
+  border-bottom: 0.5pt solid var(--border);
+  page-break-inside: avoid;
+}
+
+.signature-text { flex: 1; min-width: 0; }
+
+.signature-text .name {
+  font-family: Georgia, "Source Serif 4", serif;
+  font-size: 17pt;
+  margin: 0 0 3pt;
+  color: var(--ink);
+}
+
+.signature-text .title {
+  font-size: 10.5pt;
+  color: var(--ink);
+  margin: 0 0 2pt;
+}
+
+.signature-text .company {
+  font-size: 10.5pt;
+  color: var(--ink);
+  margin: 0 0 2pt;
+}
+
+.signature-text .contact {
+  font-size: 9.5pt;
+  color: var(--muted);
+  margin: 0;
+}
+
+.signature-photo {
+  width: 60pt;
+  height: 60pt;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 20pt;
+  flex-shrink: 0;
+}
+
+/* ---------- Content cards ---------- */
+
+.content-card {
+  background: var(--card);
+  border: 0.5pt solid var(--border);
+  border-radius: 6pt;
+  padding: 14pt 16pt;
+  margin: 0 0 12pt;
+  page-break-inside: avoid;
+}
+
+.hero-card {
+  background: var(--card);
+  border: 0.5pt solid var(--border);
+  border-radius: 6pt;
+  padding: 18pt 20pt;
+  margin: 0 0 16pt;
+  page-break-inside: avoid;
+}
+
+.hero-card .hero-label {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 9pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4pt;
+}
+
+.hero-card .hero-value {
+  font-family: Georgia, "Source Serif 4", serif;
+  font-size: 34pt;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.05;
+}
+
+.hero-card .hero-value .prefix,
+.hero-card .hero-value .suffix {
+  font-size: 22pt;
+  color: var(--muted);
+}
+
+/* ---------- KPI grid ---------- */
+
+.kpi-grid {
+  display: flex;
+  gap: 16pt;
+  margin: 0 0 20pt;
+  page-break-inside: avoid;
+}
+
+.kpi {
+  flex: 1;
+  padding: 12pt 14pt;
+  background: var(--card);
+  border: 0.5pt solid var(--border);
+  border-radius: 6pt;
+}
+
+.kpi .kpi-label {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 8.5pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4pt;
+}
+
+.kpi .kpi-value {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 14pt;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Data tables ---------- */
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10pt 0 16pt;
+}
+
+table.data th,
+table.data td {
+  padding: 7pt 10pt;
+  border-bottom: 0.5pt solid var(--border);
+  text-align: left;
+  font-size: 10pt;
+}
+
+table.data th {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 0.5pt solid var(--border-strong);
+}
+
+table.data td.num,
+table.data th.num {
+  font-family: "SF Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+table.data tr.winner td {
+  background: rgba(31, 77, 63, 0.05);
+}
+
+/* ---------- Narrative / summary copy ---------- */
+
+.summary-text {
+  font-size: 11pt;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 6pt 0 18pt;
+}
+
+.disclaimer {
+  font-size: 8.5pt;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 18pt 0 0;
+  padding-top: 10pt;
+  border-top: 0.5pt solid var(--border);
+}
+
+.disclaimer p { margin: 0 0 6pt; }
+
+/* ---------- Charts ---------- */
+
+.chart-container {
+  margin: 12pt 0 18pt;
+  page-break-inside: avoid;
+}
+
+.chart-container svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-caption {
+  font-size: 9.5pt;
+  color: var(--muted);
+  margin-top: 6pt;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ---------- Layout helpers ---------- */
+
+.no-break { page-break-inside: avoid; }
+.break-before { page-break-before: always; }
+.break-after { page-break-after: always; }
+
+.row {
+  display: flex;
+  gap: 16pt;
+  margin: 0 0 12pt;
+}
+
+.row > * { flex: 1; min-width: 0; }
+
+.label {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 9pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 2pt;
+}
+
+.value {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 11pt;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2pt 8pt;
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 8.5pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 10pt;
+  background: rgba(31, 77, 63, 0.12);
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+{{CONTENT}}
+</body>
+</html>

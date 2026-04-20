@@ -73,6 +73,8 @@ targets:
       - path: App/Resources/Assets.xcassets
       - path: App/Resources/Fonts
         type: folder
+      - path: App/Resources/PDFTemplates
+        type: folder
     info:
       path: App/Info.plist
       properties:
