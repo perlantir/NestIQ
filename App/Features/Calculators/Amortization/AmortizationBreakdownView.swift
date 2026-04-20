@@ -210,7 +210,14 @@ struct AmortizationScheduleView: View {
     }
 
     private func monthlyRow(_ p: AmortizationPayment) -> some View {
-        HStack(spacing: 0) {
+        // Engine reports `payment` = scheduled P&I and `extraPrincipal`
+        // separately. The schedule row should reconcile: "what was paid"
+        // (scheduled + extra) and "what went to principal" (scheduled +
+        // extra) both include the periodic extra, otherwise the balance
+        // column drops faster than the payment column explains.
+        let actualPayment = p.payment + p.extraPrincipal
+        let actualPrincipal = p.principal + p.extraPrincipal
+        return HStack(spacing: 0) {
             Text(String(format: "%03d", p.number))
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.inkTertiary)
@@ -219,11 +226,11 @@ struct AmortizationScheduleView: View {
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.inkSecondary)
                 .frame(width: 58, alignment: .leading)
-            Text(MoneyFormat.shared.decimalString(p.payment))
+            Text(MoneyFormat.shared.decimalString(actualPayment))
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.ink)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-            Text(MoneyFormat.shared.decimalString(p.principal))
+            Text(MoneyFormat.shared.decimalString(actualPrincipal))
                 .textStyle(Typography.num.withSize(12))
                 .foregroundStyle(Palette.ink)
                 .frame(maxWidth: .infinity, alignment: .trailing)

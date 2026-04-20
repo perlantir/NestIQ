@@ -185,12 +185,14 @@ enum AmortizationPDFHTML {
         let bodyRows = schedule.payments.map { p in
             let isDropoff = miDropoff.map { p.number == $0 } ?? false
             let rowClass = isDropoff ? " class=\"winner\"" : ""
+            let actualPayment = p.payment + p.extraPrincipal
+            let actualPrincipal = p.principal + p.extraPrincipal
             return """
             <tr\(rowClass)>
               <td class="num">\(p.number)</td>
               <td>\(PDFHTMLComposition.escape(dateFmt.string(from: p.date)))</td>
-              <td class="num">\(MoneyFormat.shared.currency(p.payment))</td>
-              <td class="num">\(MoneyFormat.shared.currency(p.principal))</td>
+              <td class="num">\(MoneyFormat.shared.currency(actualPayment))</td>
+              <td class="num">\(MoneyFormat.shared.currency(actualPrincipal))</td>
               <td class="num">\(MoneyFormat.shared.currency(p.interest))</td>
               <td class="num">\(MoneyFormat.shared.currency(p.balance))</td>
             </tr>

@@ -144,6 +144,12 @@ final class AmortizationViewModel {
 
     /// One yearly sample of the outstanding balance — used by the
     /// Balance-over-time chart on the results screen.
+    ///
+    /// When the schedule terminates off a year boundary (extra principal
+    /// or a lump-sum recast retired the loan mid-year), anchor the final
+    /// point at the actual payoff year rather than padding out to the
+    /// scheduled `termYears` — otherwise the chart would draw a phantom
+    /// linear tail from the true payoff year to the scheduled end.
     var yearlyBalances: [(year: Int, balance: Decimal)] {
         guard let sched = schedule else { return [] }
         var result: [(Int, Decimal)] = [(0, inputs.loanAmount)]
@@ -157,7 +163,11 @@ final class AmortizationViewModel {
             cursor += perYear
             yearIndex += 1
         }
-        if result.last?.0 != inputs.termYears {
+        let lastFullYearCursor = cursor - perYear
+        if lastFullYearCursor < payments.count, let finalPayment = payments.last {
+            let payoffYear = Int(ceil(Double(payments.count) / Double(perYear)))
+            result.append((payoffYear, finalPayment.balance))
+        } else if result.last?.1 != 0 {
             result.append((inputs.termYears, 0))
         }
         return result
