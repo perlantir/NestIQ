@@ -16,10 +16,26 @@ struct AmortizationBreakdownView: View {
         let color: Color
     }
 
+    /// 5R.3 — the pie used to assume principal = `pi × 0.12` and
+    /// interest = the remainder. That was a hand-waved "typical first-
+    /// year on a 30-yr conventional" guess — wildly wrong for 15-yr
+    /// loans (principal ≈ 30-40% in year 1), low-rate loans, or any
+    /// payment deep into the schedule. The engine already computes the
+    /// exact month-1 split; pull from there when available.
     private var slices: [Slice] {
         let pi = viewModel.monthlyPI
-        let principal = pi * Decimal(0.12)
-        let interest = pi - principal
+        let principal: Decimal
+        let interest: Decimal
+        if let first = viewModel.schedule?.payments.first {
+            principal = first.principal
+            interest = first.interest
+        } else {
+            // Pre-compute fallback: no schedule yet. Show full P&I as
+            // interest rather than guessing at a ratio — the slices
+            // update the moment the engine runs.
+            principal = 0
+            interest = pi
+        }
         return [
             Slice(name: "Interest", value: max(interest, 0), color: Palette.accent),
             Slice(name: "Principal", value: max(principal, 0), color: Palette.scenario2),

@@ -138,8 +138,18 @@ final class AmortizationViewModel {
         let period = miDropoffPeriod ?? (inputs.termYears * 12)
         return inputs.manualMonthlyPMI * Decimal(period)
     }
+    /// LTV for display on the results hero. When the LO has captured
+    /// a purchase price via `propertyDP`, use the real value; otherwise
+    /// fall back to the legacy 80%-LTV-by-construction guess
+    /// (`loanAmount / (loanAmount × 1.25)`) that evaluates to 0.80
+    /// regardless of inputs. 5R.3: the fallback is documented as such
+    /// — it's effectively a placeholder, not a computed LTV.
     var ltv: Double {
-        Double(truncating: (inputs.loanAmount / inputs.propertyValueGuess) as NSNumber)
+        if inputs.propertyDP.purchasePrice > 0 {
+            return Double(truncating:
+                (inputs.loanAmount / inputs.propertyDP.purchasePrice) as NSNumber)
+        }
+        return Double(truncating: (inputs.loanAmount / inputs.propertyValueGuess) as NSNumber)
     }
 
     /// One yearly sample of the outstanding balance — used by the

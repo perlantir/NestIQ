@@ -85,37 +85,42 @@ final class HelocViewModel {
         return paymentFor(loan: refi)
     }
 
+    /// 5R.3 — stress-path was previously a decorative mock: constant
+    /// drift coefficients (m × 0.5 for base; linear divergence for
+    /// shock / relief) that didn't reflect real rate mechanics.
+    /// Replaced with a step-change model that matches how ARM-style
+    /// HELOCs actually reset:
+    ///   - Month 0-11: payment at the pre-shock rate (typical annual
+    ///     reset lag — the current rate holds through the first
+    ///     adjustment window).
+    ///   - Month 12+: payment recomputed at the new rate for this
+    ///     kind (+stressShockBps for shock, −50% for relief, flat
+    ///     for base).
+    /// The computation delegates to `helocMonthlyPayment(shockBps:)`
+    /// so both points reflect actual first-lien P&I + IO HELOC math.
+    /// 5R.3 also pulled the shock magnitude from `inputs.stressShockBps`
+    /// — StressKind's hardcoded 200 bps was ignoring the user-editable
+    /// field.
     func stressPath(kind: StressKind) -> [(Int, Double)] {
-        var out: [(Int, Double)] = []
-        let base = helocMonthlyPayment(shockBps: kind.shockBps)
-        var value = base
-        for m in stride(from: 0, through: 120, by: 3) {
-            if kind == .base {
-                // Slight drift to mimic the JSX's curve
-                let drift = Double(m) * 0.5
-                value = base + Decimal(drift)
-            } else if kind == .shock {
-                let drift = Double(max(0, m - 12)) * 4
-                value = base + Decimal(drift)
-            } else {
-                let drift = Double(max(0, m - 12)) * -1.5
-                value = base + Decimal(drift)
-            }
-            out.append((m, Double(truncating: value as NSNumber)))
+        let preShock = helocMonthlyPayment(shockBps: 0).asDouble
+        let userShockBps = Double(inputs.stressShockBps)
+        let bps: Double
+        switch kind {
+        case .base:   bps = 0
+        case .shock:  bps = userShockBps
+        case .relief: bps = -userShockBps / 2
         }
-        return out
+        let postShock = helocMonthlyPayment(shockBps: bps).asDouble
+        return stride(from: 0, through: 120, by: 3).map { m in
+            (m, m < 12 ? preShock : postShock)
+        }
     }
 
+    // 5R.3 — removed hardcoded `shockBps` on the enum (it ignored
+    // `inputs.stressShockBps`). Call sites resolve the bps via
+    // `stressPath(kind:)` using the live user input.
     enum StressKind: CaseIterable {
         case base, shock, relief
-
-        var shockBps: Double {
-            switch self {
-            case .base: 0
-            case .shock: 200
-            case .relief: -100
-            }
-        }
     }
 }
 
