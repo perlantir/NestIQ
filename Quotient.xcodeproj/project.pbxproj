@@ -102,6 +102,7 @@
 		A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */; };
 		A9D05654468F1CE1812861AB /* AmortizationInputsScreen+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42266120EAAEE6500B3FC21F /* AmortizationInputsScreen+Helpers.swift */; };
 		ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */; };
+		B2988F0373843D1A0553B89B /* SettingsScreen+Compliance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */; };
 		B56C34E50BE98BBE02B240FC /* PropertyDownPaymentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6017EF2033087E8408DF36 /* PropertyDownPaymentConfig.swift */; };
 		B867A917622C9C8DD4DAD497 /* BrandDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */; };
 		BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4FD5CDE39ACDD2471254C4 /* OnboardingFlow.swift */; };
@@ -214,6 +215,7 @@
 		5D15C026D3869F6E5AF23D67 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 		5D2229147921A6B1EC3387AD /* SelfEmploymentInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEmploymentInputsScreen.swift; sourceTree = "<group>"; };
 		5FE0AC5F80F00D95D30E9003 /* SelfEmploymentInputsScreen+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfEmploymentInputsScreen+Cards.swift"; sourceTree = "<group>"; };
+		63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsScreen+Compliance.swift"; sourceTree = "<group>"; };
 		63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAViewModelTests.swift; sourceTree = "<group>"; };
 		64737CBA7DC296452DB91B72 /* QuotientNarration */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientNarration; path = Packages/QuotientNarration; sourceTree = SOURCE_ROOT; };
 		659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareBundle.swift; sourceTree = "<group>"; };
@@ -681,6 +683,7 @@
 				209828CCF35636C19F35DCEC /* LanguageDetailScreens.swift */,
 				7F288789586295CD7EDEA159 /* ProfileEditor.swift */,
 				6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */,
+				63BD578FDA22193FD44F5582 /* SettingsScreen+Compliance.swift */,
 				B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */,
 			);
 			path = Settings;
@@ -994,6 +997,7 @@
 				D2C3880F855DA44A1D6A69A5 /* SelfEmploymentResultsScreen.swift in Sources */,
 				F86A92346F133FB1E4B354B5 /* SelfEmploymentViewModel.swift in Sources */,
 				FC1CDEE93CF9F23E35101A8E /* SettingsRow.swift in Sources */,
+				B2988F0373843D1A0553B89B /* SettingsScreen+Compliance.swift in Sources */,
 				6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */,
 				BBDD23BA9E669DE12DF02763 /* ShareBundle.swift in Sources */,
 				7BBEF51A3A1704912189BA9A /* SharePreview.swift in Sources */,

@@ -22,7 +22,9 @@ struct SettingsScreen: View {
     @State private var showingReplayConfirmation = false
     @State private var showingFeedbackSheet = false
     @State private var showingEraseConfirmation = false
-    @State private var showingLicensedStatesPicker = false
+    // `internal` (not private) so SettingsScreen+Compliance can flip
+    // the flag from the Licensed states row's onTap closure.
+    @State var showingLicensedStatesPicker = false
 
     var body: some View {
         NavigationStack {
@@ -216,48 +218,8 @@ struct SettingsScreen: View {
             .name ?? "Custom"
     }
 
-    @ViewBuilder private var complianceSection: some View {
-        settingsGroup(header: "Disclaimers · compliance") {
-            SettingsRow(
-                label: "Licensed states",
-                trailing: .value(licensedStatesPreview),
-                onTap: { showingLicensedStatesPicker = true }
-            )
-            .accessibilityIdentifier("settings.licensedStates.row")
-            divider
-            settingsNavRow(
-                label: "Per-state disclosures",
-                trailing: profile.licensedStates.isEmpty ? "None" : "\(profile.licensedStates.count) states"
-            ) {
-                PerStateDisclosuresPreview(profile: profile)
-            }
-            divider
-            settingsNavRow(
-                label: "NMLS display",
-                trailing: profile.nmlsDisplayFormat.display
-            ) {
-                NMLSDisplayFormatPicker(profile: profile)
-            }
-            divider
-            settingsNavRow(
-                label: "Equal Housing language",
-                trailing: profile.ehoLanguage.display
-            ) {
-                EqualHousingLanguagePicker(profile: profile)
-            }
-        }
-    }
-
-    /// "IA, CA, TX · 4 states" (abbreviations for up to the first 3
-    /// states, then the total count). "None" when empty. Shared by both
-    /// the Settings row trailing preview and the ProfileEditor row.
-    private var licensedStatesPreview: String {
-        let states = profile.licensedStates.sorted()
-        if states.isEmpty { return "None" }
-        let abbrev = states.prefix(3).joined(separator: ", ")
-        let unit = states.count == 1 ? "state" : "states"
-        return "\(abbrev) · \(states.count) \(unit)"
-    }
+    // complianceSection + licensedStatesPreview live in
+    // SettingsScreen+Compliance.swift (Session 5L.5 extraction).
 
     private var appearanceSection: some View {
         settingsGroup(header: "Appearance") {
@@ -388,8 +350,11 @@ struct SettingsScreen: View {
 
     // MARK: Helpers
 
+    // `internal` so extension files in this folder (e.g.
+    // SettingsScreen+Compliance) can build rows using the shared group
+    // / divider / nav-row styling.
     @ViewBuilder
-    private func settingsGroup<Content: View>(
+    func settingsGroup<Content: View>(
         header: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -410,7 +375,7 @@ struct SettingsScreen: View {
         }
     }
 
-    private var divider: some View {
+    var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
     }
 
@@ -419,7 +384,7 @@ struct SettingsScreen: View {
     /// stitched below. Used for rows that push a detail screen rather
     /// than opening a sheet or toggling state.
     @ViewBuilder
-    private func settingsNavRow<Destination: View>(
+    func settingsNavRow<Destination: View>(
         label: String,
         trailing: String,
         @ViewBuilder destination: () -> Destination
