@@ -235,6 +235,36 @@ struct ProfileEditor: View {
     }
 }
 
+// MARK: - Licensed states picker sheet
+
+/// Sheet wrapper around `LicensedStatesPicker` for direct entry from
+/// Settings row / Per-State Disclosures (Session 5L.4). Seeds the
+/// selection from `profile.licensedStates` and commits back on dismiss
+/// so both entry points share identical persistence semantics with the
+/// in-ProfileEditor picker.
+struct LicensedStatesPickerSheet: View {
+    @Bindable var profile: LenderProfile
+
+    @Environment(\.modelContext)
+    private var modelContext
+
+    @State private var selection: Set<USState> = []
+
+    var body: some View {
+        LicensedStatesPicker(selection: $selection)
+            .onAppear {
+                selection = Set(profile.licensedStates.compactMap { USState(rawValue: $0) })
+            }
+            .onDisappear { commit() }
+    }
+
+    private func commit() {
+        profile.licensedStates = selection.map(\.rawValue).sorted()
+        profile.updatedAt = Date()
+        try? modelContext.save()
+    }
+}
+
 // MARK: - Licensed states picker
 
 struct LicensedStatesPicker: View {

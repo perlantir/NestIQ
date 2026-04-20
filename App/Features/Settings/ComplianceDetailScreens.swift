@@ -23,6 +23,7 @@ struct PerStateDisclosuresPreview: View {
     @Bindable var profile: LenderProfile
 
     @State private var expandedState: USState?
+    @State private var showingLicensedStatesPicker = false
 
     private var licensedStates: [USState] {
         profile.licensedStates
@@ -37,6 +38,9 @@ struct PerStateDisclosuresPreview: View {
                     + "and reviewed by counsel — you can't edit it from the app.")
                     .textStyle(Typography.body.withSize(13))
                     .foregroundStyle(Palette.inkSecondary)
+                    .padding(.horizontal, Spacing.s20)
+
+                editStatesButton
                     .padding(.horizontal, Spacing.s20)
 
                 if licensedStates.isEmpty {
@@ -58,6 +62,31 @@ struct PerStateDisclosuresPreview: View {
         .scrollIndicators(.hidden)
         .navigationTitle("Per-state disclosures")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingLicensedStatesPicker) {
+            LicensedStatesPickerSheet(profile: profile)
+                .presentationDetents([.large])
+        }
+    }
+
+    private var editStatesButton: some View {
+        Button {
+            showingLicensedStatesPicker = true
+        } label: {
+            HStack(spacing: Spacing.s8) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Edit licensed states")
+                    .textStyle(Typography.body.withWeight(.medium))
+            }
+            .foregroundStyle(Palette.accent)
+            .padding(.horizontal, Spacing.s16)
+            .padding(.vertical, Spacing.s12)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .background(Palette.accentTint)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("perState.editLicensedStates")
     }
 
     private var emptyState: some View {

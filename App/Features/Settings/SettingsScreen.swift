@@ -22,6 +22,7 @@ struct SettingsScreen: View {
     @State private var showingReplayConfirmation = false
     @State private var showingFeedbackSheet = false
     @State private var showingEraseConfirmation = false
+    @State private var showingLicensedStatesPicker = false
 
     var body: some View {
         NavigationStack {
@@ -55,6 +56,10 @@ struct SettingsScreen: View {
             }
             .sheet(isPresented: $showingFeedbackSheet) {
                 FeedbackMailSheet()
+            }
+            .sheet(isPresented: $showingLicensedStatesPicker) {
+                LicensedStatesPickerSheet(profile: profile)
+                    .presentationDetents([.large])
             }
             .confirmationDialog(
                 "Replay the onboarding tour?",
@@ -213,6 +218,13 @@ struct SettingsScreen: View {
 
     @ViewBuilder private var complianceSection: some View {
         settingsGroup(header: "Disclaimers · compliance") {
+            SettingsRow(
+                label: "Licensed states",
+                trailing: .value(licensedStatesPreview),
+                onTap: { showingLicensedStatesPicker = true }
+            )
+            .accessibilityIdentifier("settings.licensedStates.row")
+            divider
             settingsNavRow(
                 label: "Per-state disclosures",
                 trailing: profile.licensedStates.isEmpty ? "None" : "\(profile.licensedStates.count) states"
@@ -234,6 +246,17 @@ struct SettingsScreen: View {
                 EqualHousingLanguagePicker(profile: profile)
             }
         }
+    }
+
+    /// "IA, CA, TX · 4 states" (abbreviations for up to the first 3
+    /// states, then the total count). "None" when empty. Shared by both
+    /// the Settings row trailing preview and the ProfileEditor row.
+    private var licensedStatesPreview: String {
+        let states = profile.licensedStates.sorted()
+        if states.isEmpty { return "None" }
+        let abbrev = states.prefix(3).joined(separator: ", ")
+        let unit = states.count == 1 ? "state" : "states"
+        return "\(abbrev) · \(states.count) \(unit)"
     }
 
     private var appearanceSection: some View {
