@@ -90,6 +90,99 @@ extension TCAScreen {
         return colors[min(idx, colors.count - 1)]
     }
 
+    // MARK: - 5M.6 Unrecoverable costs
+
+    /// "Unrecoverable costs" grid per D5M.6. For each scenario × horizon:
+    /// Interest + MI + Closing Costs, formatted as "$X (Y% of total paid)".
+    /// A secondary "Ongoing housing costs (paid regardless)" row covers
+    /// taxes + insurance + HOA so LOs can speak to the distinction —
+    /// unrecoverable is the portion that doesn't build equity; ongoing
+    /// applies whether you own or rent.
+    @ViewBuilder var unrecoverableCostsSection: some View {
+        if !viewModel.scenarioSchedules.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.s4) {
+                Text("Unrecoverable costs · by horizon")
+                    .textStyle(Typography.section)
+                    .foregroundStyle(Palette.ink)
+                Text(
+                    "Interest + MI + closing costs. Ongoing housing costs (tax/ins/HOA) "
+                    + "shown separately — those apply whether owning or renting."
+                )
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkSecondary)
+                    .padding(.bottom, Spacing.s12)
+
+                breakdownHeader
+                ForEach(Array(viewModel.inputs.horizonsYears.enumerated()), id: \.offset) { _, years in
+                    unrecoverableRow(years: years)
+                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+                }
+                ongoingHousingRow
+                    .padding(.top, Spacing.s4)
+            }
+        }
+    }
+
+    private func unrecoverableRow(years: Int) -> some View {
+        HStack(spacing: 0) {
+            Text("\(years)yr")
+                .textStyle(Typography.num.withSize(12, design: .monospaced))
+                .foregroundStyle(Palette.inkSecondary)
+                .frame(width: 52, alignment: .leading)
+            ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.offset) { idx, scenario in
+                Text(unrecoverableDisplay(scenarioIndex: idx, scenario: scenario, years: years))
+                    .textStyle(Typography.num.withSize(11, design: .monospaced))
+                    .foregroundStyle(Palette.ink)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+        }
+        .padding(.vertical, Spacing.s8)
+    }
+
+    /// Taxes + insurance + HOA × horizon months, aggregated across the
+    /// form-level inputs (these don't vary per scenario in TCA). One row
+    /// spanning all horizons — compact display "5yr $X · 10yr $Y · ...".
+    private var ongoingHousingRow: some View {
+        let monthly = viewModel.inputs.monthlyTaxes
+            + viewModel.inputs.monthlyInsurance
+            + viewModel.inputs.monthlyHOA
+        let parts = viewModel.inputs.horizonsYears.map { years -> String in
+            let total = monthly * Decimal(years * 12)
+            return "\(years)yr " + MoneyFormat.shared.dollarsShort(total)
+        }
+        return VStack(alignment: .leading, spacing: 2) {
+            Text("Ongoing housing costs (paid regardless)")
+                .textStyle(Typography.num.withSize(10, weight: .semibold))
+                .foregroundStyle(Palette.inkTertiary)
+            Text(parts.joined(separator: " · "))
+                .textStyle(Typography.num.withSize(11, design: .monospaced))
+                .foregroundStyle(Palette.inkSecondary)
+        }
+        .padding(.top, Spacing.s8)
+        .padding(.horizontal, Spacing.s4)
+    }
+
+    /// "$87k (32%)" — sum of interest, MI, and closing through horizon;
+    /// the % is share of total mortgage paid (unrecoverable + principal).
+    /// Ongoing housing costs are deliberately excluded from the "total
+    /// paid" denominator so the percentage reads as "share of what
+    /// doesn't build equity" rather than "share of all housing cash."
+    func unrecoverableDisplay(scenarioIndex: Int, scenario: TCAScenario, years: Int) -> String {
+        guard scenarioIndex < viewModel.scenarioSchedules.count else { return "—" }
+        let schedule = viewModel.scenarioSchedules[scenarioIndex]
+        let unrecoverable = viewModel.inputs.unrecoverableCost(
+            scenario: scenario,
+            schedule: schedule,
+            years: years
+        )
+        let principal = schedule.cumulativePrincipal(throughMonth: years * 12)
+        let totalPaid = unrecoverable + principal
+        let dollar = MoneyFormat.shared.dollarsShort(unrecoverable)
+        guard totalPaid > 0 else { return dollar }
+        let pct = (unrecoverable.asDouble / totalPaid.asDouble) * 100
+        return String(format: "%@ (%.0f%%)", dollar, pct)
+    }
+
     // MARK: - Narrative (moved from TCAScreen in 5M.5)
 
     var narrative: some View {

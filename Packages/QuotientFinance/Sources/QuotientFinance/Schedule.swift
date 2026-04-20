@@ -107,5 +107,16 @@ public struct AmortizationSchedule: Sendable, Hashable, Codable {
         return payments.prefix(cap).reduce(Decimal(0)) { $0 + $1.principal + $1.extraPrincipal }
     }
 
+    /// Cumulative mortgage insurance (PMI/MIP) paid through the end of
+    /// month `M`. Honors the PMI dropoff schedule baked into the
+    /// amortization run — once PMI drops, later rows contribute 0.
+    /// Session 5M.6 primitive for TCA's per-horizon unrecoverable-
+    /// costs display.
+    public func cumulativeMI(throughMonth month: Int) -> Decimal {
+        guard month > 0 else { return 0 }
+        let cap = Swift.min(month, payments.count)
+        return payments.prefix(cap).reduce(Decimal(0)) { $0 + $1.pmi }
+    }
+
     public var payoffDate: Date? { payments.last?.date }
 }

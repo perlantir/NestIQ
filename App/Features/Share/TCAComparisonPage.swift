@@ -32,6 +32,8 @@ struct TCAComparisonPage: View {
                 .padding(.top, 14)
             interestPrincipalMatrix
                 .padding(.top, 10)
+            unrecoverableSummary
+                .padding(.top, 10)
             Spacer(minLength: 0)
             footer
         }
@@ -90,6 +92,57 @@ struct TCAComparisonPage: View {
                 .stroke(border, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
+
+    /// Session 5M.6: compact unrecoverable summary for the PDF. One
+    /// line of horizon totals per scenario (for the longest horizon +
+    /// one shorter), plus an "Ongoing housing" line derived from
+    /// taxes + insurance + HOA × horizon months. Full per-horizon
+    /// matrix lives on the in-app Results view — the PDF would overflow
+    /// with another 5-row matrix.
+    private var unrecoverableSummary: some View {
+        let schedules = viewModel.scenarioSchedules
+        let longest = viewModel.inputs.horizonsYears.max() ?? 30
+        let monthlyOngoing = viewModel.inputs.monthlyTaxes
+            + viewModel.inputs.monthlyInsurance
+            + viewModel.inputs.monthlyHOA
+        let ongoing = monthlyOngoing * Decimal(longest * 12)
+        return VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 0) {
+                Text("Unrecoverable @ \(longest)yr")
+                    .font(.system(size: 9.5, weight: .semibold))
+                    .tracking(0.6)
+                    .foregroundStyle(inkTertiary)
+                    .frame(width: 92, alignment: .leading)
+                    .padding(.leading, 16)
+                ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.offset) { idx, s in
+                    Text(unrecoverableDollar(scenarioIndex: idx, scenario: s, years: longest, schedules: schedules))
+                        .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(inkPrimary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.trailing, 16)
+                }
+            }
+            Text("Ongoing housing @ \(longest)yr: \(MoneyFormat.shared.dollarsShort(ongoing)) (tax/ins/HOA — paid regardless)")
+                .font(.system(size: 8.5))
+                .foregroundStyle(inkTertiary)
+                .padding(.leading, 16)
+        }
+    }
+
+    private func unrecoverableDollar(
+        scenarioIndex: Int,
+        scenario: TCAScenario,
+        years: Int,
+        schedules: [AmortizationSchedule]
+    ) -> String {
+        guard scenarioIndex < schedules.count else { return "—" }
+        let unrecoverable = viewModel.inputs.unrecoverableCost(
+            scenario: scenario,
+            schedule: schedules[scenarioIndex],
+            years: years
+        )
+        return MoneyFormat.shared.dollarsShort(unrecoverable)
     }
 
     private func interestPrincipalSplit(schedule: AmortizationSchedule, years: Int) -> String {
@@ -327,6 +380,15 @@ struct TCAComparisonPage: View {
             Rectangle().fill(border).frame(height: 1).padding(.bottom, 6)
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 3) {
+                    Text(
+                        "Unrecoverable costs are the portion of your housing cost that doesn't build equity "
+                        + "or transfer to you (interest, mortgage insurance, closing costs). Ongoing housing "
+                        + "costs (taxes, insurance, HOA) are shown separately because they apply regardless "
+                        + "of owning or renting."
+                    )
+                    .font(.system(size: 8.5))
+                    .foregroundStyle(inkTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
                     Text(disclaimer)
                         .font(.system(size: 8.5))
                         .foregroundStyle(inkTertiary)

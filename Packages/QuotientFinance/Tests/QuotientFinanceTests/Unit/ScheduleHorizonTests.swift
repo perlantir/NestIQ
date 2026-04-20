@@ -91,4 +91,38 @@ struct ScheduleHorizonTests {
             lastPrincipal = p
         }
     }
+
+    // MARK: - cumulativeMI (5M.6)
+
+    @Test("cumulativeMI is 0 when PMISchedule isn't set")
+    func cumulativeMIWithoutSchedule() {
+        let s = thirtyYear()  // no PMI in options
+        #expect(s.cumulativeMI(throughMonth: 120) == 0)
+    }
+
+    @Test("cumulativeMI sums per-row pmi until dropoff")
+    func cumulativeMIWithSchedule() {
+        let loan = Loan(
+            principal: 400_000,
+            annualRate: 0.06,
+            termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        )
+        let pmi = PMISchedule(
+            monthlyAmount: 120,
+            originalValue: 425_000,
+            dropAtLTV: 0.78
+        )
+        let options = AmortizationOptions(pmiSchedule: pmi)
+        let schedule = amortize(loan: loan, options: options)
+        // By month 60 MI should still be accruing — 5yr × 12 × $120 =
+        // $7,200 ceiling. Actual may be lower if dropoff hits before
+        // month 60, but >= $3,000 is a safe lower bound.
+        let mi60 = schedule.cumulativeMI(throughMonth: 60)
+        #expect(mi60 > 3_000)
+        #expect(mi60 <= 7_200)
+        // Cumulative MI at the end of the schedule equals the schedule's
+        // own totalPMI (which is the full PMI run).
+        #expect(schedule.cumulativeMI(throughMonth: 360) == schedule.totalPMI)
+    }
 }

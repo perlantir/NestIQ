@@ -245,6 +245,35 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         }
     }
 
+    /// Session 5M.6: cumulative unrecoverable cost at horizon — the
+    /// portion of total mortgage payments that doesn't build equity or
+    /// transfer to the borrower. Definition per D4 (5M): interest paid
+    /// through horizon M + MI paid through M + closing costs (paid
+    /// once at origination).
+    ///
+    /// Tax/insurance/HOA are deliberately excluded — those go to the
+    /// government / carrier / HOA regardless of ownership vs. rent and
+    /// render on a separate "Ongoing housing costs" line.
+    func unrecoverableCost(
+        scenario: TCAScenario,
+        schedule: AmortizationSchedule,
+        years: Int
+    ) -> Decimal {
+        let month = years * 12
+        return scenario.closingCosts
+            + schedule.cumulativeInterest(throughMonth: month)
+            + schedule.cumulativeMI(throughMonth: month)
+    }
+
+    /// Session 5M.6: taxes + insurance + HOA × horizon months. "Ongoing"
+    /// because the borrower pays this whether they own or rent at this
+    /// property — so it's not an ownership-specific cost to compare
+    /// against the rental alternative.
+    func ongoingHousingCost(years: Int) -> Decimal {
+        let monthly = monthlyTaxes + monthlyInsurance + monthlyHOA
+        return monthly * Decimal(years * 12)
+    }
+
     /// Session 5M.3: approximate cash-to-close per scenario. Display-
     /// only; labeled "Approximate" on surfaces so LOs don't confuse it
     /// with a regulated Loan Estimate. Earnest money is deliberately
