@@ -33,9 +33,11 @@ struct HomeScreen: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+                    brandMark
+                        .padding(.top, Spacing.s12)
+                        .padding(.bottom, Spacing.s20)
                     greeting
                         .padding(.horizontal, Spacing.s20)
-                        .padding(.top, Spacing.s12)
                         .padding(.bottom, Spacing.s16)
                     rateRibbon
                         .padding(.bottom, Spacing.s20)
@@ -60,6 +62,18 @@ struct HomeScreen: View {
                 if rateReport == nil { await refreshRates() }
             }
         }
+    }
+
+    // MARK: Brand mark
+
+    private var brandMark: some View {
+        Image("Wordmark-A")
+            .resizable()
+            .scaledToFit()
+            .frame(height: 24)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .accessibilityIdentifier("home.brand.wordmark")
+            .accessibilityLabel("NestIQ")
     }
 
     // MARK: Greeting
