@@ -82,7 +82,7 @@ enum BreakEvenChartSVG {
             let tick = "<line x1=\"\(fmt(x))\" y1=\"\(fmt(y))\" x2=\"\(fmt(x))\" y2=\"\(fmt(y + 4))\""
                 + " stroke=\"#85816F\" stroke-width=\"0.5\" />"
             let text = "<text x=\"\(fmt(x))\" y=\"\(fmt(y + 18))\" text-anchor=\"middle\""
-                + " font-family=\"\(mono)\" font-size=\"9\" fill=\"#85816F\">\(label)</text>"
+                + " font-family=\"\(mono)\" font-size=\"9\" fill=\"#17160F\">\(label)</text>"
             return tick + text
         }.joined()
 
@@ -95,7 +95,7 @@ enum BreakEvenChartSVG {
             let tick = "<line x1=\"\(fmt(padL - 4))\" y1=\"\(fmt(y))\" x2=\"\(fmt(padL))\" y2=\"\(fmt(y))\""
                 + " stroke=\"#85816F\" stroke-width=\"0.5\" />"
             let text = "<text x=\"\(fmt(padL - 8))\" y=\"\(fmt(y + 3))\" text-anchor=\"end\""
-                + " font-family=\"\(mono)\" font-size=\"9\" fill=\"#85816F\">\(label)</text>"
+                + " font-family=\"\(mono)\" font-size=\"9\" fill=\"#17160F\">\(label)</text>"
             let grid = "<line x1=\"\(fmt(padL))\" y1=\"\(fmt(y))\" x2=\"\(fmt(padL + plotW))\""
                 + " y2=\"\(fmt(y))\" stroke=\"rgba(23,22,15,0.06)\" stroke-width=\"0.5\" />"
             return tick + text + grid
@@ -109,7 +109,7 @@ enum BreakEvenChartSVG {
             <line x1="\(fmt(padL))" y1="\(fmt(closingY))" x2="\(fmt(padL + plotW))" y2="\(fmt(closingY))"
                   stroke="#85816F" stroke-width="1" stroke-dasharray="4 4" />
             <text x="\(fmt(padL + plotW - 4))" y="\(fmt(closingY - 4))" text-anchor="end"
-                  font-family="SF Mono, Menlo, monospace" font-size="9" fill="#85816F">Closing \(moneyShort(closingCosts))</text>
+                  font-family="SF Mono, Menlo, monospace" font-size="9" fill="#17160F">Closing \(moneyShort(closingCosts))</text>
             """
         }()
 
@@ -119,7 +119,7 @@ enum BreakEvenChartSVG {
             let x = sx(cx.month)
             let y = sy(cx.cumulative)
             return """
-            <circle cx="\(fmt(x))" cy="\(fmt(y))" r="4" fill="#1F4D3F" stroke="#FAF9F5" stroke-width="1.5" />
+            <circle cx="\(fmt(x))" cy="\(fmt(y))" r="4" fill="#1F4D3F" stroke="#FFFFFF" stroke-width="1.5" />
             <text x="\(fmt(x + 8))" y="\(fmt(y - 6))" font-family="SF Mono, Menlo, monospace" font-size="9.5"
                   font-weight="600" fill="#1F4D3F">Break-even · Month \(cx.month)</text>
             """
@@ -142,7 +142,7 @@ enum BreakEvenChartSVG {
           \(crossoverMarker)
           \(xTickMarkup)
           <text x="\(fmt(padL + plotW / 2))" y="\(fmt(viewH - 8))" text-anchor="middle"
-                font-family="SF Mono, Menlo, monospace" font-size="9" fill="#85816F">Months from close</text>
+                font-family="SF Mono, Menlo, monospace" font-size="9" fill="#17160F">Months from close</text>
         </svg>
         """
         return """

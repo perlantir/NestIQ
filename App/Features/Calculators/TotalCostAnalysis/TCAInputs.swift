@@ -245,14 +245,21 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
     /// Effective principal for the given scenario under the active
     /// mode. Purchase: price − DP (derivedLoanAmount), falling back
     /// to form.loanAmount when the scenario's DP isn't set up.
-    /// Refinance: scenario.loanAmount if > 0, else form.loanAmount.
+    /// Refinance: scenario.loanAmount if > 0 (cash-out / cash-in
+    /// override); otherwise `currentMortgage.currentBalance` — the
+    /// authoritative amount being refinanced. form.loanAmount stays
+    /// as a final fallback for saved scenarios predating the 5P
+    /// currentMortgage snapshot and for the (unusual) refi where the
+    /// LO hasn't attached a currentMortgage.
     func effectiveLoanAmount(for scenario: TCAScenario) -> Decimal {
         switch mode {
         case .purchase:
             let derived = scenario.propertyDP.derivedLoanAmount
             return derived > 0 ? derived : loanAmount
         case .refinance:
-            return scenario.loanAmount > 0 ? scenario.loanAmount : loanAmount
+            if scenario.loanAmount > 0 { return scenario.loanAmount }
+            if let bal = currentMortgage?.currentBalance, bal > 0 { return bal }
+            return loanAmount
         }
     }
 

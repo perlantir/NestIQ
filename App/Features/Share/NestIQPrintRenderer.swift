@@ -96,7 +96,9 @@ final class NestIQPrintRenderer: UIPrintPageRenderer {
         let font = UIFont.monospacedSystemFont(ofSize: 9, weight: .regular)
         let attrs: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: Self.mutedColor,
+            // Was mutedColor (#85816F) — flipped to ink per user ask
+            // 2026-04-20: all PDF text should match body ink, not tan.
+            .foregroundColor: Self.inkColor,
             .kern: 0.4
         ]
         let textY = footerRect.minY + 18

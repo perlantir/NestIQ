@@ -188,8 +188,13 @@ struct TCAScreen: View {
         case .purchase:
             return "Purchase · \(count) scenarios"
         case .refinance:
-            let amt = MoneyFormat.shared.decimalString(viewModel.inputs.loanAmount)
-            return "Refi · default loan $\(amt) · \(count) scenarios"
+            // Prefer the currentMortgage balance — the authoritative refi
+            // principal. Falls back to form.loanAmount for saved scenarios
+            // predating the 5P currentMortgage snapshot.
+            let bal = viewModel.inputs.currentMortgage?.currentBalance
+                ?? viewModel.inputs.loanAmount
+            let amt = MoneyFormat.shared.decimalString(bal)
+            return "Refi · balance $\(amt) · \(count) scenarios"
         }
     }
 

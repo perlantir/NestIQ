@@ -76,19 +76,9 @@ final class HTMLPDFRenderer {
     }
 
     /// Paper background for the PDF page — matches `--paper` in
-    /// base.html. Filled per-page so the WebKit content area (which
-    /// renders its own cream body background) blends seamlessly into
-    /// the rest of the page rather than appearing as a visible cream
-    /// rectangle on a default-white PDF page. Without this fill, short
-    /// pages (disclosures, cover with terse narrative) show an empty
-    /// tan rectangle where the WebKit content rect ends but the page
-    /// does not.
-    private static let paperFillColor = UIColor(
-        red: 0xFA / 255.0,
-        green: 0xF9 / 255.0,
-        blue: 0xF5 / 255.0,
-        alpha: 1
-    )
+    /// base.html. Per user ask 2026-04-20 this is now pure white; the
+    /// prior cream (#FAF9F5) left a visible tan field on the PDF.
+    private static let paperFillColor = UIColor.white
 
     private func pdfData(from webView: WKWebView, pageSize: CGSize) -> Data {
         let printRenderer = NestIQPrintRenderer()

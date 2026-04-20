@@ -84,7 +84,6 @@ struct TCAInputsScreen: View {
                     currentMortgageSection
                         .padding(.horizontal, Spacing.s20)
                         .padding(.top, Spacing.s16)
-                    loanSection.padding(.top, Spacing.s16)
                     homeValueSection.padding(.top, Spacing.s24)
                 }
                 escrowSection.padding(.top, Spacing.s24)
@@ -202,29 +201,6 @@ struct TCAInputsScreen: View {
         }
         .pickerStyle(.segmented)
         .accessibilityIdentifier("tca.modeToggle")
-    }
-
-    // MARK: Loan (refinance-mode fallback)
-
-    private var loanSection: some View {
-        let prefilled = viewModel.inputs.currentMortgage != nil
-        let header = prefilled
-            ? "Default new loan amount · refinance"
-            : "Loan amount · refinance default"
-        let hint = prefilled
-            ? "Pre-filled from current mortgage balance. Scenarios can override below."
-            : "scenarios can override below"
-        return fieldGroup(header: header) {
-            FieldRow(
-                label: "Default loan amount",
-                prefix: "$",
-                hint: hint,
-                decimal: Binding(
-                    get: { viewModel.inputs.loanAmount },
-                    set: { viewModel.inputs.loanAmount = $0 }
-                )
-            )
-        }
     }
 
     // MARK: Home value (refinance mode — shared LTV denominator)

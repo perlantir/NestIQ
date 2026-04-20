@@ -17,12 +17,12 @@
 :root {
   --ink: #17160F;
   --ink-secondary: #3A382C;
-  --paper: #FAF9F5;
+  --paper: #FFFFFF;
   --accent: #1F4D3F;
-  /* --label: mid-tone between ink and muted. Used for primary section
-     labels that were bleeding into cream paper at --muted. */
-  --label: #444038;
-  --muted: #85816F;
+  /* --label + --muted collapsed onto --ink for PDF text contrast — no
+     tan/cream on-page text after this pass (user ask 2026-04-20). */
+  --label: #17160F;
+  --muted: #17160F;
   --border: rgba(23, 22, 15, 0.08);
   --border-strong: rgba(23, 22, 15, 0.16);
   --card: #FFFFFF;

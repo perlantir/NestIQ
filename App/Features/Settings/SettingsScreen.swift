@@ -93,11 +93,18 @@ struct SettingsScreen: View {
     // MARK: Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        // Was a second render of `profile.fullName` here (duplicated the
+        // profile hero directly below). Swapped for the NestIQ wordmark
+        // per user ask 2026-04-20 so the Settings top anchors on brand,
+        // not a repeat of the name card.
+        VStack(alignment: .leading, spacing: 4) {
             Eyebrow("Settings")
-            Text(profile.fullName.isEmpty ? "Profile" : profile.fullName)
-                .textStyle(Typography.display.withSize(28, weight: .bold))
-                .foregroundStyle(Palette.ink)
+            Image("Wordmark-A")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 28)
+                .accessibilityLabel("NestIQ")
+                .accessibilityIdentifier("settings.brand.wordmark")
         }
     }
 
