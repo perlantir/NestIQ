@@ -84,6 +84,7 @@ struct IncomeQualInputsScreen: View {
                 }
                 propertySection.padding(.top, Spacing.s24)
                 dtiSection.padding(.top, Spacing.s24)
+                reservesSection.padding(.top, Spacing.s24)
 
                 computeCTA
                     .padding(.horizontal, Spacing.s20)

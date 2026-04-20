@@ -41,4 +41,30 @@ final class IncomeQualViewModelTests: XCTestCase {
         XCTAssertTrue(vm.backEndDTIIncludingDebts >= inputs.backEndLimit
                       || vm.maxLoan == 0)
     }
+
+    // MARK: - 5P.4 Reserves persistence + default
+
+    func testReservesMonthsDefaultsToTwo() {
+        let vm = IncomeQualViewModel()
+        XCTAssertEqual(vm.inputs.reservesMonths, 2)
+    }
+
+    func testReservesMonthsRangeClampedOnDecode() throws {
+        // Out-of-range decoded values clamp to 0...36 (per 5J.2 range).
+        let encoder = JSONEncoder()
+        var inputs = IncomeQualFormInputs.sampleDefault
+        inputs.reservesMonths = 24
+        let data = try encoder.encode(inputs)
+        let decoded = try JSONDecoder().decode(IncomeQualFormInputs.self, from: data)
+        XCTAssertEqual(decoded.reservesMonths, 24)
+    }
+
+    func testReservesMonthsPersistsInScenarioSnapshot() throws {
+        let vm = IncomeQualViewModel()
+        vm.inputs.reservesMonths = 12
+        let snap = vm.buildScenario()
+        let decoded = try JSONDecoder().decode(IncomeQualFormInputs.self, from: snap.inputsJSON)
+        XCTAssertEqual(decoded.reservesMonths, 12,
+                       "Reserves selection must survive the Save/Load round-trip")
+    }
 }

@@ -1,7 +1,11 @@
 // IncomeQualScreen+Reserves.swift
-// Session 5F.6: reserves-months stepper + live $ readout, hosted on the
-// Income Qualification Results view. Extracted from IncomeQualScreen so
-// the parent struct stays under SwiftLint's type_body_length cap.
+// Session 5F.6: reserves-months stepper originally lived on the Income
+// Qualification Results view.
+// Session 5P.4: the stepper moved to the Inputs screen — LOs set the
+// reserve requirement before compute. This extension now renders a
+// read-only summary card on Results showing the selected value and
+// dollar total so the LO still sees "what was chosen" without a knob
+// that changes results after the fact.
 
 import SwiftUI
 
@@ -12,24 +16,29 @@ extension IncomeQualScreen {
         let reservesTotal = viewModel.maxPITI * Decimal(months)
         return VStack(alignment: .leading, spacing: Spacing.s8) {
             Eyebrow("Reserves required")
-            reservesCard(months: months)
-            reservesTotalLine(months: months, total: reservesTotal)
-                .padding(.top, Spacing.s4)
+            reservesSummaryCard(months: months, total: reservesTotal)
         }
     }
 
-    private func reservesCard(months: Int) -> some View {
+    private func reservesSummaryCard(months: Int, total: Decimal) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.s12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Reserves: \(Self.reservesLabel(for: months))")
                     .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
                     .foregroundStyle(Palette.ink)
-                Text("0-36 · conventional 0-6, jumbo / investor up to 24+")
+                Text("Adjust on the previous screen.")
                     .textStyle(Typography.num.withSize(11))
                     .foregroundStyle(Palette.inkTertiary)
             }
             Spacer()
-            reservesStepper
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("$\(MoneyFormat.shared.decimalString(total))")
+                    .textStyle(Typography.num.withSize(15, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(Palette.ink)
+                Text("\(months) × PITI")
+                    .textStyle(Typography.num.withSize(11))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)
@@ -41,21 +50,6 @@ extension IncomeQualScreen {
         .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
     }
 
-    private var reservesStepper: some View {
-        Stepper(
-            value: Binding(
-                get: { viewModel.inputs.reservesMonths },
-                set: { viewModel.inputs.reservesMonths = max(0, min($0, 36)) }
-            ),
-            in: 0...36,
-            step: 1
-        ) {
-            EmptyView()
-        }
-        .labelsHidden()
-        .accessibilityIdentifier("incomeQual.reservesStepper")
-    }
-
     /// Month-count label with year collapsing at the 12 / 24 / 36 pivots.
     /// Any other count renders in months so LOs can read the exact value.
     static func reservesLabel(for months: Int) -> String {
@@ -65,20 +59,6 @@ extension IncomeQualScreen {
         case 36: return "3 years"
         case 1:  return "1 month"
         default: return "\(months) months"
-        }
-    }
-
-    private func reservesTotalLine(months: Int, total: Decimal) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.s4) {
-            Text("Reserves:")
-                .textStyle(Typography.num.withSize(12))
-                .foregroundStyle(Palette.inkTertiary)
-            Text("$\(MoneyFormat.shared.decimalString(total))")
-                .textStyle(Typography.num.withSize(13, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Palette.ink)
-            Text("(\(months) × PITI)")
-                .textStyle(Typography.num.withSize(11))
-                .foregroundStyle(Palette.inkTertiary)
         }
     }
 }

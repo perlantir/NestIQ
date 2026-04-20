@@ -140,6 +140,7 @@
 		D334B521EEB68DDC50A57BC7 /* SavedScenariosScreen+EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */; };
 		D95165BA7394D52B7F7340E4 /* DatePill.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25E78DDA261CA8CE65A412D /* DatePill.swift */; };
 		DCDFB1F53A2008A8AD147888 /* RootTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A2DD798F1884CC41D6E7D3 /* RootTabBar.swift */; };
+		E0B52CDDDB6BF1497223C1CC /* IncomeQualInputsScreen+Reserves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */; };
 		E679D387C757372A59304DF6 /* Eyebrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB7F7D261F926F53F6870 /* Eyebrow.swift */; };
 		E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA85ACF7219CFD229D561CB /* TCAInputsScreen.swift */; };
 		E7986402C129C7B006BA7FA2 /* HelocPDFHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821BA232A2889EF6FD4129AE /* HelocPDFHTMLTests.swift */; };
@@ -342,6 +343,7 @@
 		EC8CCAC18874B861863C4FD7 /* AmortizationPDFHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationPDFHTML.swift; sourceTree = "<group>"; };
 		ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModelTests.swift; sourceTree = "<group>"; };
 		EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestIQPrintRenderer.swift; sourceTree = "<group>"; };
+		EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualInputsScreen+Reserves.swift"; sourceTree = "<group>"; };
 		F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioSaveLoadTests.swift; sourceTree = "<group>"; };
 		F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocViewModelTests.swift; sourceTree = "<group>"; };
 		F2E629BB721D286991CE4C26 /* StackedHorizontalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedHorizontalBar.swift; sourceTree = "<group>"; };
@@ -465,6 +467,7 @@
 			children = (
 				F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */,
 				9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */,
+				EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */,
 				84046343BB1DCEDC3BE89CA3 /* IncomeQualInputsScreen+SelfEmployment.swift */,
 				19AB6D35ACA98C379AE72FC3 /* IncomeQualListViews.swift */,
 				C3C304C0B4DAA7358A29ACF4 /* IncomeQualScreen.swift */,
@@ -1024,6 +1027,7 @@
 				ED9A0F824482974D1EEEA77D /* HelocScreen.swift in Sources */,
 				3CB99BAE66A3141FB73638D7 /* HomeScreen.swift in Sources */,
 				0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */,
+				E0B52CDDDB6BF1497223C1CC /* IncomeQualInputsScreen+Reserves.swift in Sources */,
 				12EA660423A004DA7B66266E /* IncomeQualInputsScreen+SelfEmployment.swift in Sources */,
 				A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */,
 				389E07F52C6B69E232CAEF64 /* IncomeQualListViews.swift in Sources */,
