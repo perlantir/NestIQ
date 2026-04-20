@@ -288,6 +288,120 @@ extension TCAScreen {
         .chartYAxisLabel("$ saved")
     }
 
+    // MARK: - 5M.8 Reinvestment strategy
+
+    /// "Invest the savings" vs "Apply to principal" — two paths for
+    /// the monthly cash-flow differential between baseline and a
+    /// lower-payment refinance scenario. Horizon snapshots for each
+    /// path. Refinance mode + non-baseline scenarios only. Disclaimer
+    /// per D6 rendered inline.
+    @ViewBuilder var reinvestmentSection: some View {
+        if viewModel.inputs.mode == .refinance,
+           viewModel.inputs.scenarios.count > 1,
+           !viewModel.scenarioSchedules.isEmpty,
+           let metrics = viewModel.result?.scenarioMetrics {
+            let monthlyPayments = metrics.map(\.payment)
+            let ratePct = viewModel.inputs.reinvestmentRate.asDouble * 100
+            VStack(alignment: .leading, spacing: Spacing.s4) {
+                Text("Reinvestment strategy · refinance")
+                    .textStyle(Typography.section)
+                    .foregroundStyle(Palette.ink)
+                Text(
+                    "Two paths for the monthly savings. Path A invests at "
+                    + String(format: "%.2f%%", ratePct)
+                    + " annualized; path B applies them as extra principal."
+                )
+                .textStyle(Typography.body.withSize(12))
+                .foregroundStyle(Palette.inkSecondary)
+                .padding(.bottom, Spacing.s12)
+
+                ForEach(Array(viewModel.inputs.scenarios.enumerated()), id: \.element.id) { idx, s in
+                    if idx > 0 {
+                        reinvestmentScenarioCard(idx: idx, scenario: s, monthlyPayments: monthlyPayments)
+                    }
+                }
+
+                Text(
+                    "Illustrative — assumes a "
+                    + String(format: "%.2f%%", ratePct)
+                    + " annualized return on invested savings. Past performance is not "
+                    + "indicative of future results. Actual investment returns are subject to market risk."
+                )
+                .textStyle(Typography.body.withSize(11))
+                .foregroundStyle(Palette.inkTertiary)
+                .padding(.top, Spacing.s8)
+            }
+        }
+    }
+
+    private func reinvestmentScenarioCard(
+        idx: Int,
+        scenario: TCAScenario,
+        monthlyPayments: [Decimal]
+    ) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.s4) {
+            HStack(spacing: Spacing.s8) {
+                Circle().fill(breakdownColor(idx)).frame(width: 8, height: 8)
+                Text(scenario.label.uppercased() + " · " + scenario.name)
+                    .textStyle(Typography.num.withSize(12, weight: .semibold))
+                    .foregroundStyle(Palette.ink)
+            }
+            reinvestmentPathAGrid(idx: idx, monthlyPayments: monthlyPayments)
+            reinvestmentPathBLine(idx: idx, monthlyPayments: monthlyPayments)
+        }
+        .padding(.vertical, Spacing.s8)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+        }
+    }
+
+    /// "Invest the savings" horizon snapshots: one balance number per
+    /// horizon year. Compact inline row.
+    private func reinvestmentPathAGrid(idx: Int, monthlyPayments: [Decimal]) -> some View {
+        let parts = viewModel.inputs.horizonsYears.map { years -> String in
+            let balance = viewModel.inputs.pathAInvestmentBalance(
+                scenarioIndex: idx,
+                months: years * 12,
+                monthlyPayments: monthlyPayments
+            )
+            return "\(years)yr " + MoneyFormat.shared.dollarsShort(balance)
+        }
+        return HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text("Invest")
+                .textStyle(Typography.num.withSize(10, weight: .semibold))
+                .foregroundStyle(Palette.inkTertiary)
+            Text(parts.joined(separator: " · "))
+                .textStyle(Typography.num.withSize(11, design: .monospaced))
+                .foregroundStyle(Palette.ink)
+        }
+    }
+
+    /// "Apply to principal" one-line summary: months saved + interest
+    /// saved + total wealth built.
+    @ViewBuilder
+    private func reinvestmentPathBLine(idx: Int, monthlyPayments: [Decimal]) -> some View {
+        if idx < viewModel.scenarioSchedules.count,
+           let result = viewModel.inputs.pathBExtraPrincipal(
+               scenarioIndex: idx,
+               schedule: viewModel.scenarioSchedules[idx],
+               monthlyPayments: monthlyPayments
+           ) {
+            let saved = MoneyFormat.shared.dollarsShort(result.interestSaved)
+            let wealth = MoneyFormat.shared.dollarsShort(result.wealthBuilt)
+            let monthsSaved = result.originalPayoffMonth - result.newPayoffMonth
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("Payoff")
+                    .textStyle(Typography.num.withSize(10, weight: .semibold))
+                    .foregroundStyle(Palette.inkTertiary)
+                Text("\(monthsSaved)mo earlier · int saved \(saved) · wealth \(wealth)")
+                    .textStyle(Typography.num.withSize(11, design: .monospaced))
+                    .foregroundStyle(Palette.ink)
+            }
+        } else {
+            EmptyView()
+        }
+    }
+
     // MARK: - Narrative (moved from TCAScreen in 5M.5)
 
     var narrative: some View {

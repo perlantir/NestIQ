@@ -36,6 +36,8 @@ struct TCAComparisonPage: View {
                 .padding(.top, 10)
             breakEvenSummary
                 .padding(.top, 8)
+            reinvestmentSummary
+                .padding(.top, 6)
             Spacer(minLength: 0)
             footer
         }
@@ -165,9 +167,10 @@ struct TCAComparisonPage: View {
         }
     }
 
-    // unrecoverableDollar + interestPrincipalSplit live in
-    // TCAComparisonPage+Helpers.swift (extracted 5M.7 to keep the main
-    // struct under type_body_length).
+    // reinvestmentSummary (5M.8) + unrecoverableDollar +
+    // interestPrincipalSplit (5M.5/5M.6) live in
+    // TCAComparisonPage+Helpers.swift to keep this struct under
+    // SwiftLint's type_body_length cap.
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -397,7 +400,8 @@ struct TCAComparisonPage: View {
                         "Unrecoverable costs are the portion of your housing cost that doesn't build equity "
                         + "or transfer to you (interest, mortgage insurance, closing costs). Ongoing housing "
                         + "costs (taxes, insurance, HOA) are shown separately because they apply regardless "
-                        + "of owning or renting."
+                        + "of owning or renting. Reinvestment figures are illustrative — past performance is "
+                        + "not indicative of future results."
                     )
                     .font(.system(size: 8.5))
                     .foregroundStyle(inkTertiary)

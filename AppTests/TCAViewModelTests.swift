@@ -239,6 +239,99 @@ final class TCAViewModelTests: XCTestCase {
         XCTAssertEqual(data[12].cumulative, 1_200)
     }
 
+    // MARK: - Session 5M.8 — reinvestment strategy
+
+    /// Known annuity check: baseline payment $1,500, scenario payment
+    /// $1,400 → savings $100/mo. Invested at 7% for 120 months → per
+    /// textbook ~$17,308.
+    func testReinvestmentBalanceAt10Years() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Baseline", rate: 7.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 300_000),
+            TCAScenario(label: "B", name: "Refi", rate: 5.0, termYears: 30,
+                        closingCosts: 5_000, loanAmount: 300_000),
+        ]
+        let payments: [Decimal] = [Decimal(1_500), Decimal(1_400)]
+        let balance = inputs.pathAInvestmentBalance(
+            scenarioIndex: 1,
+            months: 120,
+            monthlyPayments: payments
+        )
+        let balanceDouble = balance.asDouble
+        XCTAssertTrue(balanceDouble > 17_300 && balanceDouble < 17_320,
+                      "Expected ~17,308, got \(balanceDouble)")
+    }
+
+    /// Applying $100/mo extra principal should shorten the payoff by
+    /// some number of months > 0. Specific month count depends on
+    /// amortize()'s internals; assert the invariant only.
+    func testExtraPrincipalShortensLoan() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        let scenario = TCAScenario(
+            label: "B", name: "Refi", rate: 5.0, termYears: 30,
+            closingCosts: 5_000, loanAmount: 300_000
+        )
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Baseline", rate: 7.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 300_000),
+            scenario,
+        ]
+        let payments: [Decimal] = [Decimal(1_996), Decimal(1_610)]  // approx
+        let schedule = amortize(loan: Loan(
+            principal: 300_000,
+            annualRate: 0.05,
+            termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        let result = inputs.pathBExtraPrincipal(
+            scenarioIndex: 1,
+            schedule: schedule,
+            monthlyPayments: payments
+        )
+        XCTAssertNotNil(result)
+        if let result {
+            XCTAssertTrue(result.newPayoffMonth < result.originalPayoffMonth)
+            XCTAssertTrue(result.interestSaved > 0)
+            XCTAssertTrue(result.wealthBuilt > 0)
+        }
+    }
+
+    /// When savings are zero or negative (refi costs more monthly),
+    /// both paths return zero / nil — no silent false positives.
+    func testBothPathsSameInputsProduceExpectedOutputs() {
+        var inputs = TCAFormInputs.sampleDefault
+        inputs.mode = .refinance
+        inputs.scenarios = [
+            TCAScenario(label: "A", name: "Baseline", rate: 5.0, termYears: 30,
+                        closingCosts: 0, loanAmount: 300_000),
+            TCAScenario(label: "B", name: "Worse refi", rate: 7.0, termYears: 30,
+                        closingCosts: 5_000, loanAmount: 300_000),
+        ]
+        // Baseline $1,610/mo, scenario $1,996/mo → savings NEGATIVE.
+        let payments: [Decimal] = [Decimal(1_610), Decimal(1_996)]
+        let balance = inputs.pathAInvestmentBalance(
+            scenarioIndex: 1,
+            months: 120,
+            monthlyPayments: payments
+        )
+        XCTAssertEqual(balance, 0)  // no savings to invest
+        let schedule = amortize(loan: Loan(
+            principal: 300_000,
+            annualRate: 0.07,
+            termMonths: 360,
+            startDate: Date(timeIntervalSince1970: 1_767_225_600)
+        ))
+        let pathB = inputs.pathBExtraPrincipal(
+            scenarioIndex: 1,
+            schedule: schedule,
+            monthlyPayments: payments
+        )
+        XCTAssertNil(pathB)  // no savings to apply
+    }
+
     /// Credits exceeding costs clamp at 0 (not negative).
     func testCashToCloseClampsAtZeroWhenCreditsExceedCosts() {
         var inputs = TCAFormInputs.sampleDefault

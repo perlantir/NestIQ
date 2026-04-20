@@ -86,6 +86,12 @@ struct TCAInputsScreen: View {
                     .padding(.horizontal, Spacing.s20)
                     .padding(.top, Spacing.s24)
 
+                if viewModel.inputs.mode == .refinance {
+                    reinvestmentRateSection
+                        .padding(.horizontal, Spacing.s20)
+                        .padding(.top, Spacing.s24)
+                }
+
                 computeCTA
                     .padding(.horizontal, Spacing.s20)
                     .padding(.vertical, Spacing.s24)

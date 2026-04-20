@@ -245,6 +245,75 @@ struct TCAFormInputs: Codable, Hashable, Sendable {
         }
     }
 
+    // MARK: - Session 5M.8 — reinvestment strategy
+
+    /// "Invest the savings" — future value of baseline-minus-scenario
+    /// monthly savings invested at `reinvestmentRate` for `months`.
+    /// Returns 0 when baseline or scenario payment isn't set, when
+    /// scenario index is the baseline (0), or when monthly savings is
+    /// negative (scenario costs more per month than baseline).
+    func pathAInvestmentBalance(
+        scenarioIndex: Int,
+        months: Int,
+        monthlyPayments: [Decimal]
+    ) -> Decimal {
+        guard mode == .refinance,
+              scenarioIndex > 0,
+              scenarioIndex < monthlyPayments.count
+        else { return 0 }
+        let savings = monthlyPayments[0] - monthlyPayments[scenarioIndex]
+        guard savings > 0 else { return 0 }
+        return futureValueOfMonthlyDeposits(
+            deposit: savings,
+            annualRate: reinvestmentRate.asDouble,
+            months: months
+        )
+    }
+
+    /// "Apply savings as extra principal" — accelerates payoff and
+    /// reduces lifetime interest. Returns nil when the scenario is
+    /// baseline (index 0), refinance savings are nonpositive, or
+    /// inputs don't line up with the provided schedule.
+    struct PathBResult: Hashable {
+        public let newPayoffMonth: Int
+        public let originalPayoffMonth: Int
+        public let interestSaved: Decimal
+        /// Interest saved + monthly payment × months-avoided. The
+        /// second term represents cash the borrower keeps after the
+        /// accelerated payoff — dollars they no longer have to send
+        /// the lender each month.
+        public let wealthBuilt: Decimal
+    }
+
+    func pathBExtraPrincipal(
+        scenarioIndex: Int,
+        schedule: AmortizationSchedule,
+        monthlyPayments: [Decimal]
+    ) -> PathBResult? {
+        guard mode == .refinance,
+              scenarioIndex > 0,
+              scenarioIndex < monthlyPayments.count,
+              scenarioIndex < scenarios.count
+        else { return nil }
+        let savings = monthlyPayments[0] - monthlyPayments[scenarioIndex]
+        guard savings > 0 else { return nil }
+        let accelerated = applyExtraPrincipal(
+            schedule: schedule,
+            extra: ExtraPrincipalPlan(recurring: savings, lumpSums: [])
+        )
+        let interestSaved = schedule.totalInterest - accelerated.totalInterest
+        let original = schedule.payments.count
+        let newPayoff = accelerated.payments.count
+        let monthsSaved = Swift.max(original - newPayoff, 0)
+        let avoidedCashflow = monthlyPayments[scenarioIndex] * Decimal(monthsSaved)
+        return PathBResult(
+            newPayoffMonth: newPayoff,
+            originalPayoffMonth: original,
+            interestSaved: interestSaved,
+            wealthBuilt: interestSaved + avoidedCashflow
+        )
+    }
+
     /// Session 5M.7: estimated break-even month for a non-baseline
     /// refinance scenario against the baseline (scenario index 0).
     /// Returns `nil` when break-even is never reached within the

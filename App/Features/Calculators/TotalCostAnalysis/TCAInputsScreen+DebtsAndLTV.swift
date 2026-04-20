@@ -182,4 +182,24 @@ extension TCAInputsScreen {
             )
         }
     }
+
+    // MARK: - 5M.8 Reinvestment rate
+
+    /// Single FieldRow driving `TCAFormInputs.reinvestmentRate`. The
+    /// reinvestment-strategy section on Results (and the PDF summary)
+    /// use this value as the annualized return on invested savings.
+    var reinvestmentRateSection: some View {
+        fieldGroup(header: "Reinvestment assumption") {
+            FieldRow(
+                label: "Return rate",
+                suffix: "%",
+                hint: "Annualized — for 'Invest the savings' path",
+                decimal: Binding(
+                    get: { viewModel.inputs.reinvestmentRate * 100 },
+                    set: { viewModel.inputs.reinvestmentRate = $0 / 100 }
+                ),
+                fractionDigits: 2
+            )
+        }
+    }
 }
