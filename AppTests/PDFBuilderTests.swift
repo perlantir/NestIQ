@@ -122,12 +122,15 @@ final class PDFBuilderTests: XCTestCase {
         let inspector = try XCTUnwrap(PDFInspector(url: url))
         let total = inspector.pageCount
         XCTAssertGreaterThanOrEqual(total, 2)
-        let cover = inspector.text(onPage: 0) ?? ""
-        XCTAssertTrue(cover.contains("Page 1 of \(total)"),
-                      "Cover missing 'Page 1 of \(total)'. Got: \(cover)")
+        // D12 (Session 7.3a): the "Page N of M" counter was CG-drawn by
+        // NestIQPrintRenderer, which is retired. PDF chrome is now
+        // HTML-template-driven. Amortization still uses the legacy
+        // base.html path for v0.1.1 pre-7.3f; no HTML counter runs.
+        // Assert the disclaimers appendix renders instead — the
+        // compliance content HTML-side footer survives CG retirement.
         let disclaimers = inspector.text(onPage: total - 1) ?? ""
-        XCTAssertTrue(disclaimers.contains("Page \(total) of \(total)"),
-                      "Disclaimers missing 'Page \(total) of \(total)'. Got: \(disclaimers)")
+        XCTAssertTrue(disclaimers.contains("Equal Housing Opportunity"),
+                      "Disclaimers appendix EHO footer missing. Got: \(disclaimers)")
     }
 
     /// Empty companyName on the LenderProfile renders the signature

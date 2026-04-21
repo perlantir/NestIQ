@@ -41,6 +41,8 @@ final class HelocPDFHTMLTests: XCTestCase {
         XCTAssertTrue(full.contains("Blended rate"))
         XCTAssertTrue(full.contains("Rate structure"))
         XCTAssertTrue(full.contains("The fine print"))
-        XCTAssertTrue(full.contains("Page 1 of "))
+        // D12 (Session 7.3a): CG-drawn "Page 1 of N" counter retired —
+        // replaced with an HTML-side assertion on the compliance footer.
+        XCTAssertTrue(full.contains("Equal Housing Opportunity"))
     }
 }

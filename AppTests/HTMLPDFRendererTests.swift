@@ -95,16 +95,9 @@ final class HTMLPDFRendererTests: XCTestCase {
         XCTAssertGreaterThan(doc.pageCount, 1,
                              "60 rows should paginate across >1 page; got \(doc.pageCount)")
 
-        // Page-counter footer assertion: every portrait page should
-        // carry "Page N of M" drawn by NestIQPrintRenderer.
-        let total = doc.pageCount
-        for i in 0..<total {
-            let text = doc.page(at: i)?.string ?? ""
-            XCTAssertTrue(text.contains("Page \(i + 1) of \(total)"),
-                          "Page \(i + 1) missing counter 'Page \(i + 1) of \(total)'. Got: \(text.prefix(200))")
-            XCTAssertTrue(text.contains("nestiq.mortgage"),
-                          "Page \(i + 1) missing footer URL")
-        }
+        // D12 (Session 7.3a): CG-drawn per-page "Page N of M" + footer
+        // URL retired. Pagination itself is still verifiable via
+        // doc.pageCount assertion above; nothing left to check here.
     }
 
     // MARK: - Helpers

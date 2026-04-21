@@ -24,9 +24,26 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
     /// collapses display to the note rate alone (D2).
     var aprRate: Decimal?
 
+    // MARK: - Session 7.3c additions (v2.1.1 refi PDF template parity)
+
+    /// Lender name for the PDF column header's subtitle
+    /// (`{{option_a_lender}}`). Defaults to empty so pre-7.3c scenarios
+    /// render without a lender line; LO fills from the Advanced section.
+    var lender: String
+    /// Lender fees portion of `closingCosts` (origination + underwriting
+    /// + processing). Default 0. When 0 the PDF renders "—" for the
+    /// lender-fees cell so the LO sees the split isn't captured rather
+    /// than a fabricated value.
+    var lenderFees: Decimal
+    /// Third-party + escrow portion of `closingCosts` (title, appraisal,
+    /// prepaids). Default 0 — same "—" fallback as lenderFees.
+    var thirdPartyFees: Decimal
+
     enum CodingKeys: String, CodingKey {
         case id, label, rate, termYears, points, closingCosts
         case newLoanAmount, monthlyMI, aprRate
+        // 7.3c additions
+        case lender, lenderFees, thirdPartyFees
     }
 
     init(
@@ -38,7 +55,10 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         closingCosts: Decimal = 0,
         newLoanAmount: Decimal = 0,
         monthlyMI: Decimal = 0,
-        aprRate: Decimal? = nil
+        aprRate: Decimal? = nil,
+        lender: String = "",
+        lenderFees: Decimal = 0,
+        thirdPartyFees: Decimal = 0
     ) {
         self.id = id
         self.label = label
@@ -49,6 +69,9 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         self.newLoanAmount = newLoanAmount
         self.monthlyMI = monthlyMI
         self.aprRate = aprRate
+        self.lender = lender
+        self.lenderFees = lenderFees
+        self.thirdPartyFees = thirdPartyFees
     }
 
     init(from decoder: any Decoder) throws {
@@ -62,6 +85,9 @@ struct RefiOption: Codable, Hashable, Sendable, Identifiable {
         self.newLoanAmount = try c.decodeIfPresent(Decimal.self, forKey: .newLoanAmount) ?? 0
         self.monthlyMI = try c.decodeIfPresent(Decimal.self, forKey: .monthlyMI) ?? 0
         self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
+        self.lender = try c.decodeIfPresent(String.self, forKey: .lender) ?? ""
+        self.lenderFees = try c.decodeIfPresent(Decimal.self, forKey: .lenderFees) ?? 0
+        self.thirdPartyFees = try c.decodeIfPresent(Decimal.self, forKey: .thirdPartyFees) ?? 0
     }
 }
 
@@ -88,12 +114,31 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
     /// Session 5M.1: optional APR on the existing loan. Display-only.
     var currentAPR: Decimal?
 
+    // MARK: - Session 7.3c additions (v2.1.1 refi PDF template parity)
+    //
+    // Back the page-3 assumptions box (`original_loan_amount_formatted`,
+    // `current_term`, `current_originated_date` in tokens.schema.json).
+    // All decodeIfPresent with defaults so pre-7.3c Saved Scenarios JSON
+    // decodes unchanged (verified by RefinancePDFDerivationsTests).
+
+    /// Date the borrower's current loan closed. Drives the PDF's
+    /// "Originated Mar 2024" assumptions line.
+    var currentLoanOriginatedDate: Date
+    /// Dollar amount the borrower originally financed (vs today's
+    /// balance in `currentBalance`). Drives "Original amount $445,000".
+    var currentOriginalLoanAmount: Decimal
+    /// Original term of the current loan, in years. Drives "Rate · term
+    /// {{current_rate_pct}} · 30 yr". Default 30.
+    var currentOriginalTermYears: Int
+
     enum CodingKeys: String, CodingKey {
         case currentBalance, currentRate, currentRemainingYears
         case currentMonthlyMI, homeValue
         case monthlyTaxes, monthlyInsurance, monthlyHOA
         case options, horizonsYears, stressTestHorizonYears, scenarioCount
         case currentAPR
+        // 7.3c additions
+        case currentLoanOriginatedDate, currentOriginalLoanAmount, currentOriginalTermYears
     }
 
     init(
@@ -109,7 +154,10 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         horizonsYears: [Int],
         stressTestHorizonYears: Int,
         scenarioCount: Int? = nil,
-        currentAPR: Decimal? = nil
+        currentAPR: Decimal? = nil,
+        currentLoanOriginatedDate: Date = RefinanceFormInputs.defaultCurrentLoanOriginatedDate,
+        currentOriginalLoanAmount: Decimal = 0,
+        currentOriginalTermYears: Int = 30
     ) {
         self.currentBalance = currentBalance
         self.currentRate = currentRate
@@ -124,6 +172,9 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.stressTestHorizonYears = stressTestHorizonYears
         self.scenarioCount = scenarioCount ?? options.count
         self.currentAPR = currentAPR
+        self.currentLoanOriginatedDate = currentLoanOriginatedDate
+        self.currentOriginalLoanAmount = currentOriginalLoanAmount
+        self.currentOriginalTermYears = currentOriginalTermYears
     }
 
     init(from decoder: any Decoder) throws {
@@ -142,6 +193,17 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         self.scenarioCount = try c.decodeIfPresent(Int.self, forKey: .scenarioCount)
             ?? self.options.count
         self.currentAPR = try c.decodeIfPresent(Decimal.self, forKey: .currentAPR)
+        self.currentLoanOriginatedDate = try c.decodeIfPresent(Date.self, forKey: .currentLoanOriginatedDate)
+            ?? RefinanceFormInputs.defaultCurrentLoanOriginatedDate
+        self.currentOriginalLoanAmount = try c.decodeIfPresent(Decimal.self, forKey: .currentOriginalLoanAmount) ?? 0
+        self.currentOriginalTermYears = try c.decodeIfPresent(Int.self, forKey: .currentOriginalTermYears) ?? 30
+    }
+
+    /// Default originated date for new scenarios and for pre-7.3c JSON
+    /// lacking the field. Two years before today — typical age of a
+    /// homeowner's current loan when considering a refinance.
+    static var defaultCurrentLoanOriginatedDate: Date {
+        Calendar.current.date(byAdding: .year, value: -2, to: Date()) ?? Date()
     }
 
     /// Effective new loan amount for an option. Falls back to
@@ -173,13 +235,43 @@ struct RefinanceFormInputs: Codable, Hashable, Sendable {
         monthlyInsurance: 135,
         monthlyHOA: 0,
         options: [
-            RefiOption(label: "A", rate: 6.125, termYears: 30, points: 0.5, closingCosts: 9_800),
-            RefiOption(label: "B", rate: 6.500, termYears: 25, points: 0, closingCosts: 5_200),
-            RefiOption(label: "C", rate: 5.875, termYears: 30, points: 1.5, closingCosts: 14_800),
+            RefiOption(
+                label: "A",
+                rate: 6.125,
+                termYears: 30,
+                points: 0.5,
+                closingCosts: 9_800,
+                lender: "Lakeshore",
+                lenderFees: 2_190,
+                thirdPartyFees: 5_548
+            ),
+            RefiOption(
+                label: "B",
+                rate: 6.500,
+                termYears: 25,
+                points: 0,
+                closingCosts: 5_200,
+                lender: "Coastal",
+                lenderFees: 1_825,
+                thirdPartyFees: 3_375
+            ),
+            RefiOption(
+                label: "C",
+                rate: 5.875,
+                termYears: 30,
+                points: 1.5,
+                closingCosts: 14_800,
+                lender: "Coastal",
+                lenderFees: 2_410,
+                thirdPartyFees: 6_090
+            ),
         ],
         horizonsYears: [5, 7, 10, 15, 30],
         stressTestHorizonYears: 5,
-        scenarioCount: 3
+        scenarioCount: 3,
+        currentLoanOriginatedDate: Calendar.current.date(from: DateComponents(year: 2024, month: 3, day: 1)) ?? Date(),
+        currentOriginalLoanAmount: 445_000,
+        currentOriginalTermYears: 30
     )
 
     /// Blank option with only the term defaulted to 30 yr (LOs almost

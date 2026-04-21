@@ -40,8 +40,10 @@ final class RefinancePDFHTMLTests: XCTestCase {
                       "NPV row missing")
         XCTAssertTrue(full.contains("The fine print"),
                       "Disclaimers appendix missing")
-        XCTAssertTrue(full.contains("Page 1 of "),
-                      "Cover page counter missing")
+        // D12 (Session 7.3a): CG-drawn "Page 1 of N" counter retired.
+        // Replace with an HTML-side assertion on the disclaimers footer.
+        XCTAssertTrue(full.contains("Equal Housing Opportunity"),
+                      "Disclaimers appendix EHO footer missing")
     }
 
     private func makeProfile() -> LenderProfile {
