@@ -145,11 +145,11 @@
 		BF783C5338F9606D073C3299 /* Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 889D568D9AB50BD7842D1B1F /* Links.swift */; };
 		C0C9ACE605E76BB9C2EB7A95 /* RefinanceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */; };
 		C0F0066601EC2B752A06EE4F /* CalculatorIncomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC5D2C906362CB5B9DB894 /* CalculatorIncomeTests.swift */; };
-		C116BD102302052E09BF8651 /* NestIQPrintRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */; };
 		C210B34AE0330D62B08989B6 /* TCAInputsScreen+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC433F27FC7E081201C9EAEC /* TCAInputsScreen+CurrentMortgage.swift */; };
 		C2B29CFEC12562EC0770A67B /* CalculatorTCATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38C48023F20605AA323F916 /* CalculatorTCATests.swift */; };
 		C2CD708E04D6D9C221B703AD /* RefinanceInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF3BD2AB8937E1F21365207 /* RefinanceInputs.swift */; };
 		C36A32A07102C0CEE341F064 /* CalculatorListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B29CD5F31228A3CA554FC /* CalculatorListRow.swift */; };
+		C3C54BBFB4178815B7F49626 /* PDFTemplateLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2147DF874CDC4A35FF9BB2 /* PDFTemplateLoader.swift */; };
 		C5146E4005850635BCB0716F /* QuotientPDF in Frameworks */ = {isa = PBXBuildFile; productRef = A1197D36724BA39F7185E2D9 /* QuotientPDF */; };
 		C62A0FBA3E8D64F8C99DCC4C /* DeleteAccountFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D52146ECB9717772ED1710A /* DeleteAccountFlow.swift */; };
 		C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */; };
@@ -308,6 +308,7 @@
 		88C2E96E5E0327331EA08EAE /* QuotientPDF */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientPDF; path = Packages/QuotientPDF; sourceTree = SOURCE_ROOT; };
 		892D983C4440B09DDF25034E /* CalculatorSelfEmploymentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorSelfEmploymentTests.swift; sourceTree = "<group>"; };
 		892FB7F7D261F926F53F6870 /* Eyebrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eyebrow.swift; sourceTree = "<group>"; };
+		8A2147DF874CDC4A35FF9BB2 /* PDFTemplateLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFTemplateLoader.swift; sourceTree = "<group>"; };
 		8A2E18707A0FFA68811C10D4 /* TCAScreen+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAScreen+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAInputs+CurrentMortgage.swift"; sourceTree = "<group>"; };
 		8D1F8328BE8FC08F356CAAF7 /* BrandDetailScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandDetailScreens.swift; sourceTree = "<group>"; };
@@ -393,7 +394,6 @@
 		EC8CCAC18874B861863C4FD7 /* AmortizationPDFHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationPDFHTML.swift; sourceTree = "<group>"; };
 		ECE96618EE0845B56FF97CB7 /* RefinanceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceViewModelTests.swift; sourceTree = "<group>"; };
 		EE04BD0B1D6A3059655A9B90 /* FREDRateServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FREDRateServiceTests.swift; sourceTree = "<group>"; };
-		EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestIQPrintRenderer.swift; sourceTree = "<group>"; };
 		EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualInputsScreen+Reserves.swift"; sourceTree = "<group>"; };
 		F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioSaveLoadTests.swift; sourceTree = "<group>"; };
 		F10E805C36B66F9FA4CDADEE /* tokens.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = tokens.css; sourceTree = "<group>"; };
@@ -588,10 +588,10 @@
 				C5E2E3CEECABFE30414F053A /* HelocPDFHTML.swift */,
 				D7B3C748DBC880DC729B8468 /* HTMLPDFRenderer.swift */,
 				15EAF0208372B5CA90BA8C6C /* IncomeQualPDFHTML.swift */,
-				EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */,
 				9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */,
 				87268BA2B52433B93D3884A5 /* PDFBuilder+SelfEmployment.swift */,
 				0F4E4635C56FE4C0AE554983 /* PDFHTMLComposition.swift */,
+				8A2147DF874CDC4A35FF9BB2 /* PDFTemplateLoader.swift */,
 				9F3309B12E1C10B89F8808E8 /* RefinancePDFHTML.swift */,
 				9DC6F46646562001BF919CB9 /* SelfEmploymentPDFHTML.swift */,
 				659BBBC7434F751F6EC1BEDF /* ShareBundle.swift */,
@@ -1192,7 +1192,6 @@
 				1B0DABF95C12733B55FD1537 /* Motion.swift in Sources */,
 				ADDB0E3731D1521FF71F21A7 /* NarrationDrawer.swift in Sources */,
 				EEE9807C24BB93E4FC47A272 /* NarrationSheet.swift in Sources */,
-				C116BD102302052E09BF8651 /* NestIQPrintRenderer.swift in Sources */,
 				F2B37C926E6AC64733EE4355 /* OnboardingCopy.swift in Sources */,
 				BAB9E144EF28CF3591DF3FF1 /* OnboardingFlow.swift in Sources */,
 				2AF36786E0E1F3388E79D6C3 /* OnboardingMiniatures.swift in Sources */,
@@ -1200,6 +1199,7 @@
 				76FEF13AD0F703B78363D3C8 /* PDFBuilder+SelfEmployment.swift in Sources */,
 				A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */,
 				A08074C441A2C14B9CD6E2A4 /* PDFHTMLComposition.swift in Sources */,
+				C3C54BBFB4178815B7F49626 /* PDFTemplateLoader.swift in Sources */,
 				011B6636497B396E36E49818 /* ProfileEditor.swift in Sources */,
 				B56C34E50BE98BBE02B240FC /* PropertyDownPaymentConfig.swift in Sources */,
 				07778789CCE302AB9FFEF501 /* PropertyDownPaymentSection.swift in Sources */,
