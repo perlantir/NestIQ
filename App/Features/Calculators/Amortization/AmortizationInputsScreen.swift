@@ -6,6 +6,7 @@
 // trigger a live recompute automatically.
 
 import SwiftUI
+import SwiftData
 import QuotientFinance
 
 struct AmortizationInputsScreen: View {
@@ -21,6 +22,8 @@ struct AmortizationInputsScreen: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+
+    @Query private var profiles: [LenderProfile]
 
     init(
         borrower: Borrower? = nil,
@@ -410,6 +413,7 @@ struct AmortizationInputsScreen: View {
     private var computeCTA: some View {
         VStack(spacing: Spacing.s8) {
             PrimaryButton("Compute amortization") {
+                HapticFeedback.fireOnCompute(profile: profiles.first)
                 viewModel.compute()
                 navigationActive = true
             }

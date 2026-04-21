@@ -11,6 +11,7 @@
 // for a follow-up.
 
 import SwiftUI
+import SwiftData
 import QuotientFinance
 
 struct HelocInputsScreen: View {
@@ -22,6 +23,8 @@ struct HelocInputsScreen: View {
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
+
+    @Query private var profiles: [LenderProfile]
 
     init(
         borrower: Borrower? = nil,
@@ -406,6 +409,7 @@ struct HelocInputsScreen: View {
     private var computeCTA: some View {
         VStack(spacing: Spacing.s8) {
             PrimaryButton("Compare options") {
+                HapticFeedback.fireOnCompute(profile: profiles.first)
                 navigationActive = true
             }
             .accessibilityIdentifier("heloc.compute")

@@ -432,6 +432,7 @@ struct RefinanceScreen: View {
 
     private func generatePDFAndShare() {
         guard let profile = profiles.first else { return }
+        SoundFeedback.fireOnShare(profile: profile)
         Task { @MainActor in
             do {
                 let url = try await PDFBuilder.buildRefinancePDF(

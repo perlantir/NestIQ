@@ -8,6 +8,7 @@
 // bottom.
 
 import SwiftUI
+import SwiftData
 import QuotientFinance
 
 struct RefinanceInputsScreen: View {
@@ -21,6 +22,8 @@ struct RefinanceInputsScreen: View {
     @State private var navigationActive: Bool = false
     @State private var showingBorrowerPicker: Bool = false
     @State private var selectedBorrower: Borrower?
+
+    @Query private var profiles: [LenderProfile]
 
     init(
         borrower: Borrower? = nil,
@@ -387,6 +390,7 @@ struct RefinanceInputsScreen: View {
     private var computeCTA: some View {
         VStack(spacing: Spacing.s8) {
             PrimaryButton("Compare scenarios") {
+                HapticFeedback.fireOnCompute(profile: profiles.first)
                 navigationActive = true
             }
             .accessibilityIdentifier("refi.compute")

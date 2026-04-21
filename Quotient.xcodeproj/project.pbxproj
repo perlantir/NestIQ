@@ -40,6 +40,7 @@
 		26A2CDDF96788960561661F3 /* QuotientCompliance in Frameworks */ = {isa = PBXBuildFile; productRef = 7838361CA3FDA0B06DBAF0F1 /* QuotientCompliance */; };
 		271D935848142EA3F4346183 /* ThemePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F41CEF19131B852D33AC2C /* ThemePreview.swift */; };
 		2AF36786E0E1F3388E79D6C3 /* OnboardingMiniatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = C728ACEFCBFB4C6C8A95F7B7 /* OnboardingMiniatures.swift */; };
+		2D6863936E0900B7014C3696 /* HapticFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6CD86BDE603E866BE7D55F /* HapticFeedback.swift */; };
 		2DF84F1D0C3762652949C70F /* AmortizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74BAF60DA9DC9D1D57F7335 /* AmortizationViewModel.swift */; };
 		2E3AD6A0D7A5A8919784EF89 /* MonoNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */; };
 		2E6E316743AC79A00476566F /* AccountDeletionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C35447BF63D1A8364CA99BE /* AccountDeletionTests.swift */; };
@@ -378,6 +379,7 @@
 		D8A910FE79E1FB0706776507 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		DA26BB84D7078DF9C810A23D /* SourceSerif4-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Semibold.ttf"; sourceTree = "<group>"; };
 		DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfEmploymentResultsScreen+Breakdown.swift"; sourceTree = "<group>"; };
+		DC6CD86BDE603E866BE7D55F /* HapticFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedback.swift; sourceTree = "<group>"; };
 		DF8B3E7E27F86F9FE22CCDC0 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		E0A55061CEFCACE582B54F89 /* QuotientFinance */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuotientFinance; path = Packages/QuotientFinance; sourceTree = SOURCE_ROOT; };
 		E0F1ACFBAE78BF3DB1EAB3AC /* CalculatorRefiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorRefiTests.swift; sourceTree = "<group>"; };
@@ -738,6 +740,7 @@
 				4D1338A4AF409B28F384750A /* Fields.swift */,
 				97F168CE5ADAE01630A62C44 /* FilterChip.swift */,
 				7600230EF86B01E049D9B9A2 /* HairlineDivider.swift */,
+				DC6CD86BDE603E866BE7D55F /* HapticFeedback.swift */,
 				D00A91D51212853350CE39F8 /* KPITile.swift */,
 				4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */,
 				BE900CFC0A503024B4E41C63 /* NarrationDrawer.swift */,
@@ -1175,6 +1178,7 @@
 				0DF0E7CE87E8E3234206121F /* FilterChip.swift in Sources */,
 				1FCE99C2E172CDD2D5C5FC9C /* HTMLPDFRenderer.swift in Sources */,
 				12B251F0DF98735D91CD06A4 /* HairlineDivider.swift in Sources */,
+				2D6863936E0900B7014C3696 /* HapticFeedback.swift in Sources */,
 				756733C2A196FDBAF4B8600D /* HelocInputs.swift in Sources */,
 				65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */,
 				057C883EA5C845431A7809D9 /* HelocPDFHTML.swift in Sources */,

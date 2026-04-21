@@ -6,6 +6,7 @@
 // the existing TCAScreen with the configured inputs.
 
 import SwiftUI
+import SwiftData
 import QuotientFinance
 
 struct TCAInputsScreen: View {
@@ -18,6 +19,7 @@ struct TCAInputsScreen: View {
     @State private var showingBorrowerPicker: Bool = false
     @State var selectedBorrower: Borrower?
     @State private var activeTab: Int = 0
+    @Query private var profiles: [LenderProfile]
     // 5P.8: Current Mortgage draft lives as view-local state because
     // partial entries shouldn't corrupt viewModel.inputs.currentMortgage
     // until the draft is either fully valid or fully blank.
@@ -435,6 +437,7 @@ struct TCAInputsScreen: View {
     private var computeCTA: some View {
         VStack(spacing: Spacing.s8) {
             PrimaryButton("Compute total cost analysis") {
+                HapticFeedback.fireOnCompute(profile: profiles.first)
                 persistCurrentMortgageToBorrowerIfNeeded()
                 navigationActive = true
             }
