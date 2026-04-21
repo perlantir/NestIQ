@@ -1,8 +1,7 @@
 // QuotientApp.swift
-// Main app entry. Registers bundled fonts before any view renders so
-// `.font(.custom("SourceSerif4", size:))` resolves throughout, and
-// installs the SwiftData container for LenderProfile / Borrower /
-// Scenario.
+// Main app entry. Installs the SwiftData container for LenderProfile /
+// Borrower / Scenario. SourceSerif4 fonts auto-register via the
+// `UIAppFonts` key in Info.plist — no runtime registration here.
 //
 // Launch-arg bypasses (DEBUG only, consumed by UI tests):
 //   -uitestReset      clear any persisted profile/borrowers/scenarios
@@ -11,7 +10,6 @@
 
 import SwiftUI
 import SwiftData
-import CoreText
 
 @main
 struct QuotientApp: App {
@@ -19,7 +17,6 @@ struct QuotientApp: App {
     let container: ModelContainer
 
     init() {
-        Self.registerBundledFonts()
         let isUITest = CommandLine.arguments.contains("-uitestReset")
         self.container = QuotientSchema.makeContainer(inMemory: isUITest)
         #if DEBUG
@@ -31,26 +28,6 @@ struct QuotientApp: App {
         WindowGroup {
             RootView()
                 .modelContainer(container)
-        }
-    }
-
-    /// Register every TrueType font under `App/Resources/Fonts/` with
-    /// the Core Text font manager.
-    private static func registerBundledFonts() {
-        let extensions = ["ttf", "otf"]
-        for ext in extensions {
-            let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) ?? []
-            for url in urls {
-                var error: Unmanaged<CFError>?
-                if !CTFontManagerRegisterFontsForURL(url as CFURL, .process, &error) {
-                    #if DEBUG
-                    if let cfErr = error?.takeRetainedValue() {
-                        let msg = CFErrorCopyDescription(cfErr) as String? ?? "unknown"
-                        print("[QuotientApp] font register skipped for \(url.lastPathComponent): \(msg)")
-                    }
-                    #endif
-                }
-            }
         }
     }
 

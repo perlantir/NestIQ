@@ -86,7 +86,7 @@ targets:
         UILaunchScreen:
           UIColorName: Surface
           UIImageName: Wordmark-A
-          UIImageRespectsSafeAreaInsets: true
+          UIImageRespectsSafeAreaInsets: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIRequiredDeviceCapabilities:

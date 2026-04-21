@@ -49,7 +49,7 @@
 		<key>UIImageName</key>
 		<string>Wordmark-A</string>
 		<key>UIImageRespectsSafeAreaInsets</key>
-		<true/>
+		<false/>
 	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
