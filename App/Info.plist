@@ -35,9 +35,12 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>SourceSerif4-Regular.ttf</string>
-		<string>SourceSerif4-It.ttf</string>
+		<string>SourceSerif4-Italic.ttf</string>
 		<string>SourceSerif4-Semibold.ttf</string>
-		<string>SourceSerif4-SemiboldIt.ttf</string>
+		<string>SourceSerif4-SemiboldItalic.ttf</string>
+		<string>JetBrainsMono-Regular.ttf</string>
+		<string>JetBrainsMono-Medium.ttf</string>
+		<string>JetBrainsMono-SemiBold.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

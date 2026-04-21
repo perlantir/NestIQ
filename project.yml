@@ -99,9 +99,12 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
         UIAppFonts:
           - SourceSerif4-Regular.ttf
-          - SourceSerif4-It.ttf
+          - SourceSerif4-Italic.ttf
           - SourceSerif4-Semibold.ttf
-          - SourceSerif4-SemiboldIt.ttf
+          - SourceSerif4-SemiboldItalic.ttf
+          - JetBrainsMono-Regular.ttf
+          - JetBrainsMono-Medium.ttf
+          - JetBrainsMono-SemiBold.ttf
         NSContactsUsageDescription: Quickly add borrowers from your contacts.
         NSFaceIDUsageDescription: NestIQ uses Face ID to securely open the app with your borrower data.
         NSCameraUsageDescription: Capture your company logo or professional photo.
