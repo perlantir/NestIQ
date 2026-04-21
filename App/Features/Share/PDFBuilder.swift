@@ -32,23 +32,6 @@ enum PDFBuilder {
         return url
     }
 
-    static func buildIncomeQualPDF(
-        profile: LenderProfile,
-        borrower: Borrower?,
-        viewModel: IncomeQualViewModel,
-        narrative: String
-    ) async throws -> URL {
-        let html = IncomeQualPDFHTML.buildHTML(
-            profile: profile,
-            borrower: borrower,
-            viewModel: viewModel,
-            narrative: narrative
-        )
-        let url = PDFHTMLComposition.temporaryURL(for: "income-qualification")
-        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
-        return url
-    }
-
     static func buildRefinancePDF(
         profile: LenderProfile,
         borrower: Borrower?,
@@ -108,6 +91,8 @@ enum PDFBuilder {
         return url
     }
 
-    // `buildSelfEmploymentPDF` lives in PDFBuilder+SelfEmployment.swift
-    // (kept split to match existing call-site expectations).
+    // Session 7.4 (compliance / ECOA): PDF export from IncomeQual and
+    // SelfEmployment was removed. Those calculators analyze borrower
+    // qualification inputs that LOs can't hand to applicants via
+    // printed report under Reg B.
 }
