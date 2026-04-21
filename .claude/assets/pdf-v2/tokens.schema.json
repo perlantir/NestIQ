@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "NestIQ PDF Template Tokens",
   "description": "Token contract for Mustache {{...}} substitutions in pdf-v2/templates/*.html. Every string-valued token is rendered pre-formatted (dollar signs, percent signs, thousand separators already in place) — the template does no formatting of its own.",
-  "version": "2.1.2",
+  "version": "2.1.3",
 
   "definitions": {
     "common": {
@@ -140,9 +140,13 @@
         "allOf": [{ "$ref": "#/definitions/common" }],
         "properties": {
           "purchase_summary":     { "type": "string", "example": "$685,000 purchase · Austin, TX · 4 product scenarios · 5 time horizons" },
-          "down_payment_summary": { "type": "string", "example": "20% · $137,000" }
+          "down_payment_summary": { "type": "string", "example": "20% · $137,000" },
+
+          "longest_horizon_years":     { "type": "string", "example": "30", "description": "Longest year-horizon configured on the calculator (integer). Drives the 'Unrecoverable costs @ Nyr' + 'Ongoing housing @ Nyr' headings on page 4." },
+          "ongoing_housing_formatted": { "type": "string", "example": "$324K", "description": "Taxes + insurance + HOA × longest horizon, formatted short. Page 4 unrecoverable-costs footnote." },
+          "reinvestment_rate_pct":     { "type": "string", "example": "5.25%", "description": "Assumed reinvestment rate for the page 4 reinvestment section. Percent-formatted string." }
         },
-        "note": "4×5 cost matrix <tbody> rows are replaced by sentinel <!--{{matrix_rows}}-->. Swift builder emits <tr> rows per scenario using existing CSS classes (.best, .worst, .delta). Grouped-bar chart <rect> geometry remains literal for v0.1.1 and is deferred to v0.1.2."
+        "note": "Page 2 4×5 cost matrix <tbody> rows replaced by sentinel <!--{{matrix_rows}}-->. Page 4 (iOS-local v0.1.1 extension, v2.2 upstream-sync candidate) adds three horizon-detail sections driven by four sentinels: <!--{{interest_split_header}}--> + <!--{{interest_split_rows}}--> (horizons × scenarios matrix, optional Current column), <!--{{unrecoverable_rows}}--> (scenarios + optional Current row), and <!--{{reinvestment_section}}--> (whole <section>…</section> block; Swift emits empty string in purchase mode to silence the section). Grouped-bar chart <rect> geometry on page 2 remains literal for v0.1.1 and is deferred to v0.1.2."
       }
     },
 

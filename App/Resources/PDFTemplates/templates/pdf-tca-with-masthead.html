@@ -595,5 +595,93 @@
   </div>
 </article>
 
+
+<!-- ============================================================
+     PAGE 4 — HORIZON DETAIL: INTEREST SPLIT, UNRECOVERABLE, REINVESTMENT
+     (iOS-local extension for v0.1.1 TCA PDF — Session 7.3e.
+     v2.2 upstream-sync candidate for Claude Design.)
+     ============================================================ -->
+<article class="page">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Total Cost Analysis · Horizon Detail</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">{{borrower_last}} · {{doc_num}}</div>
+    </div>
+  </header>
+
+  <!-- Interest vs principal split across horizons + scenarios -->
+  <section>
+    <div class="section-head">
+      <h2>Interest vs principal</h2>
+      <div class="note">By horizon, by scenario</div>
+    </div>
+    <p class="section-sub">
+      How much of each payment goes to interest vs building equity, measured
+      at each horizon. Higher-rate or shorter-term scenarios build equity
+      faster.
+    </p>
+    <table class="data">
+      <thead>
+        <!--{{interest_split_header}}-->
+      </thead>
+      <tbody>
+        <!--{{interest_split_rows}}-->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Unrecoverable costs over the longest horizon -->
+  <section style="margin-top: 28pt;">
+    <div class="section-head">
+      <h2>Unrecoverable costs @ {{longest_horizon_years}} yr</h2>
+      <div class="note">Interest + MI + ongoing housing</div>
+    </div>
+    <p class="section-sub">
+      The dollars that don't come back — interest paid, mortgage insurance,
+      closing costs not recovered. Lower is better.
+    </p>
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Program</th>
+          <th class="num">Unrecoverable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--{{unrecoverable_rows}}-->
+      </tbody>
+    </table>
+    <p class="meta">
+      Ongoing housing @ {{longest_horizon_years}} yr:
+      <span class="mono">{{ongoing_housing_formatted}}</span>
+      — taxes, insurance, HOA paid regardless of program choice.
+    </p>
+  </section>
+
+  <!-- Reinvestment (refi-mode only). Swift replaces the whole section
+       sentinel with "" in purchase mode so page 4 ends cleanly. -->
+  <!--{{reinvestment_section}}-->
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · {{borrower_last}} · {{doc_num}}
+      <span class="dis">
+        Horizon-detail analysis. Not a Loan Estimate. Figures assume
+        constant rate and ongoing costs through each stated horizon.
+      </span>
+    </div>
+  </div>
+</article>
+
 </body>
 </html>

@@ -88,6 +88,7 @@
 		64C121D08BF45998DE057BB8 /* pdf-heloc-with-masthead.html in Resources */ = {isa = PBXBuildFile; fileRef = 927212FCF94D7727C7C55079 /* pdf-heloc-with-masthead.html */; };
 		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
 		666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */; };
+		68344BDD3DA96378AEA9A90E /* TCAPDFV2DerivationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C829254E772028CF1BD6039 /* TCAPDFV2DerivationsTests.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
 		699E1C0B8E9E662B43FFF1F6 /* SourceSerif4-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 45486823C25475E4ECA1B417 /* SourceSerif4-Italic.ttf */; };
 		6A7B8C1B9F0BE895DC8D1EEB /* HTMLPDFRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9750C293585A5EAA1FFB90 /* HTMLPDFRendererTests.swift */; };
@@ -108,6 +109,7 @@
 		82BD309A49352B701BE4C36A /* CalculatorHelocTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A337CE585B8E7CF57F6CFE45 /* CalculatorHelocTests.swift */; };
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		85CD0D0AD6007ADC806A1377 /* CurrentMortgageSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF728446C043F9325CC00B21 /* CurrentMortgageSection.swift */; };
+		86F9FFED04113AADA61BF54E /* TCAPDFHTML+V2Derivations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE43728F1E1A93F3BC18BC5E /* TCAPDFHTML+V2Derivations.swift */; };
 		874CBC9395A8D34745D050C9 /* TCACurrentMortgagePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C66169F762F690B67FA770 /* TCACurrentMortgagePersistenceTests.swift */; };
 		889559C6650FD9B44674AF87 /* tokens.css in Resources */ = {isa = PBXBuildFile; fileRef = F10E805C36B66F9FA4CDADEE /* tokens.css */; };
 		88A1A003CD9B68A1E46AA6E3 /* TCAInputs+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */; };
@@ -266,6 +268,7 @@
 		45486823C25475E4ECA1B417 /* SourceSerif4-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceSerif4-Italic.ttf"; sourceTree = "<group>"; };
 		48FCE5E97C92AFF164AD551A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		4B30BD627A6F18B0FEAA7916 /* MonoNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonoNumber.swift; sourceTree = "<group>"; };
+		4C829254E772028CF1BD6039 /* TCAPDFV2DerivationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAPDFV2DerivationsTests.swift; sourceTree = "<group>"; };
 		4CA85ACF7219CFD229D561CB /* TCAInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAInputsScreen.swift; sourceTree = "<group>"; };
 		4D1338A4AF409B28F384750A /* Fields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fields.swift; sourceTree = "<group>"; };
 		4E217D33EC88DB92CC77AB03 /* OnboardingCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCopy.swift; sourceTree = "<group>"; };
@@ -414,6 +417,7 @@
 		F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputs.swift; sourceTree = "<group>"; };
 		F915C6B198DD46AC7AA51ECD /* LinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksTests.swift; sourceTree = "<group>"; };
 		FC5F1512080A238A7B2DD1E1 /* HelocPDFDerivationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocPDFDerivationsTests.swift; sourceTree = "<group>"; };
+		FE43728F1E1A93F3BC18BC5E /* TCAPDFHTML+V2Derivations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TCAPDFHTML+V2Derivations.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -528,6 +532,7 @@
 				A42B577CCFC5716938A9603C /* SwiftDataModelTests.swift */,
 				95C66169F762F690B67FA770 /* TCACurrentMortgagePersistenceTests.swift */,
 				6A6A5DF786C014291E0DD283 /* TCAPDFHTMLTests.swift */,
+				4C829254E772028CF1BD6039 /* TCAPDFV2DerivationsTests.swift */,
 				63E00BB6CCC74E262F406163 /* TCAViewModelTests.swift */,
 			);
 			path = AppTests;
@@ -615,6 +620,7 @@
 				A0734FF07CB1B1618BF47041 /* TCAPDFHTML.swift */,
 				E4720A5C22F91C757369B64B /* TCAPDFHTML+CurrentMortgage.swift */,
 				3DF9E471F2C1FDB2B28FED5C /* TCAPDFHTML+HorizonDetails.swift */,
+				FE43728F1E1A93F3BC18BC5E /* TCAPDFHTML+V2Derivations.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -1136,6 +1142,7 @@
 				C7D935E7A14E6E9567555273 /* SwiftDataModelTests.swift in Sources */,
 				874CBC9395A8D34745D050C9 /* TCACurrentMortgagePersistenceTests.swift in Sources */,
 				037E524986F4E7B7D8E6AF26 /* TCAPDFHTMLTests.swift in Sources */,
+				68344BDD3DA96378AEA9A90E /* TCAPDFV2DerivationsTests.swift in Sources */,
 				71F05D000CEADC3512EEAC92 /* TCAViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1268,6 +1275,7 @@
 				E7684DAFCD1BAE13C73AC01A /* TCAInputsScreen.swift in Sources */,
 				477DC1CFABF2F59224D757A0 /* TCAPDFHTML+CurrentMortgage.swift in Sources */,
 				C881B9B8FCB3DD4C1D65F33B /* TCAPDFHTML+HorizonDetails.swift in Sources */,
+				86F9FFED04113AADA61BF54E /* TCAPDFHTML+V2Derivations.swift in Sources */,
 				A8A61BF4003C61412F162914 /* TCAPDFHTML.swift in Sources */,
 				EDB8585A60DCBFA8C7FCF5B7 /* TCAScreen+Actions.swift in Sources */,
 				5C6B7A5DB3EA7B5106C8657B /* TCAScreen+BreakEven.swift in Sources */,
