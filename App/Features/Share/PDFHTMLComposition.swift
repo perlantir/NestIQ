@@ -89,24 +89,17 @@ enum PDFHTMLComposition {
 
     // MARK: - Disclaimers appendix
 
-    /// Renders the state-specific disclosures appendix plus the
-    /// licensed-states / NMLS / EHO footer strip. Always occupies its
-    /// own page via `.break-before` prefix — callers append this
-    /// fragment to the body as the final section.
+    /// Renders the universal educational-use disclosure plus the
+    /// company / NMLS / EHO footer strip. Always occupies its own page
+    /// via `.break-before` — callers append this fragment to the body
+    /// as the final section.
     static func disclaimersHTML(
         profile: LenderProfile,
         borrower: Borrower?,
         scenarioType: ScenarioType,
         generatedAt: Date = Date()
     ) -> String {
-        let state = resolveState(borrower: borrower)
-        let disclosures = requiredDisclosures(
-            for: scenarioType,
-            propertyState: state ?? .CA
-        )
-        let disclosureBody = disclosures.map(\.textEN).joined(separator: "\n\n")
-        let body = disclosureBody.isEmpty ? defaultDisclaimer : disclosureBody
-        let paragraphs = body
+        let paragraphs = defaultDisclaimer
             .components(separatedBy: "\n\n")
             .map { "<p>\(escape($0))</p>" }
             .joined()
@@ -116,7 +109,6 @@ enum PDFHTMLComposition {
         let loName = profile.fullName.isEmpty ? "Loan Officer" : profile.fullName
         let nmls = profile.nmlsId.isEmpty ? "—" : profile.nmlsId
         let company = profile.companyName.isEmpty ? "—" : profile.companyName
-        let licensed = profile.licensedStates.joined(separator: " · ")
         return """
         <section class="break-before">
           <p class="eyebrow">Disclosures</p>
@@ -127,7 +119,6 @@ enum PDFHTMLComposition {
           <div class="disclaimer">
             <p class="mono">\(escape(company))</p>
             <p class="mono">\(escape(loName)) · Individual NMLS \(escape(nmls))</p>
-            <p class="mono">Licensed: \(escape(licensed))</p>
             <p class="mono">Equal Housing Opportunity · Generated \(escape(generatedAtStr))</p>
           </div>
         </section>
@@ -223,11 +214,10 @@ enum PDFHTMLComposition {
     // MARK: - Shared constants / helpers
 
     static let defaultDisclaimer =
-        "This illustration is not a commitment to lend. Rates reflect pricing "
-        + "available at the time of generation for qualifying borrowers and may "
-        + "change without notice. Actual APR will vary by program, property, "
-        + "borrower qualifications, and closing date. See your Loan Estimate "
-        + "for final terms."
+        "This calculator is for educational and illustrative purposes only. "
+        + "Results are based on user-entered inputs and do not represent actual "
+        + "loan terms, a loan commitment, or a Loan Estimate. Actual rates and "
+        + "payments will vary."
 
     static func resolveState(borrower: Borrower?) -> USState? {
         guard let code = borrower?.propertyState?.uppercased() else { return nil }

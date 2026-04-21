@@ -7,7 +7,6 @@ import SwiftUI
 import SwiftData
 import QuotientFinance
 import QuotientNarration
-import QuotientPDF
 
 struct IncomeQualScreen: View {
     var initialInputs: IncomeQualFormInputs?
@@ -20,14 +19,11 @@ struct IncomeQualScreen: View {
     @State private var showingBorrowerPicker = false
     @State private var showingNarration = false
     @State private var justSaved = false
-    @State private var shareBundle: ShareBundle?
     @State private var showingSaveNamePrompt: Bool = false
     @State private var saveNameDraft: String = ""
 
     @Environment(\.modelContext)
     private var modelContext
-
-    @Query private var profiles: [LenderProfile]
 
     var body: some View {
         ScrollView {
@@ -89,16 +85,6 @@ struct IncomeQualScreen: View {
         .sheet(isPresented: $showingNarration) {
             NarrationSheet(facts: narrationFacts) { _ in }
                 .presentationDetents([.medium, .large])
-        }
-        .sheet(item: $shareBundle) { bundle in
-            QuotientSharePreview(
-                profile: bundle.profile,
-                borrower: viewModel.borrower,
-                pdfURL: bundle.url,
-                pageCount: bundle.pageCount,
-                onDismiss: {}
-            )
-            .presentationDetents([.large])
         }
         .onAppear {
             if let initialInputs { viewModel.inputs = initialInputs }
@@ -374,8 +360,7 @@ struct IncomeQualScreen: View {
         CalculatorDock(
             saveLabel: justSaved ? "Saved" : "Save",
             onNarrate: { showingNarration = true },
-            onSave: { promptSaveScenarioName() },
-            onShare: { generatePDFAndShare() }
+            onSave: { promptSaveScenarioName() }
         )
     }
 
@@ -427,28 +412,6 @@ struct IncomeQualScreen: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
     }
 
-    private func generatePDFAndShare() {
-        guard let profile = profiles.first else { return }
-        Task { @MainActor in
-            do {
-                let url = try await PDFBuilder.buildIncomeQualPDF(
-                    profile: profile,
-                    borrower: viewModel.borrower,
-                    viewModel: viewModel,
-                    narrative: ""
-                )
-                shareBundle = ShareBundle(
-                    url: url,
-                    pageCount: PDFInspector(url: url)?.pageCount ?? 1,
-                    profile: profile
-                )
-            } catch {
-                #if DEBUG
-                print("[IncomeQualScreen] PDF gen failed: \(error)")
-                #endif
-            }
-        }
-    }
 }
 
 // MARK: - Toolbar (5R.6)

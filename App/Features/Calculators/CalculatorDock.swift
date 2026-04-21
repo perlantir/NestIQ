@@ -13,13 +13,13 @@ struct CalculatorDock: View {
     let saveLabel: String
     let onNarrate: () -> Void
     let onSave: () -> Void
-    let onShare: () -> Void
+    let onShare: (() -> Void)?
 
     init(
         saveLabel: String = "Save",
         onNarrate: @escaping () -> Void,
         onSave: @escaping () -> Void,
-        onShare: @escaping () -> Void
+        onShare: (() -> Void)? = nil
     ) {
         self.saveLabel = saveLabel
         self.onNarrate = onNarrate
@@ -63,17 +63,19 @@ struct CalculatorDock: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("dock.save")
 
-            Button(action: onShare) {
-                Text("Share as PDF")
-                    .textStyle(Typography.bodyLg.withWeight(.semibold))
-                    .foregroundStyle(Palette.accentFG)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.s12)
-                    .background(Palette.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+            if let onShare {
+                Button(action: onShare) {
+                    Text("Share as PDF")
+                        .textStyle(Typography.bodyLg.withWeight(.semibold))
+                        .foregroundStyle(Palette.accentFG)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.s12)
+                        .background(Palette.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.listCard))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("dock.share")
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("dock.share")
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.top, Spacing.s12)

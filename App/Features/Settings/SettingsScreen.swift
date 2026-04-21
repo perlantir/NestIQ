@@ -23,9 +23,6 @@ struct SettingsScreen: View {
     @State private var showingFeedbackSheet = false
     @State private var showingEraseConfirmation = false
     @State private var showingDeleteAccount = false
-    // `internal` (not private) so SettingsScreen+Compliance can flip
-    // the flag from the Licensed states row's onTap closure.
-    @State var showingLicensedStatesPicker = false
 
     var body: some View {
         NavigationStack {
@@ -60,10 +57,6 @@ struct SettingsScreen: View {
             }
             .sheet(isPresented: $showingFeedbackSheet) {
                 FeedbackMailSheet()
-            }
-            .sheet(isPresented: $showingLicensedStatesPicker) {
-                LicensedStatesPickerSheet(profile: profile)
-                    .presentationDetents([.large])
             }
             .sheet(isPresented: $showingDeleteAccount) {
                 DeleteAccountFlow(profile: profile)

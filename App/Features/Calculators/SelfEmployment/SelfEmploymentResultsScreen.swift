@@ -7,7 +7,6 @@
 import SwiftUI
 import SwiftData
 import QuotientFinance
-import QuotientPDF
 
 struct SelfEmploymentResultsScreen: View {
     @Bindable var viewModel: SelfEmploymentViewModel
@@ -21,13 +20,10 @@ struct SelfEmploymentResultsScreen: View {
     private var modelContext
 
     @State private var justSaved = false
-    @State private var shareBundle: ShareBundle?
     @State private var expandedYear1: Bool = false
     @State private var expandedYear2: Bool = false
     @State private var showingSaveNamePrompt: Bool = false
     @State private var saveNameDraft: String = ""
-
-    @Query private var profiles: [LenderProfile]
 
     var body: some View {
         ScrollView {
@@ -91,16 +87,6 @@ struct SelfEmploymentResultsScreen: View {
         }
         .onChange(of: viewModel.inputs) {
             viewModel.compute()
-        }
-        .sheet(item: $shareBundle) { bundle in
-            QuotientSharePreview(
-                profile: bundle.profile,
-                borrower: viewModel.borrower,
-                pdfURL: bundle.url,
-                pageCount: bundle.pageCount,
-                onDismiss: {}
-            )
-            .presentationDetents([.large])
         }
     }
 
@@ -292,8 +278,7 @@ struct SelfEmploymentResultsScreen: View {
             CalculatorDock(
                 saveLabel: justSaved ? "Saved" : "Save",
                 onNarrate: {},
-                onSave: { promptSaveScenarioName() },
-                onShare: { generatePDFAndShare() }
+                onSave: { promptSaveScenarioName() }
             )
         }
     }
@@ -341,25 +326,4 @@ struct SelfEmploymentResultsScreen: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { justSaved = false }
     }
 
-    private func generatePDFAndShare() {
-        guard let profile = profiles.first else { return }
-        Task { @MainActor in
-            do {
-                let url = try await PDFBuilder.buildSelfEmploymentPDF(
-                    profile: profile,
-                    borrower: viewModel.borrower,
-                    viewModel: viewModel
-                )
-                shareBundle = ShareBundle(
-                    url: url,
-                    pageCount: PDFInspector(url: url)?.pageCount ?? 1,
-                    profile: profile
-                )
-            } catch {
-                #if DEBUG
-                print("[SelfEmploymentResultsScreen] PDF gen failed: \(error)")
-                #endif
-            }
-        }
-    }
 }
