@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NestIQ · Amortization Report</title>
+<link rel="stylesheet" href="../tokens.css" />
+</head>
+<body>
+
+<button class="print-hint" onclick="window.print()">
+  ⌘ P — Save as PDF
+</button>
+
+<!-- ============================================================
+     PAGE 1 — COVER + SUMMARY
+     ============================================================ -->
+<article class="page body-only">
+
+  <!-- Masthead -->
+  
+
+  <!-- Scenario -->
+  <section class="scenario-head">
+    <div>
+      <div class="eyebrow">Prepared for</div>
+      <h1>{{borrower_first}} <span class="i">{{borrower_last}}</span></h1>
+      <div class="sub">{{property_address}}</div>
+    </div>
+    <div class="scenario-meta">
+      <div class="row"><span class="l">Loan officer</span><span class="v">{{prepared_by_name}}</span></div>
+      <div class="row"><span class="l">NMLS</span><span class="v">#{{prepared_by_nmls}}</span></div>
+      <div class="row"><span class="l">Prepared</span><span class="v">{{prepared_date}}</span></div>
+      <div class="row"><span class="l">Rate lock</span><span class="v">{{rate_lock}}</span></div>
+      <div class="row" style="margin-top:4pt;padding-top:6pt;border-top:0.5pt solid var(--rule-soft);">
+        <span class="l">Product</span><span class="badge">{{product_badge}}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero PITI -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="eyebrow">Monthly payment · PITI</div>
+      <div class="hero-figure">
+        <span class="dollar">$</span>
+        <span class="num">{{piti_dollars}}</span>
+        <span class="decimal">.{{piti_cents}}</span>
+        <span class="unit">/mo</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      Includes principal, interest,<br/>
+      property taxes, insurance.<br/>
+      <span style="color:var(--ink); font-weight:500;">First payment</span> · {{first_payment_date}}
+    </div>
+  </section>
+
+  <!-- KPI strip -->
+  <section class="kpi-strip">
+    <div class="kpi">
+      <div class="l">Total interest</div>
+      <div class="v">{{total_interest_formatted}}</div>
+      <div class="vs">over loan life</div>
+    </div>
+    <div class="kpi">
+      <div class="l">Payoff</div>
+      <div class="v">{{payoff_date}}</div>
+      <div class="vs">360 payments</div>
+    </div>
+    <div class="kpi">
+      <div class="l">Total paid</div>
+      <div class="v">{{total_paid_formatted}}</div>
+      <div class="vs">principal + interest + esc.</div>
+    </div>
+    <div class="kpi">
+      <div class="l">LTV</div>
+      <div class="v">{{ltv_pct}}<span style="font-size:12pt;color:var(--ink3);">%</span></div>
+      <div class="vs">{{pmi_note}}</div>
+    </div>
+  </section>
+
+  <!-- Balance chart -->
+  <section>
+    <div class="section-head">
+      <h2>Balance over time</h2>
+      <div class="note">30-year horizon · principal remaining</div>
+    </div>
+    <p class="section-sub">
+      Principal paydown accelerates from roughly year 11 as the interest share of each payment falls
+      below principal. Marked milestone: <strong>year 10</strong> — {{yr10_balance_formatted}} remaining.
+    </p>
+
+    <div class="chart-wrap">
+      <svg width="100%" viewBox="0 0 720 220" preserveAspectRatio="none">
+        <!-- Grid -->
+        <line x1="20" y1="14"  x2="680" y2="14"  stroke="#D8D4C5" stroke-width="0.5"/>
+        <line x1="20" y1="66"  x2="680" y2="66"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="118" x2="680" y2="118" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="170" x2="680" y2="170" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="188" x2="680" y2="188" stroke="#17160F" stroke-width="0.8"/>
+
+        <!-- X labels -->
+        <text x="20"  y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A">'26</text>
+        <text x="130" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'31</text>
+        <text x="240" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'36</text>
+        <text x="350" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'41</text>
+        <text x="460" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'46</text>
+        <text x="570" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'51</text>
+        <text x="680" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="end">'56</text>
+
+        <!-- Y labels -->
+        <text x="685" y="17"  font-family="JetBrains Mono" font-size="9" fill="#6B675A">548k</text>
+        <text x="685" y="69"  font-family="JetBrains Mono" font-size="9" fill="#6B675A">410k</text>
+        <text x="685" y="121" font-family="JetBrains Mono" font-size="9" fill="#6B675A">274k</text>
+        <text x="685" y="173" font-family="JetBrains Mono" font-size="9" fill="#6B675A">137k</text>
+        <text x="685" y="191" font-family="JetBrains Mono" font-size="9" fill="#6B675A">0</text>
+
+        <!-- Area + line — decelerating decay of amortization -->
+        <path d="M 20 14
+                 C 70 20, 110 28, 130 34
+                 C 180 48, 220 62, 240 72
+                 C 300 104, 330 116, 350 125
+                 C 400 145, 430 156, 460 165
+                 C 510 178, 540 183, 570 186
+                 L 680 188
+                 L 680 188 L 20 188 Z"
+              fill="#E6EDE9" opacity="0.7"/>
+
+        <path d="M 20 14
+                 C 70 20, 110 28, 130 34
+                 C 180 48, 220 62, 240 72
+                 C 300 104, 330 116, 350 125
+                 C 400 145, 430 156, 460 165
+                 C 510 178, 540 183, 570 186
+                 L 680 188"
+              fill="none" stroke="#1F4D3F" stroke-width="1.8"
+              stroke-linejoin="round" stroke-linecap="round"/>
+
+        <!-- Year 10 marker -->
+        <line x1="240" y1="14" x2="240" y2="188" stroke="#6B675A" stroke-width="0.5" stroke-dasharray="2 3" opacity="0.5"/>
+        <circle cx="240" cy="72" r="3.5" fill="#FAF9F5" stroke="#1F4D3F" stroke-width="1.8"/>
+        <text x="248" y="62" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1F4D3F">Yr 10 · {{yr10_balance_formatted}}</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Composition + Narrative -->
+  <section class="two-col">
+
+    <div>
+      <div class="section-head">
+        <h2>Where the payment goes</h2>
+        <div class="note">First payment · June 2026</div>
+      </div>
+      <p class="section-sub">
+        Interest dominates early payments; principal share exceeds interest at <strong>month 197</strong>.
+      </p>
+
+      <div class="comp-bar">
+        <div style="background:var(--s1); width:74.2%"></div>
+        <div style="background:var(--s2); width:8.2%"></div>
+        <div style="background:var(--s4); width:12.9%"></div>
+        <div style="background:var(--s3); width:3.2%"></div>
+        <div style="background:var(--ink3); width:1.5%"></div>
+      </div>
+
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s1)"></div>
+        <div>Interest</div>
+        <div class="amt">$3,123.47</div>
+        <div class="pct">74%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s2)"></div>
+        <div>Principal</div>
+        <div class="amt">$344.67</div>
+        <div class="pct">8%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s4)"></div>
+        <div>Property taxes</div>
+        <div class="amt">$542.00</div>
+        <div class="pct">13%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s3)"></div>
+        <div>Homeowner's insurance</div>
+        <div class="amt">$135.00</div>
+        <div class="pct">3%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--ink3)"></div>
+        <div>HOA</div>
+        <div class="amt">$62.00</div>
+        <div class="pct">2%</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-head">
+        <h2>Analyst narrative</h2>
+        <div class="note">AI-generated · reviewed</div>
+      </div>
+
+      <div class="narrative">
+        <p class="lead" style="margin:0 0 8pt;">
+          The Smiths' {{loan_amount_formatted}} loan at <span class="hl">{{rate_pct}}</span> produces a PITI of
+          $4,207/mo — well within the 28% front-end ratio on a combined {{combined_monthly_income}} monthly income.
+        </p>
+        <p style="margin:0 0 8pt;">
+          Paying an additional <span class="hl">${{extra_principal_formatted}} / mo</span> toward principal would shorten
+          the loan by {{extra_paydown_shortened}} and save approximately <span class="hl">{{extra_paydown_interest_saved}}</span> in interest.
+          A 0.25% rate improvement at close saves roughly <span class="hl">${{quarterpt_savings_monthly}} / mo</span>
+          and <span class="hl">{{quarterpt_savings_lifetime}}</span> over the loan's life.
+        </p>
+        <p style="margin:0;">
+          At an 78% LTV, no PMI is required. Borrower reaches 80% LTV at month 37 and
+          50% LTV at month 214, when refinance incentives typically re-emerge.
+        </p>
+        <div class="sig">
+          <span>{{prepared_by_name}} · NMLS 482139</span>
+          <span>Generated {{prepared_date}} · v1.4</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  </article>
+
+
+<!-- ============================================================
+     PAGE 2 — FULL SCHEDULE (years 1-15)
+     ============================================================ -->
+<article class="page body-only">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Amortization Report · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">Smith · NIQ-AM-0147</div>
+      <div class="docnum" style="font-size:8pt;color:var(--ink3);">Pages 2 / 3</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Payment schedule</h2>
+      <div class="note">Years 1 – 15 · annual summary</div>
+    </div>
+    <p class="section-sub">
+      Monthly rows consolidated to year-end. Principal, interest, and remaining balance at the
+      final payment of each calendar year. Full monthly detail available in the app.
+    </p>
+
+    <div class="schedule-split">
+
+      <!-- Left column: years 1-8 -->
+      <div>
+        <table class="schedule">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="year-end"><td>2026</td><td>4,277</td><td>22,232</td><td>543,723</td></tr>
+            <tr class="year-end"><td>2027</td><td>4,573</td><td>29,913</td><td>539,150</td></tr>
+            <tr class="year-end"><td>2028</td><td>4,891</td><td>29,595</td><td>534,259</td></tr>
+            <tr class="year-end"><td>2029</td><td>5,231</td><td>29,255</td><td>529,028</td></tr>
+            <tr class="year-end"><td>2030</td><td>5,595</td><td>28,891</td><td>523,433</td></tr>
+            <tr class="year-end"><td>2031</td><td>5,983</td><td>28,503</td><td>517,450</td></tr>
+            <tr class="year-end"><td>2032</td><td>6,399</td><td>28,087</td><td>511,051</td></tr>
+            <tr class="year-end"><td>2033</td><td>6,845</td><td>27,641</td><td>504,206</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right column: years 9-15 -->
+      <div>
+        <table class="schedule">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="year-end"><td>2034</td><td>7,320</td><td>27,166</td><td>496,886</td></tr>
+            <tr class="year-end"><td>2035</td><td>7,829</td><td>26,657</td><td>489,057</td></tr>
+            <tr class="year-end"><td>2036</td><td>8,373</td><td>26,113</td><td>480,684</td></tr>
+            <tr class="year-end"><td>2037</td><td>8,955</td><td>25,531</td><td>471,729</td></tr>
+            <tr class="year-end"><td>2038</td><td>9,578</td><td>24,908</td><td>462,151</td></tr>
+            <tr class="year-end"><td>2039</td><td>10,244</td><td>24,242</td><td>451,907</td></tr>
+            <tr class="year-end"><td>2040</td><td>10,956</td><td>23,530</td><td>440,951</td></tr>
+            <tr class="year-end"><td>2041</td><td>11,718</td><td>22,768</td><td>429,233</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Milestones -->
+  <section style="margin-top: 28pt;">
+    <div class="section-head">
+      <h2>Equity milestones</h2>
+      <div class="note">Thresholds for PMI removal &amp; refi</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14pt;">
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">20% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Jul 2029</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 37 · PMI auto-drop</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">30% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Nov 2034</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 102</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">50% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Feb 2044</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 214</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--accent-tint); border-radius: 4pt; border: 0.5pt solid var(--accent);">
+        <div class="micro" style="color: var(--accent);">Paid in full</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt; color: var(--accent);">{{payoff_date}}</div>
+        <div class="mono" style="font-size: 8pt; color: var(--accent); opacity: 0.8; margin-top: 2pt;">mo 360</div>
+      </div>
+    </div>
+  </section>
+
+  </article>
+
+
+<!-- ============================================================
+     PAGE 3 — SCHEDULE 16-30 + SIGNATURE
+     ============================================================ -->
+<article class="page body-only">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Amortization Report · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">Smith · NIQ-AM-0147</div>
+      <div class="docnum" style="font-size:8pt;color:var(--ink3);">Pages 3 / 3</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Payment schedule</h2>
+      <div class="note">Years 16 – 30 · annual summary</div>
+    </div>
+
+    <div class="schedule-split">
+      <div>
+        <table class="schedule">
+          <thead>
+            <tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>
+          </thead>
+          <tbody>
+            <tr class="year-end"><td>2042</td><td>12,534</td><td>21,952</td><td>416,699</td></tr>
+            <tr class="year-end"><td>2043</td><td>13,407</td><td>21,079</td><td>403,292</td></tr>
+            <tr class="year-end"><td>2044</td><td>14,340</td><td>20,146</td><td>388,952</td></tr>
+            <tr class="year-end"><td>2045</td><td>15,338</td><td>19,148</td><td>373,614</td></tr>
+            <tr class="year-end"><td>2046</td><td>16,406</td><td>18,080</td><td>357,208</td></tr>
+            <tr class="year-end"><td>2047</td><td>17,548</td><td>16,938</td><td>339,660</td></tr>
+            <tr class="year-end"><td>2048</td><td>18,769</td><td>15,717</td><td>320,891</td></tr>
+            <tr class="year-end"><td>2049</td><td>20,076</td><td>14,410</td><td>300,815</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table class="schedule">
+          <thead>
+            <tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>
+          </thead>
+          <tbody>
+            <tr class="year-end"><td>2050</td><td>21,473</td><td>13,013</td><td>279,342</td></tr>
+            <tr class="year-end"><td>2051</td><td>22,968</td><td>11,518</td><td>256,374</td></tr>
+            <tr class="year-end"><td>2052</td><td>24,566</td><td>9,920</td><td>231,808</td></tr>
+            <tr class="year-end"><td>2053</td><td>26,276</td><td>8,210</td><td>205,532</td></tr>
+            <tr class="year-end"><td>2054</td><td>28,104</td><td>6,382</td><td>177,428</td></tr>
+            <tr class="year-end"><td>2055</td><td>30,060</td><td>4,426</td><td>147,368</td></tr>
+            <tr class="year-end"><td>2056</td><td>147,368</td><td>2,337</td><td style="color:var(--accent);font-weight:600;">0</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Totals · 30 yr</td>
+              <td>548,000</td>
+              <td>561,090</td>
+              <td>—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assumptions -->
+  <section style="margin-top: 28pt;">
+    <div class="section-head">
+      <h2>Assumptions &amp; disclosures</h2>
+      <div class="note">Inputs used in this report</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22pt; font-size: 9pt; line-height: 1.55;">
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Loan inputs</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Purchase price</span><span class="mono">$685,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Down payment</span><span class="mono">$137,000 · 20%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Loan amount</span><span class="mono">{{loan_amount_formatted}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Interest rate</span><span class="mono">{{rate_pct}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Term</span><span class="mono">30 years</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>First payment</span><span class="mono">{{first_payment_date}}</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Escrow &amp; fees · monthly</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Property taxes</span><span class="mono">$542.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Homeowner's insurance</span><span class="mono">$135.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>HOA</span><span class="mono">$62.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>PMI</span><span class="mono">— · n/a at 80% LTV</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Total escrow</span><span class="mono">$739.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>Total PITI</span><span class="mono" style="font-weight:600;">$4,207.14</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature -->
+  <section class="signature">
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Borrower · date</div>
+    </div>
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Loan officer · {{prepared_by_name}} · NMLS 482139</div>
+    </div>
+  </section>
+
+  </article>
+
+</body>
+</html>

@@ -15,6 +15,7 @@
 		057C883EA5C845431A7809D9 /* HelocPDFHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E2E3CEECABFE30414F053A /* HelocPDFHTML.swift */; };
 		062024066AE2E0158F765884 /* AmortizationScheduleTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E0EFC7F288F0C507A7808F /* AmortizationScheduleTable.swift */; };
 		07778789CCE302AB9FFEF501 /* PropertyDownPaymentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D700970F563C30DE8182925 /* PropertyDownPaymentSection.swift */; };
+		0AE008E799C73A365C1A222F /* pdf-amortization-with-masthead.html in Resources */ = {isa = PBXBuildFile; fileRef = 9231293C93AAB9F69D8741B4 /* pdf-amortization-with-masthead.html */; };
 		0CE960542B8CD9B7576FE91F /* QuotientFinance in Frameworks */ = {isa = PBXBuildFile; productRef = 90C588F1EAB9E98FE6CF8D65 /* QuotientFinance */; };
 		0DF0E7CE87E8E3234206121F /* FilterChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F168CE5ADAE01630A62C44 /* FilterChip.swift */; };
 		0E4118EC0EF9990CC499B19F /* IncomeQualInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8AD0BC3BDD8ABAD02CF5D7D /* IncomeQualInputs.swift */; };
@@ -63,6 +64,7 @@
 		4AC1444161A8C85000557B16 /* TCAInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C1B0601932028F30AD87A8 /* TCAInputs.swift */; };
 		4B615F48190205AD03274239 /* AmortizationMoneyFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDBB51C5F77BA004F6667E /* AmortizationMoneyFormat.swift */; };
 		4BB892923D4BE9EA8D31D80A /* TCAScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54754A91422D9F8CB7C303A8 /* TCAScreen.swift */; };
+		4FC3CEBBD8819D50DE7270F2 /* pdf-refinance-with-masthead.html in Resources */ = {isa = PBXBuildFile; fileRef = D4913FDF9D97B967C7B8D749 /* pdf-refinance-with-masthead.html */; };
 		521D8C71AF187F5F67C13103 /* JetBrainsMono-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 442F721CFB37B40CFB6979EA /* JetBrainsMono-SemiBold.ttf */; };
 		52F422CAE906682A21BF0FFA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D15C026D3869F6E5AF23D67 /* Tokens.swift */; };
 		53748ACC96F0319723126D2D /* SourceSerif4-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A5FE67D40D155466E0ABAD3A /* SourceSerif4-Regular.ttf */; };
@@ -81,6 +83,7 @@
 		6237A4C361C136D408B654F6 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA156A5E1309C690C0411E7 /* SettingsScreen.swift */; };
 		64270A283344CC69CF58A813 /* IncomeQualViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0650F99BAB92FE085CF9D8B4 /* IncomeQualViewModelTests.swift */; };
 		6441226EEEE4A71BA2859D69 /* SmokeEdgeCasesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02224566E7F76FF2685EEFB /* SmokeEdgeCasesTests.swift */; };
+		64C121D08BF45998DE057BB8 /* pdf-heloc-with-masthead.html in Resources */ = {isa = PBXBuildFile; fileRef = 927212FCF94D7727C7C55079 /* pdf-heloc-with-masthead.html */; };
 		65386FC8419778D708494A03 /* HelocInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8687DBD3C38EB02951C122 /* HelocInputsScreen.swift */; };
 		666B9F463E9B174484855063 /* SelfEmploymentResultsScreen+Breakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF68A4B42D81D743122A731 /* SelfEmploymentResultsScreen+Breakdown.swift */; };
 		6952C5BC08066589F8F650D9 /* AmortizationBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AC4D80900507619A963EDB /* AmortizationBreakdownView.swift */; };
@@ -102,6 +105,7 @@
 		83CD1FD1421208B14BE47617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24A9A56018B8BBF20141BD86 /* Assets.xcassets */; };
 		85CD0D0AD6007ADC806A1377 /* CurrentMortgageSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF728446C043F9325CC00B21 /* CurrentMortgageSection.swift */; };
 		874CBC9395A8D34745D050C9 /* TCACurrentMortgagePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C66169F762F690B67FA770 /* TCACurrentMortgagePersistenceTests.swift */; };
+		889559C6650FD9B44674AF87 /* tokens.css in Resources */ = {isa = PBXBuildFile; fileRef = F10E805C36B66F9FA4CDADEE /* tokens.css */; };
 		88A1A003CD9B68A1E46AA6E3 /* TCAInputs+CurrentMortgage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC60E64801C49F2BF10D1BA /* TCAInputs+CurrentMortgage.swift */; };
 		88DCBE802DFC175281B5DAD7 /* SaveScenarioNamePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4758660CBA7542F4563C097 /* SaveScenarioNamePrompt.swift */; };
 		8D3B988CD6D48D0594AE5079 /* SupportDetailScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B53CAF7C9D7153C92AB6B9 /* SupportDetailScreens.swift */; };
@@ -122,6 +126,7 @@
 		A4E7822C19C9779C979C788B /* CurrentMortgageDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4EAFA22D8A373BB358DC9BA /* CurrentMortgageDraftTests.swift */; };
 		A61496293FFEB9D03463EB84 /* PDFBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */; };
 		A642EFDD64BF40C777E94832 /* IncomeQualInputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */; };
+		A75C3F4BEE6CD9400DBF09F0 /* pdf-tca-with-masthead.html in Resources */ = {isa = PBXBuildFile; fileRef = 159AFFF4C0FCFAABA5CE4BE2 /* pdf-tca-with-masthead.html */; };
 		A7866B3C32456737C81A18A9 /* AmortizationHappyPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6694B1189E3C59A0D72E3C /* AmortizationHappyPathTests.swift */; };
 		A8A61BF4003C61412F162914 /* TCAPDFHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0734FF07CB1B1618BF47041 /* TCAPDFHTML.swift */; };
 		A9D05654468F1CE1812861AB /* AmortizationInputsScreen+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42266120EAAEE6500B3FC21F /* AmortizationInputsScreen+Helpers.swift */; };
@@ -220,6 +225,7 @@
 		0F4E4635C56FE4C0AE554983 /* PDFHTMLComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFHTMLComposition.swift; sourceTree = "<group>"; };
 		0F740E91156398C886E507D3 /* NarrationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationSheet.swift; sourceTree = "<group>"; };
 		0F862FEC2810B23E443ECCB1 /* RefinanceInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinanceInputsScreen.swift; sourceTree = "<group>"; };
+		159AFFF4C0FCFAABA5CE4BE2 /* pdf-tca-with-masthead.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "pdf-tca-with-masthead.html"; sourceTree = "<group>"; };
 		15EAF0208372B5CA90BA8C6C /* IncomeQualPDFHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualPDFHTML.swift; sourceTree = "<group>"; };
 		1757A4E354F362A99F02FA3C /* CalculatorAmortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorAmortTests.swift; sourceTree = "<group>"; };
 		1866228FFAF9C7A0CCC95764 /* AmortizationInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmortizationInputs.swift; sourceTree = "<group>"; };
@@ -308,6 +314,8 @@
 		8E59AF4CBDB3E0B2E8CB981F /* JetBrainsMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Regular.ttf"; sourceTree = "<group>"; };
 		906DC94C363A2002B1ACEEF2 /* SavedScenariosScreen+EditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedScenariosScreen+EditMode.swift"; sourceTree = "<group>"; };
 		906E96F722FBFC9E28E526F3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9231293C93AAB9F69D8741B4 /* pdf-amortization-with-masthead.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "pdf-amortization-with-masthead.html"; sourceTree = "<group>"; };
+		927212FCF94D7727C7C55079 /* pdf-heloc-with-masthead.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "pdf-heloc-with-masthead.html"; sourceTree = "<group>"; };
 		9369E77F193F5C66B4E6740E /* IncomeQualInputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeQualInputsScreen.swift; sourceTree = "<group>"; };
 		942C5A696DB0F88F36A35211 /* FREDRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FREDRateService.swift; sourceTree = "<group>"; };
 		9525B7262BA22F4E1FCDF228 /* PDFBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFBuilder.swift; sourceTree = "<group>"; };
@@ -359,6 +367,7 @@
 		D00A91D51212853350CE39F8 /* KPITile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KPITile.swift; sourceTree = "<group>"; };
 		D0D1F3B75BEEB2A8E1AF4C00 /* AssumptionsDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssumptionsDrawer.swift; sourceTree = "<group>"; };
 		D381BCE91A0673E2D3CBDA9E /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
+		D4913FDF9D97B967C7B8D749 /* pdf-refinance-with-masthead.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "pdf-refinance-with-masthead.html"; sourceTree = "<group>"; };
 		D5F34AF2E2681FFA81B071FC /* HelocInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocInputs.swift; sourceTree = "<group>"; };
 		D7B3C748DBC880DC729B8468 /* HTMLPDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLPDFRenderer.swift; sourceTree = "<group>"; };
 		D7BEADBEAC2EA40C63E71FF7 /* SegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedControl.swift; sourceTree = "<group>"; };
@@ -387,6 +396,7 @@
 		EE5FB1AE81D9B7BF0A5C9FA6 /* NestIQPrintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestIQPrintRenderer.swift; sourceTree = "<group>"; };
 		EEBA59D90D4FFA9B9E55CF1D /* IncomeQualInputsScreen+Reserves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IncomeQualInputsScreen+Reserves.swift"; sourceTree = "<group>"; };
 		F1044CE0F6EDA21CB2317ABE /* ScenarioSaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioSaveLoadTests.swift; sourceTree = "<group>"; };
+		F10E805C36B66F9FA4CDADEE /* tokens.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = tokens.css; sourceTree = "<group>"; };
 		F112859C549CAEAB6F668E1B /* JetBrainsMono-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Medium.ttf"; sourceTree = "<group>"; };
 		F2203C19EB633AFA8EE6E2F1 /* HelocViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelocViewModelTests.swift; sourceTree = "<group>"; };
 		F2E629BB721D286991CE4C26 /* StackedHorizontalBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedHorizontalBar.swift; sourceTree = "<group>"; };
@@ -608,6 +618,8 @@
 			children = (
 				EBF1422E8C8ECAA3034373F9 /* base.html */,
 				59D416855FC744765B2EA79B /* SignatureBlock.html */,
+				F10E805C36B66F9FA4CDADEE /* tokens.css */,
+				DAAF4C0C7757C37B1D8638B9 /* templates */,
 			);
 			path = PDFTemplates;
 			sourceTree = "<group>";
@@ -794,6 +806,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		DAAF4C0C7757C37B1D8638B9 /* templates */ = {
+			isa = PBXGroup;
+			children = (
+				9231293C93AAB9F69D8741B4 /* pdf-amortization-with-masthead.html */,
+				927212FCF94D7727C7C55079 /* pdf-heloc-with-masthead.html */,
+				D4913FDF9D97B967C7B8D749 /* pdf-refinance-with-masthead.html */,
+				159AFFF4C0FCFAABA5CE4BE2 /* pdf-tca-with-masthead.html */,
+			);
+			path = templates;
+			sourceTree = "<group>";
+		};
 		E0D4ECE9E62B2559D7A77ACB /* TotalCostAnalysis */ = {
 			isa = PBXGroup;
 			children = (
@@ -883,6 +906,7 @@
 			buildConfigurationList = A0FBA81A9F3A812D69409DA0 /* Build configuration list for PBXNativeTarget "Quotient" */;
 			buildPhases = (
 				92F0D8CA463449EEE2144CE0 /* SwiftLint */,
+				501F151457AF35AF92192D39 /* Sync PDF templates from .claude source pack */,
 				AA68859BCB92001E611FA7B5 /* Sources */,
 				B7A88525F06361A30787DA95 /* Resources */,
 				72C24CA41DFABA1A29AB1B86 /* Frameworks */,
@@ -987,12 +1011,45 @@
 				5DFCE5E6F9F09B24C683051B /* SourceSerif4-Semibold.ttf in Resources */,
 				1980D6799815C94CCE9604A2 /* SourceSerif4-SemiboldItalic.ttf in Resources */,
 				23273BFD3AED267359FD1573 /* base.html in Resources */,
+				0AE008E799C73A365C1A222F /* pdf-amortization-with-masthead.html in Resources */,
+				64C121D08BF45998DE057BB8 /* pdf-heloc-with-masthead.html in Resources */,
+				4FC3CEBBD8819D50DE7270F2 /* pdf-refinance-with-masthead.html in Resources */,
+				A75C3F4BEE6CD9400DBF09F0 /* pdf-tca-with-masthead.html in Resources */,
+				889559C6650FD9B44674AF87 /* tokens.css in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		501F151457AF35AF92192D39 /* Sync PDF templates from .claude source pack */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-amortization-with-masthead.html",
+				"$(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-refinance-with-masthead.html",
+				"$(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-tca-with-masthead.html",
+				"$(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-heloc-with-masthead.html",
+				"$(SRCROOT)/.claude/assets/pdf-v2/tokens.css",
+			);
+			name = "Sync PDF templates from .claude source pack";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-amortization-with-masthead.html",
+				"$(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-refinance-with-masthead.html",
+				"$(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-tca-with-masthead.html",
+				"$(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-heloc-with-masthead.html",
+				"$(SRCROOT)/App/Resources/PDFTemplates/tokens.css",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SOURCE=\"${SRCROOT}/.claude/assets/pdf-v2\"\nDEST=\"${SRCROOT}/App/Resources/PDFTemplates\"\nmkdir -p \"${DEST}/templates\"\nrsync -a \\\n  \"${SOURCE}/templates/pdf-amortization-with-masthead.html\" \\\n  \"${SOURCE}/templates/pdf-refinance-with-masthead.html\" \\\n  \"${SOURCE}/templates/pdf-tca-with-masthead.html\" \\\n  \"${SOURCE}/templates/pdf-heloc-with-masthead.html\" \\\n  \"${DEST}/templates/\"\nrsync -a \"${SOURCE}/tokens.css\" \"${DEST}/tokens.css\"\n";
+		};
 		92F0D8CA463449EEE2144CE0 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

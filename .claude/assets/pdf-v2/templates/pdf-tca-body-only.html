@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NestIQ · Total Cost Analysis · {{borrower_last}}</title>
+<link rel="stylesheet" href="../tokens.css" />
+<style>
+/* TCA-specific styles */
+
+.tca-matrix {
+  width: 100%; border-collapse: collapse;
+  font-size: 9pt; margin-bottom: 20pt;
+}
+.tca-matrix thead th {
+  font-family: var(--mono); font-size: 7pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+  padding: 10pt 10pt; border-bottom: 1pt solid var(--ink);
+  text-align: right;
+}
+.tca-matrix thead th:first-child { text-align: left; }
+.tca-matrix tbody th {
+  font-family: var(--serif); font-size: 11pt; font-weight: 400;
+  letter-spacing: -0.015em; text-align: left;
+  padding: 10pt 10pt 10pt 0;
+  border-bottom: 0.4pt solid var(--rule-soft);
+  color: var(--ink);
+}
+.tca-matrix tbody th .sub {
+  font-family: var(--mono); font-size: 7pt;
+  color: var(--ink3); font-weight: 500;
+  letter-spacing: 0.04em; display: block; margin-top: 2pt;
+}
+.tca-matrix tbody td {
+  font-family: var(--mono); padding: 10pt;
+  border-bottom: 0.4pt solid var(--rule-soft);
+  text-align: right; font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.tca-matrix tbody td.best { color: var(--gain); background: rgba(47, 107, 72, 0.06); }
+.tca-matrix tbody td.worst { color: var(--loss); background: rgba(138, 47, 47, 0.04); }
+.tca-matrix tbody td .delta {
+  display: block; font-size: 7pt; font-weight: 400;
+  color: var(--ink3); margin-top: 2pt;
+}
+.tca-matrix tbody td.best .delta { color: var(--gain); opacity: 0.8; }
+
+/* Scenario card — reusable key grid */
+.scenario-cards {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10pt; margin-bottom: 22pt;
+}
+.scn-card {
+  padding: 14pt 14pt 12pt;
+  border: 0.5pt solid var(--rule);
+  border-radius: 4pt;
+  position: relative;
+}
+.scn-card.recommended {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+}
+.scn-card .tag {
+  font-family: var(--mono); font-size: 6.5pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 4pt;
+}
+.scn-card.recommended .tag { color: var(--accent); }
+.scn-card .nm {
+  font-family: var(--serif); font-size: 13pt; font-weight: 400;
+  letter-spacing: -0.015em; color: var(--ink); margin-bottom: 8pt;
+}
+.scn-card.recommended .nm { color: var(--accent); }
+.scn-card .rs {
+  font-family: var(--mono); font-size: 18pt; font-weight: 500;
+  letter-spacing: -0.015em; line-height: 1;
+}
+.scn-card .rs .pct {
+  font-size: 9pt; color: var(--ink3); margin-left: 1pt;
+}
+.scn-card .meta {
+  display: flex; justify-content: space-between;
+  margin-top: 8pt; padding-top: 8pt;
+  border-top: 0.4pt solid var(--rule-soft);
+  font-family: var(--mono); font-size: 7.5pt; color: var(--ink3);
+}
+
+/* Bar chart rows for total cost by horizon */
+.bar-row {
+  display: grid; grid-template-columns: 110pt 1fr 80pt;
+  gap: 14pt; align-items: center;
+  padding: 7pt 0;
+}
+.bar-row .lbl {
+  font-family: var(--mono); font-size: 8pt; color: var(--ink2);
+  letter-spacing: 0.01em;
+}
+.bar-row .bar-track {
+  background: var(--rule-soft); height: 16pt; border-radius: 2pt;
+  position: relative; overflow: hidden;
+}
+.bar-row .bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  border-radius: 2pt;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 6pt;
+  font-family: var(--mono); font-size: 7pt; font-weight: 600;
+  color: var(--paper);
+  letter-spacing: 0.04em;
+}
+.bar-row .amt {
+  font-family: var(--mono); font-size: 10pt; font-weight: 500;
+  text-align: right;
+}
+</style>
+</head>
+<body>
+
+<button class="print-hint" onclick="window.print()">⌘ P — Save as PDF</button>
+
+<!-- ============================================================
+     PAGE 1 — COVER + SCENARIO CARDS + HORIZON CHART
+     ============================================================ -->
+<article class="page body-only">
+
+  
+
+  <section class="scenario-head">
+    <div>
+      <div class="eyebrow">Prepared for</div>
+      <h1>{{borrower_first}} <span class="i">{{borrower_last}}</span></h1>
+      <div class="sub">{{purchase_summary}}</div>
+    </div>
+    <div class="scenario-meta">
+      <div class="row"><span class="l">Loan officer</span><span class="v">{{prepared_by_name}}</span></div>
+      <div class="row"><span class="l">NMLS</span><span class="v">#{{prepared_by_nmls}}</span></div>
+      <div class="row"><span class="l">Prepared</span><span class="v">{{prepared_date}}</span></div>
+      <div class="row"><span class="l">Down payment</span><span class="v">{{down_payment_summary}}</span></div>
+      <div class="row" style="margin-top:4pt;padding-top:6pt;border-top:0.5pt solid var(--rule-soft);">
+        <span class="l">Expected stay</span><span class="badge">7 YEARS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scenario cards -->
+  <section>
+    <div class="section-head">
+      <h2>Product scenarios</h2>
+      <div class="note">4 products evaluated · {{loan_amount_formatted}} financed</div>
+    </div>
+
+    <div class="scenario-cards">
+      <div class="scn-card">
+        <div class="tag">Scenario 01</div>
+        <div class="nm">30-yr fixed</div>
+        <div class="rs">6.750<span class="pct">%</span></div>
+        <div class="meta">
+          <span>$3,554/mo</span>
+          <span>0 pts</span>
+        </div>
+      </div>
+      <div class="scn-card recommended">
+        <div class="tag">Scenario 02 · Recommended</div>
+        <div class="nm">7/6 ARM</div>
+        <div class="rs">6.125<span class="pct">%</span></div>
+        <div class="meta">
+          <span>$3,332/mo</span>
+          <span>0 pts</span>
+        </div>
+      </div>
+      <div class="scn-card">
+        <div class="tag">Scenario 03</div>
+        <div class="nm">15-yr fixed</div>
+        <div class="rs">5.750<span class="pct">%</span></div>
+        <div class="meta">
+          <span>$4,552/mo</span>
+          <span>0.25 pts</span>
+        </div>
+      </div>
+      <div class="scn-card">
+        <div class="tag">Scenario 04</div>
+        <div class="nm">30-yr · buydown</div>
+        <div class="rs">6.250<span class="pct">%</span></div>
+        <div class="meta">
+          <span>$3,373/mo</span>
+          <span>2.0 pts</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Total cost by horizon (grouped bar chart) -->
+  <section>
+    <div class="section-head">
+      <h2>Total cost by horizon</h2>
+      <div class="note">Cumulative out-of-pocket · principal + interest + fees</div>
+    </div>
+    <p class="section-sub">
+      Total dollars the borrower will have spent if the loan is paid off, sold, or
+      refinanced at that horizon. Scenario 02 (7/6 ARM) is recommended for a 7-year stay.
+    </p>
+
+    <div class="chart-wrap">
+      <svg width="100%" viewBox="0 0 720 300" preserveAspectRatio="none">
+        <!-- Grid lines -->
+        <line x1="50" y1="40"  x2="680" y2="40"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="50" y1="90"  x2="680" y2="90"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="50" y1="140" x2="680" y2="140" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="50" y1="190" x2="680" y2="190" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="50" y1="240" x2="680" y2="240" stroke="#17160F" stroke-width="0.8"/>
+
+        <!-- Y labels -->
+        <text x="46" y="43"  font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$1.4M</text>
+        <text x="46" y="93"  font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$1.0M</text>
+        <text x="46" y="143" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$750K</text>
+        <text x="46" y="193" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$400K</text>
+        <text x="46" y="243" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$0</text>
+
+        <!-- Groups: 5 horizons x 4 scenarios. Each group centered at its X. -->
+        <!-- Group positions: 110, 230, 350, 470, 590 -->
+
+        <!-- 5-yr group — minimal costs -->
+        <g>
+          <rect x="82"  y="214" width="14" height="26" fill="#264B6A"/>
+          <rect x="98"  y="216" width="14" height="24" fill="#1F4D3F"/>
+          <rect x="114" y="204" width="14" height="36" fill="#73522A"/>
+          <rect x="130" y="212" width="14" height="28" fill="#6A3F5A"/>
+          <text x="113" y="260" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle" font-weight="600">5 yr</text>
+        </g>
+
+        <!-- 7-yr group — marked -->
+        <g>
+          <rect x="202" y="198" width="14" height="42" fill="#264B6A"/>
+          <rect x="218" y="204" width="14" height="36" fill="#1F4D3F"/>
+          <rect x="234" y="184" width="14" height="56" fill="#73522A"/>
+          <rect x="250" y="200" width="14" height="40" fill="#6A3F5A"/>
+          <!-- Recommended marker -->
+          <rect x="196" y="30" width="76" height="220" fill="none" stroke="#1F4D3F" stroke-width="0.8" stroke-dasharray="3 3" rx="2"/>
+          <text x="234" y="24" font-family="JetBrains Mono" font-size="8" font-weight="600" fill="#1F4D3F" text-anchor="middle">EXPECTED STAY</text>
+          <text x="233" y="260" font-family="JetBrains Mono" font-size="9" fill="#1F4D3F" text-anchor="middle" font-weight="700">7 yr</text>
+        </g>
+
+        <!-- 10-yr group -->
+        <g>
+          <rect x="322" y="174" width="14" height="66" fill="#264B6A"/>
+          <rect x="338" y="180" width="14" height="60" fill="#1F4D3F"/>
+          <rect x="354" y="152" width="14" height="88" fill="#73522A"/>
+          <rect x="370" y="178" width="14" height="62" fill="#6A3F5A"/>
+          <text x="353" y="260" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle" font-weight="600">10 yr</text>
+        </g>
+
+        <!-- 15-yr group -->
+        <g>
+          <rect x="442" y="132" width="14" height="108" fill="#264B6A"/>
+          <rect x="458" y="142" width="14" height="98" fill="#1F4D3F"/>
+          <rect x="474" y="82"  width="14" height="158" fill="#73522A"/>
+          <rect x="490" y="136" width="14" height="104" fill="#6A3F5A"/>
+          <text x="473" y="260" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle" font-weight="600">15 yr</text>
+        </g>
+
+        <!-- 30-yr group -->
+        <g>
+          <rect x="562" y="52"  width="14" height="188" fill="#264B6A"/>
+          <rect x="578" y="78"  width="14" height="162" fill="#1F4D3F"/>
+          <rect x="594" y="82"  width="14" height="158" fill="#73522A"/>
+          <rect x="610" y="60"  width="14" height="180" fill="#6A3F5A"/>
+          <text x="593" y="260" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle" font-weight="600">30 yr</text>
+        </g>
+
+        <!-- Legend -->
+        <g transform="translate(50, 282)">
+          <rect x="0" y="0" width="10" height="8" fill="#264B6A"/>
+          <text x="14" y="7" font-family="JetBrains Mono" font-size="8" fill="#3D3A2F">30-yr fixed</text>
+
+          <rect x="100" y="0" width="10" height="8" fill="#1F4D3F"/>
+          <text x="114" y="7" font-family="JetBrains Mono" font-size="8" fill="#3D3A2F">7/6 ARM</text>
+
+          <rect x="200" y="0" width="10" height="8" fill="#73522A"/>
+          <text x="214" y="7" font-family="JetBrains Mono" font-size="8" fill="#3D3A2F">15-yr fixed</text>
+
+          <rect x="300" y="0" width="10" height="8" fill="#6A3F5A"/>
+          <text x="314" y="7" font-family="JetBrains Mono" font-size="8" fill="#3D3A2F">30-yr · buydown</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  </article>
+
+
+<!-- ============================================================
+     PAGE 2 — 20-CELL MATRIX + HORIZON BARS
+     ============================================================ -->
+<article class="page body-only">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Total Cost Analysis · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">{{borrower_last}} · {{doc_num}}</div>
+      <div class="docnum" style="font-size:8pt;color:var(--ink3);">Page 2 / 3</div>
+    </div>
+  </header>
+
+  <!-- 20-cell matrix -->
+  <section>
+    <div class="section-head">
+      <h2>Cost matrix · 4 × 5</h2>
+      <div class="note">Total dollars out of pocket at each horizon</div>
+    </div>
+    <p class="section-sub">
+      Best value at each horizon is highlighted <span style="color:var(--gain);font-weight:600;">green</span>.
+      At the borrower's expected 7-year stay, <strong>Scenario 02</strong> delivers the lowest total cost.
+    </p>
+
+    <table class="tca-matrix">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>5-yr</th>
+          <th>7-yr</th>
+          <th>10-yr</th>
+          <th>15-yr</th>
+          <th>30-yr · full</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Scenario 01 <span class="sub">30-yr fixed · 6.750%</span></th>
+          <td>$213,250</td>
+          <td>$298,420</td>
+          <td>$426,490<span class="delta">baseline</span></td>
+          <td>$640,390</td>
+          <td class="worst">$1,279,330<span class="delta">+$68k vs best</span></td>
+        </tr>
+        <tr>
+          <th>Scenario 02 <span class="sub">7/6 ARM · 6.125% · recommended</span></th>
+          <td class="best">$199,980<span class="delta">best</span></td>
+          <td class="best">$279,900<span class="delta">−$18.5k</span></td>
+          <td>$419,810</td>
+          <td>$652,140</td>
+          <td>$1,244,210</td>
+        </tr>
+        <tr>
+          <th>Scenario 03 <span class="sub">15-yr fixed · 5.750%</span></th>
+          <td>$273,120</td>
+          <td>$382,370</td>
+          <td>$546,230</td>
+          <td class="best">$819,360<span class="delta">best · paid off</span></td>
+          <td class="best">$819,360<span class="delta">best</span></td>
+        </tr>
+        <tr>
+          <th>Scenario 04 <span class="sub">30-yr fixed · 6.250% · 2 pts</span></th>
+          <td>$208,570</td>
+          <td>$291,000</td>
+          <td class="best">$415,860<span class="delta">−$10.6k</span></td>
+          <td>$624,780</td>
+          <td>$1,213,280</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Horizon bar chart — drill-in on recommended 7-yr -->
+  <section>
+    <div class="section-head">
+      <h2>7-year horizon · detail</h2>
+      <div class="note">Ranked by total cost at expected stay</div>
+    </div>
+
+    <div style="padding: 4pt 0;">
+      <div class="bar-row">
+        <div class="lbl">7/6 ARM · 6.125%</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: var(--accent); width: 73%;">$279,900</div>
+        </div>
+        <div class="amt" style="color: var(--gain);">BEST</div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">30-yr · buydown</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: var(--s2); width: 76%;">$291,000</div>
+        </div>
+        <div class="amt">+$11.1k</div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">30-yr fixed · 6.75%</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: var(--s1); width: 78%;">$298,420</div>
+        </div>
+        <div class="amt">+$18.5k</div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">15-yr fixed · 5.75%</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: var(--s3); width: 100%;">$382,370</div>
+        </div>
+        <div class="amt" style="color: var(--loss);">+$102.5k</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Narrative -->
+  <section style="margin-top: 14pt;">
+    <div class="section-head">
+      <h2>Analyst narrative</h2>
+      <div class="note">AI-generated · reviewed</div>
+    </div>
+    <div class="narrative">
+      <p class="lead" style="margin:0 0 8pt;">
+        With an expected <span class="hl">7-year stay</span>, the 7/6 ARM (Scenario 02) saves
+        $18.5k versus the 30-yr fixed over the same horizon — the ARM's first rate reset
+        arrives just as the borrower plans to exit.
+      </p>
+      <p style="margin:0 0 8pt;">
+        The <span class="hl">buydown (Scenario 04)</span> closes most of the gap but requires
+        $10,960 in discount points at closing. Break-even on the buydown relative to the
+        baseline 30-yr is <span class="hl">month 48</span>.
+      </p>
+      <p style="margin:0;">
+        Scenario 03 (15-yr) is cheapest only over 15+ years. Recommend revisiting if the
+        household's expected stay extends beyond year 10.
+      </p>
+      <div class="sig">
+        <span>{{prepared_by_name}} · NMLS 482139</span>
+        <span>Generated {{prepared_date}} · v1.4</span>
+      </div>
+    </div>
+  </section>
+
+  </article>
+
+
+<!-- ============================================================
+     PAGE 3 — EQUITY vs COST + ASSUMPTIONS + SIGNATURE
+     ============================================================ -->
+<article class="page body-only">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Total Cost Analysis · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">{{borrower_last}} · {{doc_num}}</div>
+      <div class="docnum" style="font-size:8pt;color:var(--ink3);">Page 3 / 3</div>
+    </div>
+  </header>
+
+  <!-- Equity built chart (line) -->
+  <section>
+    <div class="section-head">
+      <h2>Equity built over time</h2>
+      <div class="note">Principal paid · excludes home appreciation</div>
+    </div>
+    <p class="section-sub">
+      How much of each payment builds ownership. The 15-yr is faster equity;
+      the ARM and buydown track the 30-yr fixed with minor differences.
+    </p>
+
+    <div class="chart-wrap">
+      <svg width="100%" viewBox="0 0 720 220" preserveAspectRatio="none">
+        <!-- Grid -->
+        <line x1="40" y1="30"  x2="680" y2="30"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="40" y1="80"  x2="680" y2="80"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="40" y1="130" x2="680" y2="130" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="40" y1="180" x2="680" y2="180" stroke="#17160F" stroke-width="0.8"/>
+
+        <!-- Y labels -->
+        <text x="36" y="33"  font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$548K</text>
+        <text x="36" y="83"  font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$365K</text>
+        <text x="36" y="133" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$180K</text>
+        <text x="36" y="183" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">$0</text>
+
+        <!-- X labels -->
+        <text x="40"  y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A">0</text>
+        <text x="150" y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="middle">5</text>
+        <text x="235" y="200" font-family="JetBrains Mono" font-size="8" fill="#1F4D3F" font-weight="600" text-anchor="middle">7</text>
+        <text x="320" y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="middle">10</text>
+        <text x="460" y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="middle">15</text>
+        <text x="570" y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="middle">20</text>
+        <text x="680" y="200" font-family="JetBrains Mono" font-size="8" fill="#6B675A" text-anchor="end">30 yr</text>
+
+        <!-- 7-yr marker -->
+        <line x1="235" y1="30" x2="235" y2="180" stroke="#1F4D3F" stroke-width="0.6" stroke-dasharray="3 3" opacity="0.6"/>
+
+        <!-- 15-yr fixed · steepest curve, finishes at $548k by year 15 -->
+        <path d="M 40 180 L 150 136 L 235 118 L 320 88 L 460 30"
+              fill="none" stroke="#73522A" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- 30-yr buydown -->
+        <path d="M 40 180 L 150 168 L 235 164 L 320 154 L 460 130 L 570 96 L 680 30"
+              fill="none" stroke="#6A3F5A" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- 7/6 ARM (recommended) -->
+        <path d="M 40 180 L 150 170 L 235 165 L 320 155 L 460 128 L 570 92 L 680 30"
+              fill="none" stroke="#1F4D3F" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- 30-yr fixed -->
+        <path d="M 40 180 L 150 172 L 235 168 L 320 158 L 460 132 L 570 96 L 680 30"
+              fill="none" stroke="#264B6A" stroke-width="1.4"
+              stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- 7-yr crosspoints -->
+        <circle cx="235" cy="165" r="3" fill="#FAF9F5" stroke="#1F4D3F" stroke-width="1.6"/>
+        <text x="242" y="162" font-family="JetBrains Mono" font-size="8" fill="#1F4D3F" font-weight="600">$72K</text>
+
+        <circle cx="235" cy="118" r="3" fill="#FAF9F5" stroke="#73522A" stroke-width="1.6"/>
+        <text x="242" y="115" font-family="JetBrains Mono" font-size="8" fill="#73522A" font-weight="600">$221K</text>
+      </svg>
+
+      <div class="chart-legend">
+        <div class="lg"><div class="sw" style="background:#1F4D3F; height:3pt;"></div>7/6 ARM · recommended</div>
+        <div class="lg"><div class="sw" style="background:#264B6A;"></div>30-yr fixed</div>
+        <div class="lg"><div class="sw" style="background:#73522A;"></div>15-yr fixed</div>
+        <div class="lg"><div class="sw" style="background:#6A3F5A;"></div>30-yr · buydown</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assumptions -->
+  <section style="margin-top: 22pt;">
+    <div class="section-head">
+      <h2>Assumptions &amp; disclosures</h2>
+      <div class="note">Inputs used in this report</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22pt; font-size: 9pt; line-height: 1.55;">
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Transaction</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Purchase price</span><span class="mono">$685,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Down payment</span><span class="mono">$137,000 · 20%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Loan amount</span><span class="mono">$548,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Expected stay</span><span class="mono">7 years</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>Property taxes &amp; ins.</span><span class="mono">held constant</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Methodology</div>
+        <div style="padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft); font-size:8.5pt; line-height:1.5;">
+          Cost includes interest, scheduled principal paid, points, and one-time fees.
+        </div>
+        <div style="padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft); font-size:8.5pt; line-height:1.5;">
+          ARM reset rate = index (5.500%) + margin (2.50%) = 8.000%, subject to 2/1/5 caps.
+        </div>
+        <div style="padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft); font-size:8.5pt; line-height:1.5;">
+          Equity excludes home appreciation; appreciation sensitivity available on request.
+        </div>
+        <div style="padding:3pt 0; font-size:8.5pt; line-height:1.5;">
+          Rates reflect published indications on <span class="mono">{{prepared_date}} · 09:22 EST</span>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature -->
+  <section class="signature">
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Borrower · date</div>
+    </div>
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Loan officer · {{prepared_by_name}} · NMLS 482139</div>
+    </div>
+  </section>
+
+  </article>
+
+</body>
+</html>

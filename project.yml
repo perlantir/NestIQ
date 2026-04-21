@@ -132,6 +132,30 @@ targets:
             echo "warning: SwiftLint not installed — install via 'brew install swiftlint'"
           fi
         basedOnDependencyAnalysis: false
+      - name: Sync PDF templates from .claude source pack
+        script: |
+          SOURCE="${SRCROOT}/.claude/assets/pdf-v2"
+          DEST="${SRCROOT}/App/Resources/PDFTemplates"
+          mkdir -p "${DEST}/templates"
+          rsync -a \
+            "${SOURCE}/templates/pdf-amortization-with-masthead.html" \
+            "${SOURCE}/templates/pdf-refinance-with-masthead.html" \
+            "${SOURCE}/templates/pdf-tca-with-masthead.html" \
+            "${SOURCE}/templates/pdf-heloc-with-masthead.html" \
+            "${DEST}/templates/"
+          rsync -a "${SOURCE}/tokens.css" "${DEST}/tokens.css"
+        inputFiles:
+          - $(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-amortization-with-masthead.html
+          - $(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-refinance-with-masthead.html
+          - $(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-tca-with-masthead.html
+          - $(SRCROOT)/.claude/assets/pdf-v2/templates/pdf-heloc-with-masthead.html
+          - $(SRCROOT)/.claude/assets/pdf-v2/tokens.css
+        outputFiles:
+          - $(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-amortization-with-masthead.html
+          - $(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-refinance-with-masthead.html
+          - $(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-tca-with-masthead.html
+          - $(SRCROOT)/App/Resources/PDFTemplates/templates/pdf-heloc-with-masthead.html
+          - $(SRCROOT)/App/Resources/PDFTemplates/tokens.css
   QuotientTests:
     type: bundle.unit-test
     platform: iOS

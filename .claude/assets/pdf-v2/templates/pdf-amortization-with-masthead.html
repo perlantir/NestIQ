@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NestIQ · Amortization Report</title>
+<link rel="stylesheet" href="../tokens.css" />
+</head>
+<body>
+
+<button class="print-hint" onclick="window.print()">
+  ⌘ P — Save as PDF
+</button>
+
+<!-- ============================================================
+     PAGE 1 — COVER + SUMMARY
+     ============================================================ -->
+<article class="page">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div class="masthead-left">
+      <div class="monogram">
+        <span class="n">N</span>
+        <span class="iq">iq</span>
+      </div>
+      <div class="wordmark">Nest<span>IQ</span></div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">Mortgage Amortization</div>
+      <div class="docnum">{{doc_num}}</div>
+    </div>
+  </header>
+
+  <!-- Scenario -->
+  <section class="scenario-head">
+    <div>
+      <div class="eyebrow">Prepared for</div>
+      <h1>{{borrower_first}} <span class="i">{{borrower_last}}</span></h1>
+      <div class="sub">{{property_address}}</div>
+    </div>
+    <div class="scenario-meta">
+      <div class="row"><span class="l">Loan officer</span><span class="v">{{prepared_by_name}}</span></div>
+      <div class="row"><span class="l">NMLS</span><span class="v">#{{prepared_by_nmls}}</span></div>
+      <div class="row"><span class="l">Prepared</span><span class="v">{{prepared_date}}</span></div>
+      <div class="row"><span class="l">Rate lock</span><span class="v">{{rate_lock}}</span></div>
+      <div class="row" style="margin-top:4pt;padding-top:6pt;border-top:0.5pt solid var(--rule-soft);">
+        <span class="l">Product</span><span class="badge">{{product_badge}}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero PITI -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="eyebrow">Monthly payment · PITI</div>
+      <div class="hero-figure">
+        <span class="dollar">$</span>
+        <span class="num">{{piti_dollars}}</span>
+        <span class="decimal">.{{piti_cents}}</span>
+        <span class="unit">/mo</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      Includes principal, interest,<br/>
+      property taxes, insurance.<br/>
+      <span style="color:var(--ink); font-weight:500;">First payment</span> · {{first_payment_date}}
+    </div>
+  </section>
+
+  <!-- KPI strip -->
+  <section class="kpi-strip">
+    <div class="kpi">
+      <div class="l">Total interest</div>
+      <div class="v">{{total_interest_formatted}}</div>
+      <div class="vs">over loan life</div>
+    </div>
+    <div class="kpi">
+      <div class="l">Payoff</div>
+      <div class="v">{{payoff_date}}</div>
+      <div class="vs">360 payments</div>
+    </div>
+    <div class="kpi">
+      <div class="l">Total paid</div>
+      <div class="v">{{total_paid_formatted}}</div>
+      <div class="vs">principal + interest + esc.</div>
+    </div>
+    <div class="kpi">
+      <div class="l">LTV</div>
+      <div class="v">{{ltv_pct}}<span style="font-size:12pt;color:var(--ink3);">%</span></div>
+      <div class="vs">{{pmi_note}}</div>
+    </div>
+  </section>
+
+  <!-- Balance chart -->
+  <section>
+    <div class="section-head">
+      <h2>Balance over time</h2>
+      <div class="note">30-year horizon · principal remaining</div>
+    </div>
+    <p class="section-sub">
+      Principal paydown accelerates from roughly year 11 as the interest share of each payment falls
+      below principal. Marked milestone: <strong>year 10</strong> — {{yr10_balance_formatted}} remaining.
+    </p>
+
+    <div class="chart-wrap">
+      <svg width="100%" viewBox="0 0 720 220" preserveAspectRatio="none">
+        <!-- Grid -->
+        <line x1="20" y1="14"  x2="680" y2="14"  stroke="#D8D4C5" stroke-width="0.5"/>
+        <line x1="20" y1="66"  x2="680" y2="66"  stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="118" x2="680" y2="118" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="170" x2="680" y2="170" stroke="#D8D4C5" stroke-width="0.5" stroke-dasharray="2 3"/>
+        <line x1="20" y1="188" x2="680" y2="188" stroke="#17160F" stroke-width="0.8"/>
+
+        <!-- X labels -->
+        <text x="20"  y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A">'26</text>
+        <text x="130" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'31</text>
+        <text x="240" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'36</text>
+        <text x="350" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'41</text>
+        <text x="460" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'46</text>
+        <text x="570" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="middle">'51</text>
+        <text x="680" y="208" font-family="JetBrains Mono" font-size="9" fill="#6B675A" text-anchor="end">'56</text>
+
+        <!-- Y labels -->
+        <text x="685" y="17"  font-family="JetBrains Mono" font-size="9" fill="#6B675A">548k</text>
+        <text x="685" y="69"  font-family="JetBrains Mono" font-size="9" fill="#6B675A">410k</text>
+        <text x="685" y="121" font-family="JetBrains Mono" font-size="9" fill="#6B675A">274k</text>
+        <text x="685" y="173" font-family="JetBrains Mono" font-size="9" fill="#6B675A">137k</text>
+        <text x="685" y="191" font-family="JetBrains Mono" font-size="9" fill="#6B675A">0</text>
+
+        <!-- Area + line — decelerating decay of amortization -->
+        <path d="M 20 14
+                 C 70 20, 110 28, 130 34
+                 C 180 48, 220 62, 240 72
+                 C 300 104, 330 116, 350 125
+                 C 400 145, 430 156, 460 165
+                 C 510 178, 540 183, 570 186
+                 L 680 188
+                 L 680 188 L 20 188 Z"
+              fill="#E6EDE9" opacity="0.7"/>
+
+        <path d="M 20 14
+                 C 70 20, 110 28, 130 34
+                 C 180 48, 220 62, 240 72
+                 C 300 104, 330 116, 350 125
+                 C 400 145, 430 156, 460 165
+                 C 510 178, 540 183, 570 186
+                 L 680 188"
+              fill="none" stroke="#1F4D3F" stroke-width="1.8"
+              stroke-linejoin="round" stroke-linecap="round"/>
+
+        <!-- Year 10 marker -->
+        <line x1="240" y1="14" x2="240" y2="188" stroke="#6B675A" stroke-width="0.5" stroke-dasharray="2 3" opacity="0.5"/>
+        <circle cx="240" cy="72" r="3.5" fill="#FAF9F5" stroke="#1F4D3F" stroke-width="1.8"/>
+        <text x="248" y="62" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1F4D3F">Yr 10 · {{yr10_balance_formatted}}</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Composition + Narrative -->
+  <section class="two-col">
+
+    <div>
+      <div class="section-head">
+        <h2>Where the payment goes</h2>
+        <div class="note">First payment · June 2026</div>
+      </div>
+      <p class="section-sub">
+        Interest dominates early payments; principal share exceeds interest at <strong>month 197</strong>.
+      </p>
+
+      <div class="comp-bar">
+        <div style="background:var(--s1); width:74.2%"></div>
+        <div style="background:var(--s2); width:8.2%"></div>
+        <div style="background:var(--s4); width:12.9%"></div>
+        <div style="background:var(--s3); width:3.2%"></div>
+        <div style="background:var(--ink3); width:1.5%"></div>
+      </div>
+
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s1)"></div>
+        <div>Interest</div>
+        <div class="amt">$3,123.47</div>
+        <div class="pct">74%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s2)"></div>
+        <div>Principal</div>
+        <div class="amt">$344.67</div>
+        <div class="pct">8%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s4)"></div>
+        <div>Property taxes</div>
+        <div class="amt">$542.00</div>
+        <div class="pct">13%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--s3)"></div>
+        <div>Homeowner's insurance</div>
+        <div class="amt">$135.00</div>
+        <div class="pct">3%</div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-swatch" style="background:var(--ink3)"></div>
+        <div>HOA</div>
+        <div class="amt">$62.00</div>
+        <div class="pct">2%</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-head">
+        <h2>Analyst narrative</h2>
+        <div class="note">AI-generated · reviewed</div>
+      </div>
+
+      <div class="narrative">
+        <p class="lead" style="margin:0 0 8pt;">
+          The Smiths' {{loan_amount_formatted}} loan at <span class="hl">{{rate_pct}}</span> produces a PITI of
+          $4,207/mo — well within the 28% front-end ratio on a combined {{combined_monthly_income}} monthly income.
+        </p>
+        <p style="margin:0 0 8pt;">
+          Paying an additional <span class="hl">${{extra_principal_formatted}} / mo</span> toward principal would shorten
+          the loan by {{extra_paydown_shortened}} and save approximately <span class="hl">{{extra_paydown_interest_saved}}</span> in interest.
+          A 0.25% rate improvement at close saves roughly <span class="hl">${{quarterpt_savings_monthly}} / mo</span>
+          and <span class="hl">{{quarterpt_savings_lifetime}}</span> over the loan's life.
+        </p>
+        <p style="margin:0;">
+          At an 78% LTV, no PMI is required. Borrower reaches 80% LTV at month 37 and
+          50% LTV at month 214, when refinance incentives typically re-emerge.
+        </p>
+        <div class="sig">
+          <span>{{prepared_by_name}} · NMLS 482139</span>
+          <span>Generated {{prepared_date}} · v1.4</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · Smith Residence · {{doc_num}}
+      <span class="dis">
+        This is an illustrative amortization scenario, not a Loan Estimate or commitment to lend.
+        Figures assume constant rate and escrow; actuals may vary.
+      </span>
+    </div>
+  </div>
+</article>
+
+
+<!-- ============================================================
+     PAGE 2 — FULL SCHEDULE (years 1-15)
+     ============================================================ -->
+<article class="page">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Amortization Report · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">Smith · NIQ-AM-0147</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Payment schedule</h2>
+      <div class="note">Years 1 – 15 · annual summary</div>
+    </div>
+    <p class="section-sub">
+      Monthly rows consolidated to year-end. Principal, interest, and remaining balance at the
+      final payment of each calendar year. Full monthly detail available in the app.
+    </p>
+
+    <!--{{schedule_page_1_rows}}-->
+  </section>
+
+  <!-- Milestones -->
+  <section style="margin-top: 28pt;">
+    <div class="section-head">
+      <h2>Equity milestones</h2>
+      <div class="note">Thresholds for PMI removal &amp; refi</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14pt;">
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">20% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Jul 2029</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 37 · PMI auto-drop</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">30% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Nov 2034</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 102</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--sunken); border-radius: 4pt;">
+        <div class="micro">50% equity</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt;">Feb 2044</div>
+        <div class="mono" style="font-size: 8pt; color: var(--ink3); margin-top: 2pt;">mo 214</div>
+      </div>
+      <div style="padding: 12pt 14pt; background: var(--accent-tint); border-radius: 4pt; border: 0.5pt solid var(--accent);">
+        <div class="micro" style="color: var(--accent);">Paid in full</div>
+        <div class="mono" style="font-size: 14pt; font-weight: 500; margin-top: 4pt; color: var(--accent);">{{payoff_date}}</div>
+        <div class="mono" style="font-size: 8pt; color: var(--accent); opacity: 0.8; margin-top: 2pt;">mo 360</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · Smith Residence · {{doc_num}}
+      <span class="dis">
+        Year-end balances are calculated after the December payment of each calendar year. Rounded to dollars.
+      </span>
+    </div>
+  </div>
+</article>
+
+
+<!-- ============================================================
+     PAGE 3 — SCHEDULE 16-30 + SIGNATURE
+     ============================================================ -->
+<article class="page">
+  <header class="masthead" style="margin-bottom:18pt; padding-bottom:8pt; border-bottom-width:1pt;">
+    <div class="masthead-left">
+      <div class="monogram" style="width:28pt;height:28pt;">
+        <span class="n" style="font-size:22pt;">N</span>
+        <span class="iq" style="font-size:6pt;right:4pt;bottom:3pt;">iq</span>
+      </div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">Amortization Report · Continued</div>
+        <div class="wordmark" style="font-size:14pt;">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">Smith · NIQ-AM-0147</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Payment schedule</h2>
+      <div class="note">Years 16 – 30 · annual summary</div>
+    </div>
+
+    <!--{{schedule_page_2_rows}}-->
+  </section>
+
+  <!-- Assumptions -->
+  <section style="margin-top: 28pt;">
+    <div class="section-head">
+      <h2>Assumptions &amp; disclosures</h2>
+      <div class="note">Inputs used in this report</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22pt; font-size: 9pt; line-height: 1.55;">
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Loan inputs</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Purchase price</span><span class="mono">$685,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Down payment</span><span class="mono">$137,000 · 20%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Loan amount</span><span class="mono">{{loan_amount_formatted}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Interest rate</span><span class="mono">{{rate_pct}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Term</span><span class="mono">30 years</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>First payment</span><span class="mono">{{first_payment_date}}</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">Escrow &amp; fees · monthly</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Property taxes</span><span class="mono">$542.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Homeowner's insurance</span><span class="mono">$135.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>HOA</span><span class="mono">$62.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>PMI</span><span class="mono">— · n/a at 80% LTV</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Total escrow</span><span class="mono">$739.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>Total PITI</span><span class="mono" style="font-weight:600;">$4,207.14</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature -->
+  <section class="signature">
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Borrower · date</div>
+    </div>
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Loan officer · {{prepared_by_name}} · NMLS 482139</div>
+    </div>
+  </section>
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · Smith Residence · {{doc_num}}
+      <span class="dis">
+        Not a Loan Estimate, commitment to lend, or binding offer. Rates, fees, and terms subject to change.
+        Consult disclosures provided with any final loan application. Equal Housing Opportunity.
+      </span>
+    </div>
+  </div>
+</article>
+
+</body>
+</html>

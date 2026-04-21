@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NestIQ PDF Template Tokens",
+  "description": "Token contract for Mustache {{...}} substitutions in pdf-v2/templates/*.html. Every string-valued token is rendered pre-formatted (dollar signs, percent signs, thousand separators already in place) — the template does no formatting of its own.",
+  "version": "2.1.2",
+
+  "definitions": {
+    "common": {
+      "type": "object",
+      "description": "Fields present in every template.",
+      "properties": {
+        "borrower_first":    { "type": "string", "example": "Priya" },
+        "borrower_last":     { "type": "string", "example": "Venkatesan", "description": "Rendered italic + accent color in the H1." },
+        "property_address":  { "type": "string", "example": "847 Bayview Ave · Oakland, CA 94610" },
+        "doc_num":           { "type": "string", "example": "NIQ-RF-2026-04-17-0203", "description": "Internal doc ID, format NIQ-<type>-<YYYY-MM-DD>-<seq>." },
+        "prepared_by_name":  { "type": "string", "example": "N. Matthews" },
+        "prepared_by_nmls":  { "type": "string", "example": "482139", "description": "NMLS # — template renders leading #." },
+        "prepared_date":     { "type": "string", "example": "Apr 17, 2026" },
+        "loan_amount_formatted": { "type": "string", "example": "$548,000" }
+      },
+      "required": ["borrower_first", "borrower_last", "doc_num", "prepared_by_name", "prepared_by_nmls", "prepared_date"]
+    }
+  },
+
+  "templates": {
+
+    "amortization": {
+      "file": "pdf-amortization-{with-masthead|body-only}.html",
+      "tokens": {
+        "allOf": [{ "$ref": "#/definitions/common" }],
+        "properties": {
+          "rate_lock":        { "type": "string", "example": "45-day" },
+          "product_badge":    { "type": "string", "example": "GEN-QM · 30yr" },
+          "piti_dollars":     { "type": "string", "example": "4,207", "description": "Whole-dollar portion of PITI — rendered in 54pt mono." },
+          "piti_cents":       { "type": "string", "example": "14", "description": "Two-digit cents portion, rendered small." },
+          "first_payment_date": { "type": "string", "example": "Jun 01, 2026" },
+          "total_interest_formatted": { "type": "string", "example": "$561K" },
+          "payoff_date":      { "type": "string", "example": "May 2056" },
+          "total_paid_formatted": { "type": "string", "example": "$1.28M" },
+          "ltv_pct":          { "type": "string", "example": "78" },
+          "pmi_note":         { "type": "string", "example": "no PMI required" },
+          "yr10_balance_formatted":     { "type": "string", "example": "$458,720" },
+          "rate_pct":         { "type": "string", "example": "6.750%" },
+          "extra_principal_formatted":  { "type": "string", "example": "200" },
+          "extra_paydown_shortened":    { "type": "string", "example": "4 yrs 3 mos" },
+          "extra_paydown_interest_saved": { "type": "string", "example": "$87,200" },
+          "quarterpt_savings_monthly":  { "type": "string", "example": "92" },
+          "quarterpt_savings_lifetime": { "type": "string", "example": "$33K" },
+          "combined_monthly_income":    { "type": "string", "example": "$20,400" }
+        },
+        "note": "Schedule-split grids (years 1-15 on page 2, years 16-30 on page 3) are replaced by two sentinel comments: <!--{{schedule_page_1_rows}}--> and <!--{{schedule_page_2_rows}}-->. Swift builder emits the full <div class=\"schedule-split\"> contents (two <table class=\"schedule\"> columns per page, plus the 30-year totals <tfoot> on page 2)."
+      }
+    },
+
+    "refinance": {
+      "file": "pdf-refinance-{with-masthead|body-only}.html",
+      "tokens": {
+        "allOf": [{ "$ref": "#/definitions/common" }],
+        "properties": {
+          "refi_type":                { "type": "string", "example": "Rate-&-term refinance" },
+          "current_balance_formatted":{ "type": "string", "example": "$412,300" },
+          "current_rate_pct":         { "type": "string", "example": "7.375%" },
+          "recommended_option_tag":   { "type": "string", "example": "Option B" },
+          "recommended_option_name":  { "type": "string", "example": "30-yr fixed at 6.125%" },
+          "recommended_breakeven_months":    { "type": "string", "example": "28 months" },
+          "recommended_monthly_savings":     { "type": "string", "example": "285" },
+          "recommended_closing_costs_formatted": { "type": "string", "example": "$8,040" },
+          "recommended_lifetime_savings_formatted": { "type": "string", "example": "$68,400" },
+          "recommended_lifetime_short": { "type": "string", "example": "$68.4K" },
+          "recommended_npv_short":    { "type": "string", "example": "$41.2K" },
+          "option_a_lender":          { "type": "string", "example": "Lakeshore" },
+          "option_a_term":            { "type": "string", "example": "30 yr", "description": "Short form used in col-head subtitle AND the Terms-row cell on the comparison matrix." },
+          "option_b_lender":          { "type": "string", "example": "Coastal" },
+          "option_b_term":            { "type": "string", "example": "30 yr" },
+          "option_c_lender":          { "type": "string", "example": "Coastal" },
+          "option_c_term":            { "type": "string", "example": "15 yr" },
+
+          "recommended_breakeven_months_short": { "type": "string", "example": "28", "description": "Bare integer for the page 1 break-even hero cell (displayed adjacent to a small 'mo' unit)." },
+          "recommended_remaining_years":        { "type": "string", "example": "28", "description": "Integer years remaining on the current loan, used in 'remaining N yrs · net of costs' on the page 1 hero." },
+
+          "option_a_rate_pct":  { "type": "string", "example": "6.375%" },
+          "option_b_rate_pct":  { "type": "string", "example": "6.125%" },
+          "option_c_rate_pct":  { "type": "string", "example": "5.625%" },
+          "option_a_apr_pct":   { "type": "string", "example": "6.468%" },
+          "option_b_apr_pct":   { "type": "string", "example": "6.219%" },
+          "option_c_apr_pct":   { "type": "string", "example": "5.742%" },
+          "option_a_points":    { "type": "string", "example": "0.50" },
+          "option_b_points":    { "type": "string", "example": "0.00" },
+          "option_c_points":    { "type": "string", "example": "0.25" },
+
+          "option_a_pi_formatted":       { "type": "string", "example": "$2,576" },
+          "option_b_pi_formatted":       { "type": "string", "example": "$2,507" },
+          "option_c_pi_formatted":       { "type": "string", "example": "$3,396" },
+          "current_monthly_pi_formatted":{ "type": "string", "example": "$2,792", "description": "Current loan P+I. Used in both the 'vs current' label and the page 3 assumptions box." },
+          "option_a_pi_delta_formatted": { "type": "string", "example": "−$216", "description": "Signed delta — Swift emits leading − or + before the dollar sign." },
+          "option_b_pi_delta_formatted": { "type": "string", "example": "−$285" },
+          "option_c_pi_delta_formatted": { "type": "string", "example": "+$604" },
+          "option_a_pi_delta_pct":       { "type": "string", "example": "−7.7%" },
+          "option_b_pi_delta_pct":       { "type": "string", "example": "−10.2%" },
+          "option_c_pi_delta_pct":       { "type": "string", "example": "+21.6%" },
+
+          "option_a_lender_fees_formatted":     { "type": "string", "example": "$2,190" },
+          "option_b_lender_fees_formatted":     { "type": "string", "example": "$1,825" },
+          "option_c_lender_fees_formatted":     { "type": "string", "example": "$2,410" },
+          "option_a_third_party_formatted":     { "type": "string", "example": "$5,872" },
+          "option_b_third_party_formatted":     { "type": "string", "example": "$6,215" },
+          "option_c_third_party_formatted":     { "type": "string", "example": "$6,090" },
+          "option_a_discount_points_formatted": { "type": "string", "example": "$2,062", "description": "Em-dash '—' when zero points." },
+          "option_b_discount_points_formatted": { "type": "string", "example": "—" },
+          "option_c_discount_points_formatted": { "type": "string", "example": "$1,031" },
+          "option_a_total_closing_formatted":   { "type": "string", "example": "$10,124" },
+          "option_b_total_closing_formatted":   { "type": "string", "example": "$8,040", "description": "Resolves to the same value as recommended_closing_costs_formatted; both names retained for readability per context." },
+          "option_c_total_closing_formatted":   { "type": "string", "example": "$9,531" },
+
+          "option_a_breakeven_label":               { "type": "string", "example": "47 mo", "description": "Display text — Swift may also emit 'n/a' when not applicable." },
+          "option_b_breakeven_label":               { "type": "string", "example": "28 mo" },
+          "option_c_breakeven_label":               { "type": "string", "example": "n/a" },
+          "option_a_interest_remaining_formatted":  { "type": "string", "example": "$515,730" },
+          "option_b_interest_remaining_formatted":  { "type": "string", "example": "$490,120" },
+          "option_c_interest_remaining_formatted":  { "type": "string", "example": "$198,050" },
+          "option_a_lifetime_savings_formatted":    { "type": "string", "example": "$42,100" },
+          "option_b_lifetime_savings_formatted":    { "type": "string", "example": "$68,400" },
+          "option_c_lifetime_savings_formatted":    { "type": "string", "example": "$174,200" },
+          "option_a_npv_formatted":                 { "type": "string", "example": "$23,800" },
+          "option_b_npv_formatted":                 { "type": "string", "example": "$41,200" },
+          "option_c_npv_formatted":                 { "type": "string", "example": "$52,900" },
+
+          "original_loan_amount_formatted": { "type": "string", "example": "$445,000", "description": "Page 3 assumptions box — original amount of the current loan at origination." },
+          "current_term":                   { "type": "string", "example": "30 yr", "description": "Page 3 assumptions box — original term of the current loan." },
+          "current_remaining_term":         { "type": "string", "example": "28 yr 2 mo" },
+          "current_originated_date":        { "type": "string", "example": "Mar 2024" }
+        },
+        "note": "Comparison matrix (page 2), break-even hero (page 1), and current-loan assumptions box (page 3) are fully tokenized as of v2.1.2 (49 new tokens beyond v2.1.1). gain/loss CSS classes on the delta + lifetime-savings rows remain hardcoded for the demo-typical option ordering; SVG break-even chart paths/labels, analyst narrative block, and savings-by-holding-period grid remain literal — all three regions tracked in Quotient V0.1.2-BACKLOG.md."
+      }
+    },
+
+    "tca": {
+      "file": "pdf-tca-{with-masthead|body-only}.html",
+      "tokens": {
+        "allOf": [{ "$ref": "#/definitions/common" }],
+        "properties": {
+          "purchase_summary":     { "type": "string", "example": "$685,000 purchase · Austin, TX · 4 product scenarios · 5 time horizons" },
+          "down_payment_summary": { "type": "string", "example": "20% · $137,000" }
+        },
+        "note": "4×5 cost matrix <tbody> rows are replaced by sentinel <!--{{matrix_rows}}-->. Swift builder emits <tr> rows per scenario using existing CSS classes (.best, .worst, .delta). Grouped-bar chart <rect> geometry remains literal for v0.1.1 and is deferred to v0.1.2."
+      }
+    },
+
+    "heloc": {
+      "file": "pdf-heloc-{with-masthead|body-only}.html",
+      "page_count": 3,
+      "tokens": {
+        "allOf": [{ "$ref": "#/definitions/common" }],
+        "properties": {
+          "cash_need_formatted":          { "type": "string", "example": "$180,000" },
+          "home_value_formatted":         { "type": "string", "example": "$925,000" },
+          "post_cltv_pct":                { "type": "string", "example": "64%" },
+          "remaining_equity_formatted":   { "type": "string", "example": "$335,000" },
+          "first_mortgage_balance_formatted": { "type": "string", "example": "$412,000" },
+          "first_mortgage_payment":       { "type": "string", "example": "1,795" },
+          "first_mortgage_originated":    { "type": "string", "example": "Aug 2021" },
+          "current_rate_pct":             { "type": "string", "example": "3.25%", "description": "Preserved first-lien rate — the anchor of the HELOC argument." },
+
+          "first_lien_bar_pct":           { "type": "string", "example": "44%", "description": "Stack-diagram bar width for first-mortgage balance as % of home value." },
+          "heloc_bar_pct":                { "type": "string", "example": "20%", "description": "Stack-diagram bar width for HELOC draw." },
+          "remaining_equity_bar_pct":     { "type": "string", "example": "36%" },
+
+          "recommended_product":          { "type": "string", "example": "$200K HELOC · 10 / 20 draw-repay" },
+          "recommended_savings_vs_refi":  { "type": "string", "example": "$43K" },
+          "ten_yr_savings_vs_refi":       { "type": "string", "example": "43,200" },
+          "blended_effective_rate_pct":   { "type": "string", "example": "5.18%" },
+
+          "heloc_draw_rate_pct":          { "type": "string", "example": "8.25%" },
+          "heloc_index_plus_margin_pct":  { "type": "string", "example": "Prime + 0.50" },
+          "heloc_draw_period_yrs":        { "type": "string", "example": "10" },
+          "heloc_repay_period_yrs":       { "type": "string", "example": "20" },
+          "heloc_lifetime_cap_pct":       { "type": "string", "example": "18.00%" },
+          "heloc_line_formatted":         { "type": "string", "example": "$200,000" },
+          "heloc_interest_only_payment":  { "type": "string", "example": "1,238" },
+          "heloc_repay_payment_start":    { "type": "string", "example": "1,534" },
+
+          "cashout_refi_rate_pct":        { "type": "string", "example": "6.875%" },
+          "rate_premium_bps":             { "type": "string", "example": "362" },
+
+          "heloc_year1_payment":          { "type": "string", "example": "3,033" },
+          "heloc_year5_payment":          { "type": "string", "example": "3,033" },
+          "heloc_year11_payment":         { "type": "string", "example": "3,329" },
+          "refi_year1_payment":           { "type": "string", "example": "3,890" },
+          "refi_year5_payment":           { "type": "string", "example": "3,890" },
+          "refi_year11_payment":          { "type": "string", "example": "3,890" },
+
+          "heloc_closing_costs_formatted": { "type": "string", "example": "$450" },
+          "refi_closing_costs_formatted":  { "type": "string", "example": "$11,200" },
+          "heloc_breakeven_months":        { "type": "string", "example": "immediate" },
+          "heloc_10yr_interest_formatted": { "type": "string", "example": "$141K" },
+          "refi_10yr_interest_formatted":  { "type": "string", "example": "$378K" },
+          "heloc_10yr_principal_paydown":  { "type": "string", "example": "$112K" },
+          "refi_10yr_principal_paydown":   { "type": "string", "example": "$76K" },
+          "heloc_10yr_net_cost":           { "type": "string", "example": "$29K saved" },
+          "refi_10yr_net_cost":            { "type": "string", "example": "$72K extra" },
+
+          "stress_today_rate":     { "type": "string", "example": "8.25%" },
+          "stress_today_payment":  { "type": "string", "example": "1,238" },
+          "stress_today_peak":     { "type": "string", "example": "1,534" },
+          "stress_flat_rate":      { "type": "string", "example": "8.25%" },
+          "stress_flat_payment":   { "type": "string", "example": "1,238" },
+          "stress_flat_peak":      { "type": "string", "example": "1,534" },
+          "stress_plus1_rate":     { "type": "string", "example": "9.25%" },
+          "stress_plus1_payment":  { "type": "string", "example": "1,388" },
+          "stress_plus1_delta":    { "type": "string", "example": "150" },
+          "stress_plus1_peak":     { "type": "string", "example": "1,687" },
+          "stress_plus2_rate":     { "type": "string", "example": "10.25%" },
+          "stress_plus2_payment":  { "type": "string", "example": "1,538" },
+          "stress_plus2_delta":    { "type": "string", "example": "300" },
+          "stress_plus2_peak":     { "type": "string", "example": "1,845" },
+          "stress_plus2_blended":  { "type": "string", "example": "5.92%" },
+          "stress_plus3_rate":     { "type": "string", "example": "11.25%" },
+          "stress_plus3_payment":  { "type": "string", "example": "1,688" },
+          "stress_plus3_delta":    { "type": "string", "example": "450" },
+          "stress_plus3_peak":     { "type": "string", "example": "2,005" },
+          "stress_crossover_bps":  { "type": "string", "example": "180" }
+        },
+        "note": "Stack diagram bar widths (first_lien_bar_pct etc.) must sum to 100% and are CSS width values. Stress-test rows are currently a fixed 5-row table; in a future revision engineering can render rows from a stress_paths[] array."
+      }
+    }
+  }
+}

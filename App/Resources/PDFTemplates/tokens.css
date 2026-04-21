@@ -1,0 +1,383 @@
+/* =========================================================
+   NestIQ · PDF tokens
+   Shared by all 6 templates × 2 variants.
+   Consumers: iOS UIPrintPageRenderer + WKWebView, Safari print.
+   ========================================================= */
+
+/* ---------- FONTS (local, not Google CDN) ----------
+   iOS: bundle TTFs at App/Resources/Fonts/
+   Web: place at /public/fonts/ and swap relative paths.
+   See fonts/README.txt for download URLs.
+   -------------------------------------------------- */
+
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('../fonts/SourceSerif4-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('../fonts/SourceSerif4-Italic.ttf') format('truetype');
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('../fonts/SourceSerif4-Semibold.ttf') format('truetype');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('../fonts/SourceSerif4-SemiboldItalic.ttf') format('truetype');
+  font-weight: 600; font-style: italic; font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/JetBrainsMono-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/JetBrainsMono-Medium.ttf') format('truetype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/JetBrainsMono-SemiBold.ttf') format('truetype');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+
+/* ---------- DESIGN TOKENS ---------- */
+:root {
+  --ink:   #17160F;
+  --ink2:  #3D3A2F;
+  --ink3:  #6B675A;
+  --ink4:  #9A957F;
+  --paper: #FAF9F5;
+  --sunken: #F2F0E8;
+  --rule:   #D8D4C5;
+  --rule-soft: #E6E3D6;
+  --accent: #1F4D3F;       /* ledger green */
+  --accent-tint: #E6EDE9;
+  --gain:   #2F6B48;
+  --loss:   #8A2F2F;
+
+  /* Scenario palette */
+  --s1: #264B6A;
+  --s2: #6A3F5A;
+  --s3: #73522A;
+  --s4: #1F4D3F;
+
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --sans:  -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: #E1DDD0;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 10pt;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ---------- PAGE ---------- */
+.page {
+  width: 8.5in;
+  min-height: 11in;
+  background: var(--paper);
+  margin: 0.3in auto;
+  padding: 0.55in 0.6in 0.5in;
+  position: relative;
+  page-break-after: always;
+  box-shadow: 0 2px 20px -6px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.page:last-child { page-break-after: auto; }
+
+/* Body-only variant drops left/right padding so iOS Core Graphics
+   can draw its own masthead + margins. */
+.page.body-only {
+  padding: 0.35in 0.6in 0.45in;
+}
+
+/* ---------- TYPE UTILITIES ---------- */
+.serif { font-family: var(--serif); font-weight: 400; letter-spacing: -0.018em; }
+.mono  { font-family: var(--mono); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'zero' 1; }
+.eyebrow {
+  font-family: var(--mono); font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+}
+.micro {
+  font-family: var(--mono); font-size: 6.8pt; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+}
+
+/* ---------- MASTHEAD ---------- */
+.masthead {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding-bottom: 10pt; border-bottom: 2.5pt solid var(--ink);
+  margin-bottom: 24pt;
+}
+.masthead-left { display: flex; align-items: center; gap: 14pt; }
+.monogram {
+  width: 42pt; height: 42pt; background: var(--accent);
+  border-radius: 5pt; display: grid; place-items: center;
+  position: relative; flex-shrink: 0;
+}
+.monogram .n {
+  font-family: var(--serif); font-size: 32pt; font-weight: 400;
+  color: var(--paper); line-height: 1; letter-spacing: -0.04em;
+  margin-top: 2pt;
+}
+.monogram .iq {
+  position: absolute; right: 5pt; bottom: 4pt;
+  font-family: var(--serif); font-size: 8pt; color: var(--paper);
+  opacity: 0.82; font-style: italic;
+}
+.wordmark {
+  font-family: var(--serif); font-size: 26pt; font-weight: 400;
+  letter-spacing: -0.035em; line-height: 1; color: var(--ink);
+}
+.wordmark span { font-style: italic; color: var(--accent); margin-left: -1.5pt; }
+
+.masthead-right { text-align: right; }
+.masthead-right .doctype {
+  font-family: var(--mono); font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
+}
+.masthead-right .docnum {
+  font-family: var(--mono); font-size: 9pt; color: var(--ink);
+  margin-top: 2pt; letter-spacing: 0.04em;
+}
+
+/* Compact continued-page masthead */
+.masthead.continued { margin-bottom: 18pt; padding-bottom: 8pt; border-bottom-width: 1pt; }
+.masthead.continued .monogram { width: 28pt; height: 28pt; }
+.masthead.continued .monogram .n { font-size: 22pt; }
+.masthead.continued .monogram .iq { font-size: 6pt; right: 4pt; bottom: 3pt; }
+.masthead.continued .wordmark { font-size: 14pt; }
+.masthead.continued .docnum { font-size: 8pt; color: var(--ink3); }
+
+/* ---------- SCENARIO HEADER ---------- */
+.scenario-head {
+  display: grid; grid-template-columns: 1fr auto; gap: 20pt;
+  margin-bottom: 18pt;
+}
+.scenario-head h1 {
+  font-family: var(--serif); font-weight: 400;
+  font-size: 32pt; letter-spacing: -0.025em;
+  line-height: 1.04; margin: 4pt 0 4pt;
+}
+.scenario-head h1 .i { font-style: italic; color: var(--accent); }
+.scenario-head .sub {
+  font-family: var(--mono); font-size: 9.5pt; color: var(--ink2);
+  margin-top: 4pt; letter-spacing: 0.01em;
+}
+.scenario-meta {
+  border-left: 1pt solid var(--rule); padding-left: 16pt;
+  display: flex; flex-direction: column; gap: 8pt; min-width: 180pt;
+}
+.scenario-meta .row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12pt;
+}
+.scenario-meta .row .l {
+  font-family: var(--mono); font-size: 7pt; color: var(--ink3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.scenario-meta .row .v {
+  font-family: var(--mono); font-size: 9.5pt; color: var(--ink); font-weight: 500;
+}
+.badge {
+  display: inline-block; padding: 2pt 6pt;
+  background: var(--accent); color: var(--paper);
+  font-family: var(--mono); font-size: 7pt; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2pt;
+}
+
+/* ---------- HERO NUMBER ---------- */
+.hero {
+  background: var(--sunken); border-radius: 6pt;
+  padding: 20pt 22pt; margin-bottom: 20pt;
+  display: grid; grid-template-columns: 1fr auto; gap: 24pt; align-items: center;
+}
+.hero-left .eyebrow { margin-bottom: 4pt; }
+.hero-figure { display: flex; align-items: baseline; line-height: 1; }
+.hero-figure .dollar {
+  font-family: var(--mono); font-size: 14pt; color: var(--ink3);
+  margin-right: 2pt; font-weight: 400;
+}
+.hero-figure .num {
+  font-family: var(--mono); font-size: 54pt; font-weight: 500;
+  letter-spacing: -0.025em; color: var(--ink);
+}
+.hero-figure .decimal {
+  font-family: var(--mono); font-size: 14pt; color: var(--ink3);
+  margin-left: 2pt; font-weight: 400;
+}
+.hero-figure .unit {
+  font-family: var(--mono); font-size: 10pt; color: var(--ink3); margin-left: 8pt;
+}
+.hero-right {
+  text-align: right; font-family: var(--mono); font-size: 8pt;
+  color: var(--ink3); letter-spacing: 0.04em; line-height: 1.6;
+}
+
+/* ---------- KPI STRIP ---------- */
+.kpi-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 14pt 0 18pt; margin-bottom: 22pt;
+  border-top: 1pt solid var(--rule);
+  border-bottom: 1pt solid var(--rule);
+}
+.kpi { padding: 0 14pt; }
+.kpi + .kpi { border-left: 0.5pt solid var(--rule); }
+.kpi:first-child { padding-left: 0; }
+.kpi:last-child  { padding-right: 0; }
+.kpi .l {
+  font-family: var(--mono); font-size: 6.8pt; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+}
+.kpi .v {
+  font-family: var(--mono); font-size: 18pt; font-weight: 500;
+  letter-spacing: -0.015em; margin-top: 5pt; color: var(--ink);
+}
+.kpi .vs {
+  font-family: var(--mono); font-size: 8pt; color: var(--ink3); margin-top: 2pt;
+}
+.kpi .v.positive { color: var(--gain); }
+
+/* ---------- SECTION HEAD ---------- */
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: 6pt; margin-bottom: 12pt;
+  border-bottom: 1pt solid var(--rule);
+}
+.section-head h2 {
+  font-family: var(--serif); font-weight: 400; margin: 0;
+  font-size: 16pt; letter-spacing: -0.02em;
+}
+.section-head .note { font-family: var(--mono); font-size: 8pt; color: var(--ink3); }
+.section-sub {
+  font-size: 9pt; color: var(--ink2); line-height: 1.5;
+  margin: -6pt 0 14pt; max-width: 420pt; letter-spacing: -0.005em;
+}
+.chart-wrap { margin: 10pt 0 20pt; }
+
+/* ---------- COMPOSITION BAR ---------- */
+.two-col {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 28pt; margin-bottom: 20pt;
+}
+.comp-bar {
+  display: flex; height: 10pt; border-radius: 1.5pt; overflow: hidden;
+  border: 0.5pt solid var(--rule); margin-bottom: 12pt;
+}
+.comp-row {
+  display: grid; grid-template-columns: 10pt 1fr auto auto;
+  gap: 10pt; align-items: center;
+  padding: 7pt 0; border-bottom: 0.5pt solid var(--rule-soft);
+  font-size: 9pt;
+}
+.comp-row:last-child { border-bottom: 0; }
+.comp-swatch { width: 8pt; height: 8pt; border-radius: 1pt; }
+.comp-row .amt { font-family: var(--mono); font-weight: 500; }
+.comp-row .pct {
+  font-family: var(--mono); font-size: 7.5pt; color: var(--ink3);
+  width: 32pt; text-align: right;
+}
+
+/* ---------- NARRATIVE CARD ---------- */
+.narrative {
+  background: var(--paper); border: 0.5pt solid var(--rule);
+  border-left: 2.5pt solid var(--accent);
+  padding: 14pt 16pt; border-radius: 0 4pt 4pt 0;
+  font-family: var(--serif); font-size: 10.5pt;
+  line-height: 1.55; letter-spacing: -0.005em; color: var(--ink);
+}
+.narrative .lead { font-size: 11pt; }
+.narrative .hl { color: var(--accent); font-weight: 500; font-style: italic; }
+.narrative .sig {
+  font-family: var(--mono); font-size: 7.5pt; color: var(--ink3);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-top: 12pt; padding-top: 8pt;
+  border-top: 0.5pt solid var(--rule-soft);
+  font-style: normal; display: flex; justify-content: space-between;
+}
+
+/* ---------- SCHEDULE TABLE ---------- */
+.schedule { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.schedule thead { display: table-header-group; }
+.schedule thead th {
+  font-family: var(--mono); font-size: 6.8pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+  text-align: right; padding: 6pt 8pt; border-bottom: 1pt solid var(--ink);
+}
+.schedule thead th:first-child { text-align: left; }
+.schedule tbody td {
+  font-family: var(--mono); padding: 5pt 8pt;
+  border-bottom: 0.4pt solid var(--rule-soft);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.schedule tbody td:first-child {
+  text-align: left; color: var(--ink3); font-size: 8pt;
+}
+.schedule tbody tr.year-end { background: var(--sunken); }
+.schedule tbody tr.year-end td:first-child { color: var(--ink); font-weight: 600; }
+.schedule tbody tr { page-break-inside: avoid; }
+.schedule tfoot td {
+  font-family: var(--mono); padding: 8pt 8pt;
+  border-top: 1pt solid var(--ink); font-weight: 600; text-align: right;
+}
+.schedule tfoot td:first-child { text-align: left; }
+.schedule-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24pt; }
+
+/* ---------- PAGE FOOTER ---------- */
+.pagefoot {
+  position: absolute; left: 0.6in; right: 0.6in; bottom: 0.35in;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding-top: 10pt; border-top: 0.5pt solid var(--rule);
+  font-family: var(--mono); font-size: 7pt; color: var(--ink3);
+  letter-spacing: 0.04em;
+}
+.pagefoot .left { max-width: 320pt; line-height: 1.5; font-style: normal; }
+.pagefoot .left .dis {
+  color: var(--ink4); font-style: italic; display: block; margin-top: 3pt;
+  text-transform: none; letter-spacing: 0.01em;
+}
+.pagefoot .pn { font-weight: 600; color: var(--ink); }
+
+/* Body-only: no footer chrome — engine handles it */
+.body-only .pagefoot { display: none; }
+
+/* ---------- SIGNATURE ---------- */
+.signature {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32pt;
+  margin-top: 28pt; padding-top: 18pt; border-top: 1pt solid var(--rule);
+}
+.sig-block .line {
+  border-bottom: 0.8pt solid var(--ink); height: 22pt; margin-bottom: 4pt;
+}
+.sig-block .l {
+  font-family: var(--mono); font-size: 7pt;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+}
+
+/* ---------- PRINT ---------- */
+@media print {
+  html, body { background: white; }
+  .page { margin: 0; box-shadow: none; border: 0; }
+  @page { size: letter; margin: 0; }
+  .print-hint { display: none !important; }
+}
+.print-hint {
+  position: fixed; right: 20px; top: 20px; z-index: 100;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 14px; border-radius: 6px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  cursor: pointer; border: 0;
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,0.3);
+}
+.print-hint:hover { background: var(--accent); }

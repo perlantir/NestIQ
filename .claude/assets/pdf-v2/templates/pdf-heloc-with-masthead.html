@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NestIQ · HELOC vs Refinance · {{borrower_last}}</title>
+<link rel="stylesheet" href="../tokens.css" />
+<style>
+/* HELOC-specific layer */
+
+.stack-diagram {
+  background: var(--sunken); border-radius: 6pt;
+  padding: 20pt 22pt; margin-bottom: 20pt;
+}
+.stack-row {
+  display: grid; grid-template-columns: 110pt 1fr 120pt;
+  align-items: center; gap: 14pt;
+  padding: 8pt 0; border-bottom: 0.4pt solid var(--rule-soft);
+}
+.stack-row:last-child { border-bottom: 0; }
+.stack-row .sl {
+  font-family: var(--mono); font-size: 7pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+}
+.stack-bar { height: 14pt; border-radius: 2pt; display: flex; align-items: center; padding: 0 8pt; }
+.stack-bar .lbl {
+  font-family: var(--mono); font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.06em; color: var(--paper);
+}
+.stack-row .sv {
+  font-family: var(--mono); font-size: 11pt; font-weight: 500;
+  text-align: right; color: var(--ink);
+}
+.stack-row.total { border-top: 1pt solid var(--ink); border-bottom: 0; padding-top: 10pt; margin-top: 4pt; }
+.stack-row.total .sl { color: var(--ink); }
+.stack-row.total .sv { font-size: 14pt; }
+
+/* Scenario compare (HELOC vs Refi) */
+.hl-compare {
+  display: grid; grid-template-columns: 180pt 1fr 1fr;
+  border-top: 1pt solid var(--ink);
+  border-bottom: 1pt solid var(--ink);
+  margin-bottom: 20pt;
+}
+.hl-compare .hc-head {
+  padding: 10pt 12pt; font-family: var(--mono); font-size: 7pt;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+  border-bottom: 0.5pt solid var(--rule); font-weight: 600;
+}
+.hl-compare .hc-col-head {
+  padding: 12pt 14pt 10pt;
+  border-bottom: 0.5pt solid var(--rule);
+  border-left: 0.5pt solid var(--rule-soft);
+}
+.hl-compare .hc-col-head .label {
+  font-family: var(--mono); font-size: 7pt; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 3pt;
+}
+.hl-compare .hc-col-head .name {
+  font-family: var(--serif); font-size: 14pt;
+  letter-spacing: -0.015em; color: var(--ink);
+}
+.hl-compare .hc-col-head.recommended { background: var(--accent-tint); }
+.hl-compare .hc-col-head.recommended .name { color: var(--accent); }
+.hl-compare .hc-label {
+  padding: 8pt 12pt; font-size: 9pt; color: var(--ink2);
+  border-bottom: 0.4pt solid var(--rule-soft);
+  display: flex; align-items: center;
+}
+.hl-compare .hc-cell {
+  padding: 8pt 14pt; font-family: var(--mono); font-size: 10pt; font-weight: 500;
+  border-bottom: 0.4pt solid var(--rule-soft);
+  border-left: 0.5pt solid var(--rule-soft);
+  display: flex; align-items: center;
+}
+.hl-compare .hc-cell.recommended { background: var(--accent-tint); color: var(--accent); }
+.hl-compare .hc-cell.gain { color: var(--gain); }
+.hl-compare .hc-cell.loss { color: var(--loss); }
+.hl-compare .hc-sub {
+  font-family: var(--mono); font-size: 6.8pt; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); padding: 12pt 12pt 4pt; background: var(--sunken);
+}
+.hl-compare .hc-sub.spacer { border-left: 0.5pt solid var(--rule-soft); }
+.hl-compare .hc-row-last .hc-label,
+.hl-compare .hc-row-last .hc-cell { border-bottom: 0; }
+
+.badge-rec {
+  display: inline-block; margin-left: 8pt;
+  padding: 1pt 5pt; background: var(--accent); color: var(--paper);
+  font-family: var(--mono); font-size: 6.5pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2pt;
+}
+
+/* Stress-test table */
+.stress {
+  width: 100%; border-collapse: collapse; font-size: 9pt;
+}
+.stress thead th {
+  font-family: var(--mono); font-size: 6.8pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3);
+  text-align: right; padding: 8pt 10pt; border-bottom: 1pt solid var(--ink);
+}
+.stress thead th:first-child { text-align: left; }
+.stress tbody td {
+  font-family: var(--mono); padding: 8pt 10pt;
+  border-bottom: 0.4pt solid var(--rule-soft);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.stress tbody td:first-child {
+  text-align: left; color: var(--ink2); font-family: var(--sans); font-size: 9pt;
+}
+.stress tbody tr.alert td { color: var(--loss); }
+.stress tbody tr.alert td:first-child { color: var(--ink); font-weight: 600; }
+
+/* Draw-period timeline */
+.timeline-wrap { margin: 12pt 0 16pt; }
+.timeline-axis {
+  position: relative; height: 42pt;
+  border-bottom: 1pt solid var(--ink);
+  margin: 20pt 0 4pt;
+}
+.timeline-axis .draw,
+.timeline-axis .repay {
+  position: absolute; top: 0; height: 28pt;
+  display: flex; align-items: center; padding: 0 10pt;
+  font-family: var(--mono); font-size: 8pt; font-weight: 600;
+  letter-spacing: 0.06em; color: var(--paper);
+}
+.timeline-axis .draw { left: 0; width: 33%; background: var(--accent); border-radius: 2pt 0 0 0; }
+.timeline-axis .repay { left: 33%; width: 67%; background: var(--s3); border-radius: 0 2pt 0 0; }
+.timeline-axis .tick {
+  position: absolute; top: 28pt; width: 1pt; height: 6pt; background: var(--ink3);
+}
+.timeline-axis .tick-label {
+  position: absolute; top: 36pt; font-family: var(--mono); font-size: 7pt;
+  color: var(--ink3); transform: translateX(-50%);
+}
+</style>
+</head>
+<body>
+
+<button class="print-hint" onclick="window.print()">⌘ P — Save as PDF</button>
+
+<!-- ============================================================
+     PAGE 1 — COVER + LIEN STACK + RECOMMENDATION
+     ============================================================ -->
+<article class="page">
+
+  <header class="masthead">
+    <div class="masthead-left">
+      <div class="monogram"><span class="n">N</span><span class="iq">iq</span></div>
+      <div class="wordmark">Nest<span>IQ</span></div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">HELOC vs Refinance</div>
+      <div class="docnum">{{doc_num}}</div>
+    </div>
+  </header>
+
+  <section class="scenario-head">
+    <div>
+      <div class="eyebrow">Prepared for</div>
+      <h1>{{borrower_first}} <span class="i">{{borrower_last}}</span></h1>
+      <div class="sub">{{property_address}} · equity access strategy</div>
+    </div>
+    <div class="scenario-meta">
+      <div class="row"><span class="l">Loan officer</span><span class="v">{{prepared_by_name}}</span></div>
+      <div class="row"><span class="l">NMLS</span><span class="v">#{{prepared_by_nmls}}</span></div>
+      <div class="row"><span class="l">Prepared</span><span class="v">{{prepared_date}}</span></div>
+      <div class="row"><span class="l">Cash need</span><span class="v">{{cash_need_formatted}}</span></div>
+      <div class="row" style="margin-top:4pt;padding-top:6pt;border-top:0.5pt solid var(--rule-soft);">
+        <span class="l">Blended rate</span><span class="badge">{{blended_effective_rate_pct}}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Headline recommendation -->
+  <section class="hero" style="grid-template-columns: 1.1fr 1fr; padding: 24pt 26pt;">
+    <div class="hero-left">
+      <div class="eyebrow">Recommendation</div>
+      <div style="font-family: var(--serif); font-size: 26pt; letter-spacing: -0.02em; margin-top: 6pt; line-height: 1.1;">
+        Keep the first mortgage, add a <span style="color: var(--accent); font-style: italic;">{{recommended_product}}</span>
+      </div>
+      <div class="mono" style="font-size: 9pt; color: var(--ink2); margin-top: 10pt; letter-spacing: 0.01em;">
+        Preserves {{current_rate_pct}} first-lien rate · blended cost {{blended_effective_rate_pct}} · {{recommended_savings_vs_refi}} better than cash-out refi
+      </div>
+    </div>
+    <div class="hero-right" style="text-align: right; font-family: var(--mono); font-size: 10pt; color: var(--ink2); line-height: 1.4;">
+      10-yr cost vs refi<br/>
+      <span style="font-size: 32pt; font-weight: 500; color: var(--gain); letter-spacing: -0.02em;">−${{ten_yr_savings_vs_refi}}</span>
+      <span style="font-size: 10pt; color: var(--ink3);">cheaper</span>
+    </div>
+  </section>
+
+  <!-- Lien stack -->
+  <section>
+    <div class="section-head">
+      <h2>Lien stack · after drawing {{cash_need_formatted}}</h2>
+      <div class="note">Home value {{home_value_formatted}} · CLTV {{post_cltv_pct}}</div>
+    </div>
+    <p class="section-sub">
+      Stacking a new HELOC behind the preserved first mortgage. The 3.25% rate on the
+      existing first lien is protected — only the marginal {{cash_need_formatted}} is borrowed at current rates.
+    </p>
+
+    <div class="stack-diagram">
+      <div class="stack-row">
+        <div class="sl">Home value</div>
+        <div class="stack-bar" style="background: var(--ink2); width: 100%;">
+          <span class="lbl">{{home_value_formatted}}</span>
+        </div>
+        <div class="sv">{{home_value_formatted}}</div>
+      </div>
+      <div class="stack-row">
+        <div class="sl">1st mortgage · preserved</div>
+        <div class="stack-bar" style="background: var(--accent); width: {{first_lien_bar_pct}};">
+          <span class="lbl">{{current_rate_pct}} · 28 yr remaining</span>
+        </div>
+        <div class="sv">{{first_mortgage_balance_formatted}}</div>
+      </div>
+      <div class="stack-row">
+        <div class="sl">New HELOC · 2nd</div>
+        <div class="stack-bar" style="background: var(--s3); width: {{heloc_bar_pct}};">
+          <span class="lbl">{{heloc_draw_rate_pct}} · 10/20 draw/repay</span>
+        </div>
+        <div class="sv">{{cash_need_formatted}}</div>
+      </div>
+      <div class="stack-row">
+        <div class="sl">Available equity</div>
+        <div class="stack-bar" style="background: var(--rule); width: {{remaining_equity_bar_pct}};">
+          <span class="lbl" style="color: var(--ink3);">cushion</span>
+        </div>
+        <div class="sv" style="color:var(--ink3);">{{remaining_equity_formatted}}</div>
+      </div>
+      <div class="stack-row total">
+        <div class="sl">Blended effective rate</div>
+        <div class="stack-bar" style="background: transparent;"></div>
+        <div class="sv" style="color: var(--accent);">{{blended_effective_rate_pct}}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Draw / repay timeline -->
+  <section>
+    <div class="section-head">
+      <h2>HELOC lifecycle</h2>
+      <div class="note">{{heloc_draw_period_yrs}}-yr draw · {{heloc_repay_period_yrs}}-yr repayment</div>
+    </div>
+    <div class="timeline-wrap">
+      <div class="timeline-axis">
+        <div class="draw">DRAW · interest-only · {{heloc_draw_period_yrs}} yr</div>
+        <div class="repay">REPAYMENT · P + I · {{heloc_repay_period_yrs}} yr</div>
+        <div class="tick" style="left: 0;"></div>
+        <div class="tick-label" style="left: 0;">today</div>
+        <div class="tick" style="left: 33%;"></div>
+        <div class="tick-label" style="left: 33%;">yr {{heloc_draw_period_yrs}}</div>
+        <div class="tick" style="left: 66%;"></div>
+        <div class="tick-label" style="left: 66%;">yr 20</div>
+        <div class="tick" style="left: 100%;"></div>
+        <div class="tick-label" style="left: 100%;">yr 30 · paid off</div>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14pt; font-size: 9pt; margin-top: 10pt;">
+      <div>
+        <div class="micro">Draw period</div>
+        <div class="mono" style="font-size: 14pt; margin-top: 4pt;">${{heloc_interest_only_payment}}/mo</div>
+        <div style="color: var(--ink3); margin-top: 2pt; font-size: 8.5pt;">Interest only on {{cash_need_formatted}} at {{heloc_draw_rate_pct}}</div>
+      </div>
+      <div>
+        <div class="micro">Early repay period</div>
+        <div class="mono" style="font-size: 14pt; margin-top: 4pt;">${{heloc_repay_payment_start}}/mo</div>
+        <div style="color: var(--ink3); margin-top: 2pt; font-size: 8.5pt;">Principal + interest kicks in</div>
+      </div>
+      <div>
+        <div class="micro">Rate ceiling</div>
+        <div class="mono" style="font-size: 14pt; margin-top: 4pt;">{{heloc_lifetime_cap_pct}}</div>
+        <div style="color: var(--ink3); margin-top: 2pt; font-size: 8.5pt;">Lifetime cap · {{heloc_index_plus_margin_pct}} today</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · {{borrower_last}} · {{doc_num}}
+      <span class="dis">
+        HELOC rates are variable and tied to the Prime Rate. Illustrative blended rate assumes
+        current index levels and does not reflect future rate moves.
+      </span>
+    </div>
+  </div>
+</article>
+
+
+<!-- ============================================================
+     PAGE 2 — SIDE-BY-SIDE COMPARISON
+     ============================================================ -->
+<article class="page">
+  <header class="masthead continued">
+    <div class="masthead-left">
+      <div class="monogram"><span class="n">N</span><span class="iq">iq</span></div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">HELOC vs Refinance · Continued</div>
+        <div class="wordmark">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">{{borrower_last}} · {{doc_num}}</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>HELOC vs Cash-out refinance</h2>
+      <div class="note">Same {{cash_need_formatted}} need · 10-year horizon</div>
+    </div>
+    <p class="section-sub">
+      A cash-out refi would replace the existing {{current_rate_pct}} first lien with a new
+      {{cashout_refi_rate_pct}} loan on the entire balance. The HELOC keeps the low-rate first
+      lien intact and borrows only the marginal cash at the current second-lien rate.
+    </p>
+
+    <div class="hl-compare">
+      <div class="hc-head">Scenario</div>
+      <div class="hc-col-head recommended">
+        <div class="label">Option A <span class="badge-rec">REC</span></div>
+        <div class="name">HELOC · 2nd lien</div>
+      </div>
+      <div class="hc-col-head">
+        <div class="label">Option B</div>
+        <div class="name">Cash-out refinance</div>
+      </div>
+
+      <!-- Rates group -->
+      <div class="hc-sub">Rate structure</div>
+      <div class="hc-sub spacer"></div>
+      <div class="hc-sub spacer"></div>
+
+      <div class="hc-label">1st lien rate</div>
+      <div class="hc-cell recommended">{{current_rate_pct}} · preserved</div>
+      <div class="hc-cell">{{cashout_refi_rate_pct}} · reset</div>
+
+      <div class="hc-label">2nd lien rate</div>
+      <div class="hc-cell recommended">{{heloc_draw_rate_pct}} · variable</div>
+      <div class="hc-cell">—</div>
+
+      <div class="hc-label">Blended effective rate</div>
+      <div class="hc-cell recommended">{{blended_effective_rate_pct}}</div>
+      <div class="hc-cell">{{cashout_refi_rate_pct}}</div>
+
+      <!-- Monthly group -->
+      <div class="hc-sub">Monthly payment</div>
+      <div class="hc-sub spacer"></div>
+      <div class="hc-sub spacer"></div>
+
+      <div class="hc-label">Year 1 (draw / post-refi)</div>
+      <div class="hc-cell recommended">${{heloc_year1_payment}}</div>
+      <div class="hc-cell">${{refi_year1_payment}}</div>
+
+      <div class="hc-label">Year 5</div>
+      <div class="hc-cell recommended">${{heloc_year5_payment}}</div>
+      <div class="hc-cell">${{refi_year5_payment}}</div>
+
+      <div class="hc-label">Year 11 (HELOC enters repayment)</div>
+      <div class="hc-cell recommended loss">${{heloc_year11_payment}}</div>
+      <div class="hc-cell">${{refi_year11_payment}}</div>
+
+      <!-- Costs group -->
+      <div class="hc-sub">Closing &amp; costs</div>
+      <div class="hc-sub spacer"></div>
+      <div class="hc-sub spacer"></div>
+
+      <div class="hc-label">Closing costs</div>
+      <div class="hc-cell recommended gain">{{heloc_closing_costs_formatted}}</div>
+      <div class="hc-cell loss">{{refi_closing_costs_formatted}}</div>
+
+      <div class="hc-label">Break-even vs current</div>
+      <div class="hc-cell recommended">{{heloc_breakeven_months}}</div>
+      <div class="hc-cell">n/a · payment increases</div>
+
+      <!-- Outcomes group -->
+      <div class="hc-sub">10-yr outcomes</div>
+      <div class="hc-sub spacer"></div>
+      <div class="hc-sub spacer"></div>
+
+      <div class="hc-label">Total interest paid</div>
+      <div class="hc-cell recommended">{{heloc_10yr_interest_formatted}}</div>
+      <div class="hc-cell loss">{{refi_10yr_interest_formatted}}</div>
+
+      <div class="hc-label">1st-lien equity rebuilt</div>
+      <div class="hc-cell recommended gain">{{heloc_10yr_principal_paydown}}</div>
+      <div class="hc-cell">{{refi_10yr_principal_paydown}}</div>
+
+      <div class="hc-row-last hc-label">Net cost vs do-nothing</div>
+      <div class="hc-row-last hc-cell recommended gain">{{heloc_10yr_net_cost}}</div>
+      <div class="hc-row-last hc-cell loss">{{refi_10yr_net_cost}}</div>
+    </div>
+  </section>
+
+  <!-- Narrative -->
+  <section>
+    <div class="section-head">
+      <h2>Analyst narrative</h2>
+      <div class="note">AI-generated · reviewed</div>
+    </div>
+    <div class="narrative">
+      <p class="lead" style="margin:0 0 8pt;">
+        The {{borrower_last}}s' existing first mortgage at <span class="hl">{{current_rate_pct}}</span>
+        is a rate that will not be available again in this cycle. Refinancing the entire
+        balance to access {{cash_need_formatted}} would reset the full loan to
+        <span class="hl">{{cashout_refi_rate_pct}}</span> — a {{rate_premium_bps}} bps premium on
+        {{first_mortgage_balance_formatted}}, not just on the cash drawn.
+      </p>
+      <p style="margin:0 0 8pt;">
+        A <span class="hl">HELOC</span> isolates the marginal borrowing at today's rate while
+        preserving the first-lien economics. Blended cost of capital is
+        <span class="hl">{{blended_effective_rate_pct}}</span> — materially below a full refi.
+      </p>
+      <p style="margin:0;">
+        Principal risk: the HELOC rate is <span class="hl">variable</span>. Page 3 models
+        the payment under +100 bps and +200 bps shocks; the borrower retains the option to
+        refinance the HELOC into a fixed second or roll it into a cash-out refi later if
+        rates decline.
+      </p>
+      <div class="sig">
+        <span>{{prepared_by_name}} · NMLS #{{prepared_by_nmls}}</span>
+        <span>Generated {{prepared_date}} · v2.1</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · {{borrower_last}} · {{doc_num}}
+      <span class="dis">
+        HELOC payments reset at the end of the draw period. Not a Loan Estimate. Rate lock on
+        an initial fixed-rate advance may be available; ask your loan officer.
+      </span>
+    </div>
+  </div>
+</article>
+
+
+<!-- ============================================================
+     PAGE 3 — RATE STRESS + ASSUMPTIONS + SIGNATURE
+     ============================================================ -->
+<article class="page">
+  <header class="masthead continued">
+    <div class="masthead-left">
+      <div class="monogram"><span class="n">N</span><span class="iq">iq</span></div>
+      <div>
+        <div class="micro" style="margin-bottom:2pt;">HELOC vs Refinance · Continued</div>
+        <div class="wordmark">Nest<span>IQ</span></div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="doctype">{{borrower_last}} · {{doc_num}}</div>
+    </div>
+  </header>
+
+  <!-- Rate stress -->
+  <section>
+    <div class="section-head">
+      <h2>Variable-rate stress paths</h2>
+      <div class="note">HELOC payment under rate shock scenarios</div>
+    </div>
+    <p class="section-sub">
+      The draw-period payment is interest-only, so it scales linearly with rate. These
+      figures show the {{cash_need_formatted}} HELOC payment today and under Fed-shock
+      scenarios through 2028.
+    </p>
+
+    <table class="stress">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>HELOC rate</th>
+          <th>Draw payment</th>
+          <th>Δ vs today</th>
+          <th>Repay-period peak</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Today · {{prepared_date}}</td>
+          <td>{{stress_today_rate}}</td>
+          <td>${{stress_today_payment}}</td>
+          <td>—</td>
+          <td>${{stress_today_peak}}</td>
+        </tr>
+        <tr>
+          <td>Flat — no change through 2028</td>
+          <td>{{stress_flat_rate}}</td>
+          <td>${{stress_flat_payment}}</td>
+          <td>$0</td>
+          <td>${{stress_flat_peak}}</td>
+        </tr>
+        <tr>
+          <td>Mild · +100 bps</td>
+          <td>{{stress_plus1_rate}}</td>
+          <td>${{stress_plus1_payment}}</td>
+          <td>+${{stress_plus1_delta}}</td>
+          <td>${{stress_plus1_peak}}</td>
+        </tr>
+        <tr class="alert">
+          <td>Severe · +200 bps</td>
+          <td>{{stress_plus2_rate}}</td>
+          <td>${{stress_plus2_payment}}</td>
+          <td>+${{stress_plus2_delta}}</td>
+          <td>${{stress_plus2_peak}}</td>
+        </tr>
+        <tr class="alert">
+          <td>Extreme · +300 bps / at cap</td>
+          <td>{{stress_plus3_rate}}</td>
+          <td>${{stress_plus3_payment}}</td>
+          <td>+${{stress_plus3_delta}}</td>
+          <td>${{stress_plus3_peak}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 14pt; padding: 12pt 14pt; background: var(--accent-tint); border-radius: 4pt; font-size: 9pt; line-height: 1.55;">
+      <span class="micro" style="color: var(--accent); margin-right: 8pt;">GUARDRAIL</span>
+      Even at the +200 bps stress, HELOC blended rate ({{stress_plus2_blended}}) stays below
+      the cash-out refi alternative ({{cashout_refi_rate_pct}}). Break point — where HELOC
+      becomes more expensive than refi-today — is <strong>{{stress_crossover_bps}} bps</strong>
+      of rate increase.
+    </div>
+  </section>
+
+  <!-- Assumptions -->
+  <section style="margin-top: 24pt;">
+    <div class="section-head">
+      <h2>Assumptions &amp; disclosures</h2>
+      <div class="note">Inputs used in this report</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22pt; font-size: 9pt; line-height: 1.55;">
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">First mortgage</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Current balance</span><span class="mono">{{first_mortgage_balance_formatted}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Rate · term</span><span class="mono">{{current_rate_pct}} · 30 yr fixed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Monthly P + I</span><span class="mono">${{first_mortgage_payment}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>Originated</span><span class="mono">{{first_mortgage_originated}}</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="micro" style="margin-bottom: 8pt;">HELOC terms quoted</div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Credit line</span><span class="mono">{{heloc_line_formatted}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Initial rate</span><span class="mono">{{heloc_draw_rate_pct}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Index + margin</span><span class="mono">{{heloc_index_plus_margin_pct}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;border-bottom:0.4pt solid var(--rule-soft);">
+          <span>Draw / repay</span><span class="mono">{{heloc_draw_period_yrs}}/{{heloc_repay_period_yrs}} yr</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:3pt 0;">
+          <span>Lifetime cap</span><span class="mono">{{heloc_lifetime_cap_pct}}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signature -->
+  <section class="signature">
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Borrower · date</div>
+    </div>
+    <div class="sig-block">
+      <div class="line"></div>
+      <div class="l">Loan officer · {{prepared_by_name}} · NMLS #{{prepared_by_nmls}}</div>
+    </div>
+  </section>
+
+  <div class="pagefoot">
+    <div class="left">
+      NestIQ Report · {{borrower_last}} · {{doc_num}}
+      <span class="dis">
+        Equal Housing Opportunity. HELOC rates are variable. Not a commitment to lend.
+      </span>
+    </div>
+  </div>
+</article>
+
+</body>
+</html>
