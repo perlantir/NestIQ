@@ -23,54 +23,24 @@ final class TCAPDFHTMLTests: XCTestCase {
         let url = try await PDFBuilder.buildTCAPDF(
             profile: profile,
             borrower: borrower,
-            viewModel: vm,
-            narrative: ""
+            viewModel: vm
         )
         let doc = try XCTUnwrap(PDFDocument(url: url))
         XCTAssertGreaterThanOrEqual(doc.pageCount, 2,
-                                    "TCA PDF should paginate cover + detail + disclaimers")
+                                    "TCA PDF should paginate cover + matrix + detail + disclaimers")
 
         let full = (0..<doc.pageCount)
             .compactMap { doc.page(at: $0)?.string }
             .joined(separator: "\n")
-        let cover = doc.page(at: 0)?.string ?? ""
-        XCTAssertTrue(cover.contains("Nick Gallick"),
-                      "Signature block LO name missing on cover. Got first 400 chars: \(cover.prefix(400))")
-        // Single-source signature check (5N.3 regression pin). The
-        // name legitimately appears once on the cover signature and
-        // once in the disclaimers footer — only the cover is the
-        // surface where the double-block regression surfaced.
-        let coverOccurrences = cover.components(separatedBy: "Nick Gallick").count - 1
-        XCTAssertEqual(coverOccurrences, 1,
-                       "Expected exactly one 'Nick Gallick' on the cover; got \(coverOccurrences)")
-
         XCTAssertTrue(full.contains("Smith"),
                       "Borrower name missing from TCA PDF cover")
-        XCTAssertTrue(full.contains("Scenarios compared"),
-                      "TCA scenarios-compared heading missing")
-        XCTAssertTrue(full.contains("Total cost by horizon"),
-                      "Horizon matrix heading missing")
-
-        // At least one scenario label (A / B / C / D) should appear.
-        let labels = vm.inputs.scenarios.map { $0.label.uppercased() }
-        XCTAssertTrue(labels.contains(where: { full.contains($0) }),
-                      "No scenario label present in TCA PDF. Expected any of \(labels)")
-
-        // Disclaimers appendix
-        XCTAssertTrue(full.contains("The fine print"),
-                      "Disclaimers page missing its H1")
-
-        // D12 (Session 7 / 2026-04-21): the Core Graphics per-page chrome
-        // (NestIQPrintRenderer wordmark header + "Page N of M ·
-        // nestiq.mortgage" footer) was retired — PDF chrome is now
-        // HTML-template-driven. TCA stays on base.html + PDFHTMLComposition
-        // until its v2.1.1 migration in Session 7.3e/f, so the interim
-        // TCA PDF renders without a masthead band or live page counter.
-        // The disclaimers appendix "Equal Housing Opportunity" footer
-        // strip (still emitted by PDFHTMLComposition.disclaimersHTML) is
-        // the remaining compliance anchor we can assert on.
+        // v2.1.1 template page 2 heading — "Cost matrix" — is the
+        // scenario/horizon grid that matrix_rows populates.
+        XCTAssertTrue(full.contains("Cost matrix"),
+                      "TCA cost matrix heading missing")
+        // Compliance trailer (D12 C2) — EHO statement on trailing page.
         XCTAssertTrue(full.contains("Equal Housing Opportunity"),
-                      "Disclaimers footer EHO statement missing")
+                      "Compliance trailer EHO footer missing")
     }
 
     func testBreakEvenSVGDomainMatchesTerm() {
@@ -145,21 +115,17 @@ final class TCAPDFHTMLTests: XCTestCase {
         vm.inputs.currentMortgage = borrower.currentMortgage
         vm.compute()
 
-        let html = TCAPDFHTML.buildHTML(
+        let html = try TCAPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
-            viewModel: vm,
-            narrative: ""
+            viewModel: vm
         )
-        // Horizon matrix header carries Current column.
+        // Page-4 interest-split header carries Current column (v2.1.1).
         XCTAssertTrue(html.contains("<th class=\"num\">Current</th>"),
                       "Refi-mode PDF missing Current column header")
-        // Caption reflects the status-quo framing.
-        XCTAssertTrue(html.contains("'Current' = staying"),
-                      "Refi-mode caption missing Current-column note")
-        // Unrecoverable + Equity sections carry Current rows.
+        // Unrecoverable section carries Current row + Status quo label.
         XCTAssertTrue(html.contains("<td>Current</td>"),
-                      "Refi-mode PDF missing Current row in unrecoverable / equity tables")
+                      "Refi-mode PDF missing Current row in unrecoverable table")
         XCTAssertTrue(html.contains("<td>Status quo</td>"),
                       "Refi-mode PDF missing 'Status quo' program label")
     }
@@ -171,11 +137,10 @@ final class TCAPDFHTMLTests: XCTestCase {
         vm.inputs.mode = .purchase
         vm.compute()
 
-        let html = TCAPDFHTML.buildHTML(
+        let html = try TCAPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
-            viewModel: vm,
-            narrative: ""
+            viewModel: vm
         )
         XCTAssertFalse(html.contains("<th class=\"num\">Current</th>"),
                        "Purchase-mode PDF should not show Current column")

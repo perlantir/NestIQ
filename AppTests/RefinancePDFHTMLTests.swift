@@ -29,21 +29,15 @@ final class RefinancePDFHTMLTests: XCTestCase {
             .joined(separator: "\n")
         XCTAssertTrue(full.contains("Smith"),
                       "Borrower surname missing from Refi PDF")
-        XCTAssertTrue(full.contains("Current vs refinance options"),
+        // v2.1.1 template sections
+        XCTAssertTrue(full.contains("Side-by-side comparison"),
                       "Refi comparison section heading missing")
-        // Exhibit the comparison rows exist
-        XCTAssertTrue(full.contains("Loan amt"),
-                      "Loan amt row missing")
         XCTAssertTrue(full.contains("Break-even"),
                       "Break-even row missing")
         XCTAssertTrue(full.contains("NPV"),
                       "NPV row missing")
-        XCTAssertTrue(full.contains("The fine print"),
-                      "Disclaimers appendix missing")
-        // D12 (Session 7.3a): CG-drawn "Page 1 of N" counter retired.
-        // Replace with an HTML-side assertion on the disclaimers footer.
         XCTAssertTrue(full.contains("Equal Housing Opportunity"),
-                      "Disclaimers appendix EHO footer missing")
+                      "Compliance trailer EHO footer missing")
     }
 
     private func makeProfile() -> LenderProfile {

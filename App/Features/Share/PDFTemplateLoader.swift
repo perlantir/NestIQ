@@ -14,28 +14,30 @@ import QuotientCompliance
 enum PDFTemplateLoader {
 
     enum Error: Swift.Error, CustomStringConvertible {
-        case templateFolderMissing
+        case templatesFolderMissing
         case templateNotFound(name: String)
 
         var description: String {
             switch self {
-            case .templateFolderMissing:
-                return "PDFTemplates folder missing from main bundle — verify preBuildScripts rsync ran."
+            case .templatesFolderMissing:
+                return "Main bundle resource URL unavailable — cannot resolve PDF template assets."
             case .templateNotFound(let name):
-                return "PDF template '\(name).html' not found in PDFTemplates/templates/."
+                return "PDF template '\(name).html' not found in the main bundle."
             }
         }
     }
 
-    /// Folder URL WKWebView uses as baseURL so `<link href="../tokens.css">`
-    /// inside each template resolves to `PDFTemplates/tokens.css`.
+    /// Folder URL WKWebView uses as baseURL so `<link href="tokens.css">`
+    /// inside each template resolves against the app bundle where
+    /// tokens.css was copied by the pre-build rsync. The XcodeGen folder
+    /// reference flattens nested directories, so templates and
+    /// tokens.css both sit at the bundle root — we therefore use the
+    /// bundle's resourceURL as the base and rewrite `../tokens.css`
+    /// hrefs to `tokens.css` at load time.
     static var templatesFolderURL: URL {
         get throws {
-            guard let url = Bundle.main.url(
-                forResource: "PDFTemplates",
-                withExtension: nil
-            )?.appendingPathComponent("templates") else {
-                throw Error.templateFolderMissing
+            guard let url = Bundle.main.resourceURL else {
+                throw Error.templatesFolderMissing
             }
             return url
         }
@@ -44,12 +46,18 @@ enum PDFTemplateLoader {
     /// Load a v2.1.1 with-masthead template's raw HTML by name
     /// (without the `.html` extension).
     static func load(_ name: String) throws -> String {
-        let url = try templatesFolderURL.appendingPathComponent("\(name).html")
-        do {
-            return try String(contentsOf: url, encoding: .utf8)
-        } catch {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "html") else {
             throw Error.templateNotFound(name: name)
         }
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        // XcodeGen flattens the PDFTemplates folder into the app bundle
+        // root; tokens.css sits next to the HTML instead of one level
+        // up. Rewrite the stylesheet href so WKWebView finds it against
+        // `baseURL = Bundle.main.resourceURL`.
+        return raw.replacingOccurrences(
+            of: "href=\"../tokens.css\"",
+            with: "href=\"tokens.css\""
+        )
     }
 
     /// Trailing compliance disclosures page appended after the editorial

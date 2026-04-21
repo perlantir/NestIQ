@@ -15,18 +15,20 @@ enum PDFBuilder {
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: AmortizationViewModel,
-        narrative: String,
         scheduleGranularity: AmortScheduleGranularity = .yearly
     ) async throws -> URL {
-        let html = AmortizationPDFHTML.buildHTML(
+        let html = try AmortizationPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
-            narrative: narrative,
             scheduleGranularity: scheduleGranularity
         )
         let url = PDFHTMLComposition.temporaryURL(for: "amortization")
-        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        try await HTMLPDFRenderer.shared.renderPDF(
+            html: html,
+            to: url,
+            baseURL: try PDFTemplateLoader.templatesFolderURL
+        )
         return url
     }
 
@@ -53,48 +55,56 @@ enum PDFBuilder {
         viewModel: RefinanceViewModel,
         narrative: String
     ) async throws -> URL {
-        let html = RefinancePDFHTML.buildHTML(
+        let html = try RefinancePDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
             viewModel: viewModel,
             narrative: narrative
         )
         let url = PDFHTMLComposition.temporaryURL(for: "refinance")
-        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        try await HTMLPDFRenderer.shared.renderPDF(
+            html: html,
+            to: url,
+            baseURL: try PDFTemplateLoader.templatesFolderURL
+        )
         return url
     }
 
     static func buildTCAPDF(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: TCAViewModel,
-        narrative: String
+        viewModel: TCAViewModel
     ) async throws -> URL {
-        let html = TCAPDFHTML.buildHTML(
+        let html = try TCAPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel,
-            narrative: narrative
+            viewModel: viewModel
         )
         let url = PDFHTMLComposition.temporaryURL(for: "total-cost")
-        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        try await HTMLPDFRenderer.shared.renderPDF(
+            html: html,
+            to: url,
+            baseURL: try PDFTemplateLoader.templatesFolderURL
+        )
         return url
     }
 
     static func buildHelocPDF(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: HelocViewModel,
-        narrative: String
+        viewModel: HelocViewModel
     ) async throws -> URL {
-        let html = HelocPDFHTML.buildHTML(
+        let html = try HelocPDFHTML.buildHTML(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel,
-            narrative: narrative
+            viewModel: viewModel
         )
         let url = PDFHTMLComposition.temporaryURL(for: "heloc")
-        try await HTMLPDFRenderer.shared.renderPDF(html: html, to: url)
+        try await HTMLPDFRenderer.shared.renderPDF(
+            html: html,
+            to: url,
+            baseURL: try PDFTemplateLoader.templatesFolderURL
+        )
         return url
     }
 

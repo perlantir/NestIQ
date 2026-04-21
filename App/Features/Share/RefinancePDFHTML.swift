@@ -1,10 +1,9 @@
 // RefinancePDFHTML.swift
-// Session 5O.4 — Refinance Comparison PDF body composition.
+// Session 7.3f — Template-driven refinance PDF builder.
 //
-// Mirrors the on-screen RefinanceTableView matrix (Current + N option
-// columns, row per metric — loan amt, rate, APR, term, points,
-// closing, payment, break-even, NPV, lifetime Δ, LTV, MI) plus a
-// per-option break-even SVG (BreakEvenChartSVG).
+// Loads pdf-refinance-with-masthead.html, fills ~49 tokens from
+// RefinanceViewModel + +PDFDerivations, injects the AI narrative at
+// <!--{{narrative_body}}-->, and appends the compliance trailer.
 
 import Foundation
 import QuotientFinance
@@ -17,333 +16,197 @@ enum RefinancePDFHTML {
         borrower: Borrower?,
         viewModel: RefinanceViewModel,
         narrative: String
-    ) -> String {
-        let body = coverSection(
+    ) throws -> String {
+        let template = try PDFTemplateLoader.load("pdf-refinance-with-masthead")
+        let values = tokens(profile: profile, borrower: borrower, viewModel: viewModel)
+        var html = HTMLPDFRenderer.shared.interpolate(template: template, values: values)
+        html = html.replacingOccurrences(
+            of: "<!--{{narrative_body}}-->",
+            with: narrativeBlockHTML(narrative: narrative)
+        )
+        let trailer = PDFTemplateLoader.complianceTrailerPage(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel,
-            narrative: narrative
+            scenarioType: .refinance
         )
-            + comparisonSection(viewModel: viewModel)
-            + breakEvenSection(viewModel: viewModel)
-            + PDFHTMLComposition.disclaimersHTML(
-                profile: profile,
-                borrower: borrower,
-                scenarioType: .refinance
-            )
-        return PDFHTMLComposition.wrap(body: body)
+        return html.replacingOccurrences(
+            of: "</body>",
+            with: "\(trailer)\n</body>"
+        )
     }
 
-    // MARK: - Cover
+    // MARK: - Tokens
 
-    private static func coverSection(
+    private static func tokens(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: RefinanceViewModel,
-        narrative: String
-    ) -> String {
-        let borrowerName = borrower?.fullName ?? "Client"
-        let savings = MoneyFormat.shared.currency(viewModel.monthlySavings)
-        let be = viewModel.breakEvenMonth.map { "\($0) mo" } ?? "—"
-        let lifetime = MoneyFormat.shared.dollarsShort(abs(viewModel.lifetimeDelta))
-        let npv = MoneyFormat.shared.dollarsShort(abs(viewModel.npvDelta))
-        let currentRate = String(format: "%.3f", viewModel.inputs.currentRate)
-        let currentRateDisplay = displayRateAndAPR(
-            rate: viewModel.inputs.currentRate,
-            decimalAPR: viewModel.inputs.currentAPR
-        )
-        let fallback = "Selected refi saves \(savings)/mo versus the current \(currentRate)% loan. "
-            + "Break-even: \(be)."
-        let loanSummary = "Current "
-            + MoneyFormat.shared.currency(viewModel.inputs.currentBalance)
-            + " @ \(currentRateDisplay)"
-
-        let eyebrow = "REFINANCE COMPARISON · \(PDFHTMLComposition.formatDate(Date()))"
-        let hero = PDFHTMLComposition.heroCardHTML(
-            label: "Monthly savings · selected option",
-            value: savings,
-            prefix: "",
-            suffix: ""
-        )
-        let kpis = PDFHTMLComposition.kpiGridHTML([
-            ("Break-even", be),
-            ("Lifetime Δ", lifetime),
-            ("NPV @ 5%", npv)
-        ])
-        let signature = PDFHTMLComposition.signatureHTML(profile: profile)
-        let title = PDFHTMLComposition.titleBlockHTML(
-            eyebrow: eyebrow,
-            borrowerName: borrowerName,
-            loanSummary: loanSummary
-        )
-        let narrativeCopy = narrative.isEmpty ? fallback : narrative
-        return """
-        <section>
-          \(signature)
-          \(title)
-          \(hero)
-          \(kpis)
-          <h2>Summary</h2>
-          <p class="summary-text">\(PDFHTMLComposition.escape(narrativeCopy))</p>
-        </section>
-        """
-    }
-
-    // MARK: - Side-by-side comparison
-
-    private static func comparisonSection(viewModel: RefinanceViewModel) -> String {
+        viewModel: RefinanceViewModel
+    ) -> [String: String] {
         let inputs = viewModel.inputs
+        let money = MoneyFormat.shared
+        let first = borrower?.firstName ?? "Client"
+        let last = borrower?.lastName ?? ""
+        let addr = borrower?.propertyAddress ?? ""
+        let prepared = PDFHTMLComposition.formatDate(Date(), style: .short)
+
         let options = inputs.options
-        let headers = ["Cur"] + options.map { $0.label.uppercased() }
-        let headerCells = headers.map { h in
-            "<th class=\"num\">\(PDFHTMLComposition.escape(h))</th>"
-        }.joined()
+        // selectedOptionIndex is 1-based (0 = current). Map to options[] index.
+        let recommendedIdx = max(viewModel.selectedOptionIndex - 1, 0)
+        let recommendedOption = options.indices.contains(recommendedIdx)
+            ? options[recommendedIdx]
+            : nil
+        let recommendedTag = recommendedOption.map { "Option \($0.label)" } ?? "Option A"
 
-        let rows = buildRows(viewModel: viewModel)
-        let bodyRows = rows.map { row in
-            let cells = row.values.enumerated().map { idx, value -> String in
-                let winner = row.winnerIndex == idx
-                let displayed = winner ? "✓ \(value)" : value
-                return "<td class=\"num\">\(PDFHTMLComposition.escape(displayed))</td>"
-            }.joined()
-            return "<tr><td>\(PDFHTMLComposition.escape(row.label))</td>\(cells)</tr>"
-        }.joined()
+        let currentPI = viewModel.currentMonthlyPI
+        let currentTerm = "\(inputs.currentOriginalTermYears) yr"
+        let remainingYears = inputs.currentRemainingYears
+        let currentRemainingTerm = "\(remainingYears) yr"
 
-        return """
-        <section class="break-before">
-          <p class="eyebrow">Side-by-side</p>
-          <h2>Current vs refinance options</h2>
-          <table class="data">
-            <thead><tr><th>Metric</th>\(headerCells)</tr></thead>
-            <tbody>\(bodyRows)</tbody>
-          </table>
-          <p class="meta">Winner per row carries a checkmark. Payment row minimizes $/mo; break-even
-             row minimizes months to recoup closing; NPV / lifetime rows maximize delta vs Current.</p>
-        </section>
-        """
+        let origFmt = DateFormatter()
+        origFmt.dateFormat = "MMM yyyy"
+        let originated = origFmt.string(from: inputs.currentLoanOriginatedDate)
+
+        var out: [String: String] = [
+            // common
+            "borrower_first": PDFHTMLComposition.escape(first),
+            "borrower_last": PDFHTMLComposition.escape(last.isEmpty ? first : last),
+            "property_address": PDFHTMLComposition.escape(addr),
+            "doc_num": generateDocNum(prefix: "RF"),
+            "prepared_by_name": PDFHTMLComposition.escape(profile.fullName),
+            "prepared_by_nmls": PDFHTMLComposition.escape(profile.nmlsId),
+            "prepared_date": prepared,
+            "loan_amount_formatted": money.currency(inputs.currentBalance),
+
+            // Cover
+            "refi_type": "Rate-&-term refinance",
+            "current_balance_formatted": money.currency(inputs.currentBalance),
+            "current_rate_pct": String(format: "%.3f%%", inputs.currentRate),
+            "current_monthly_pi_formatted": money.currency(currentPI),
+
+            // Recommendation
+            "recommended_option_tag": recommendedTag,
+            "recommended_option_name": recommendedOptionName(option: recommendedOption),
+            "recommended_breakeven_months": breakEvenDisplayLong(months: viewModel.breakEvenMonth),
+            "recommended_breakeven_months_short": breakEvenDisplayShort(months: viewModel.breakEvenMonth),
+            "recommended_monthly_savings": money.decimalString(viewModel.monthlySavings),
+            "recommended_closing_costs_formatted": money.currency(recommendedOption?.closingCosts ?? 0),
+            "recommended_lifetime_savings_formatted": money.currency(max(viewModel.lifetimeDelta, 0)),
+            "recommended_lifetime_short": money.dollarsShort(max(viewModel.lifetimeDelta, 0)),
+            "recommended_npv_short": money.dollarsShort(max(viewModel.npvDelta, 0)),
+            "recommended_remaining_years": String(viewModel.recommendedRemainingYears),
+
+            // Current-loan assumptions (page 3)
+            "original_loan_amount_formatted": money.currency(inputs.currentOriginalLoanAmount),
+            "current_term": currentTerm,
+            "current_remaining_term": currentRemainingTerm,
+            "current_originated_date": originated
+        ]
+
+        // Three option columns — fill A/B/C from options[] or dash.
+        let letters = ["a", "b", "c"]
+        for (i, letter) in letters.enumerated() {
+            let opt = options.indices.contains(i) ? options[i] : nil
+            let metrics = viewModel.metrics(forOptionAt: i)
+            let discountPts = viewModel.discountPointsAmount(forOptionAt: i)
+
+            out["option_\(letter)_lender"] = opt.flatMap {
+                $0.lender.isEmpty ? nil : PDFHTMLComposition.escape($0.lender)
+            } ?? "—"
+            out["option_\(letter)_term"] = opt.map { "\($0.termYears) yr" } ?? "—"
+            out["option_\(letter)_rate_pct"] = opt.map { String(format: "%.3f%%", $0.rate) } ?? "—"
+            out["option_\(letter)_apr_pct"] = opt.flatMap { $0.aprRate }
+                .map { String(format: "%.3f%%", $0.asDouble) } ?? "—"
+            out["option_\(letter)_points"] = opt.map { String(format: "%.2f", $0.points) } ?? "—"
+            out["option_\(letter)_pi_formatted"] = metrics.map { money.currency($0.payment) } ?? "—"
+            out["option_\(letter)_pi_delta_formatted"] = opt != nil
+                ? signedDollars(viewModel.paymentDelta(forOptionAt: i))
+                : "—"
+            out["option_\(letter)_pi_delta_pct"] = opt != nil
+                ? signedPercent(viewModel.paymentDeltaPct(forOptionAt: i))
+                : "—"
+            out["option_\(letter)_lender_fees_formatted"] = opt.map {
+                $0.lenderFees > 0 ? money.currency($0.lenderFees) : "—"
+            } ?? "—"
+            out["option_\(letter)_third_party_formatted"] = opt.map {
+                $0.thirdPartyFees > 0 ? money.currency($0.thirdPartyFees) : "—"
+            } ?? "—"
+            out["option_\(letter)_discount_points_formatted"] = discountPts > 0
+                ? money.currency(discountPts)
+                : "—"
+            out["option_\(letter)_total_closing_formatted"] = opt.map { money.currency($0.closingCosts) } ?? "—"
+            out["option_\(letter)_breakeven_label"] = viewModel
+                .breakEvenMonth(forOptionAt: i)
+                .map { "\($0) mo" } ?? "n/a"
+            out["option_\(letter)_interest_remaining_formatted"] = opt != nil
+                ? money.currency(viewModel.interestOverTerm(forOptionAt: i))
+                : "—"
+            out["option_\(letter)_lifetime_savings_formatted"] = opt != nil
+                ? money.currency(max(viewModel.lifetimeSavings(forOptionAt: i), 0))
+                : "—"
+            out["option_\(letter)_npv_formatted"] = metrics
+                .map { money.currency(max($0.npvAt5pct - (viewModel.current?.npvAt5pct ?? 0), 0)) } ?? "—"
+        }
+
+        return out
     }
 
-    private struct Row {
-        let label: String
-        let values: [String]
-        let winnerIndex: Int?
-    }
+    // MARK: - Narrative injection
 
-    private static func buildRows(viewModel: RefinanceViewModel) -> [Row] {
-        let inputs = viewModel.inputs
-        let opts = inputs.options
-        let anyAPR = inputs.currentAPR != nil || opts.contains { $0.aprRate != nil }
-        let anyMI = inputs.currentMonthlyMI > 0 || opts.contains { $0.monthlyMI > 0 }
-        let hasHomeValue = inputs.homeValue > 0
-
-        var rows: [Row] = []
-
-        rows.append(Row(
-            label: "Loan amt",
-            values: [MoneyFormat.shared.currency(inputs.currentBalance)]
-                + opts.map {
-                    MoneyFormat.shared.currency(inputs.effectiveLoanAmount(for: $0))
-                },
-            winnerIndex: nil
-        ))
-        rows.append(Row(
-            label: "Rate",
-            values: [String(format: "%.3f%%", inputs.currentRate)]
-                + opts.map { String(format: "%.3f%%", $0.rate) },
-            winnerIndex: nil
-        ))
-        if anyAPR {
-            rows.append(Row(
-                label: "APR",
-                values: [formatAPR(inputs.currentAPR)]
-                    + opts.map { formatAPR($0.aprRate) },
-                winnerIndex: nil
-            ))
+    private static func narrativeBlockHTML(narrative: String) -> String {
+        let trimmed = narrative.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return """
+            <p class="lead" style="margin:0 0 8pt;">
+              Narrative not available — add analyst narration from the refinance results screen.
+            </p>
+            """
         }
-        rows.append(Row(
-            label: "Term",
-            values: ["\(inputs.currentRemainingYears) yr"]
-                + opts.map { "\($0.termYears) yr" },
-            winnerIndex: nil
-        ))
-        rows.append(Row(
-            label: "Points",
-            values: ["—"] + opts.map { String(format: "%.2f", $0.points) },
-            winnerIndex: nil
-        ))
-        rows.append(Row(
-            label: "Closing",
-            values: ["—"] + opts.map { MoneyFormat.shared.currency($0.closingCosts) },
-            winnerIndex: nil
-        ))
-        rows.append(paymentRow(viewModel: viewModel))
-        rows.append(breakEvenRow(viewModel: viewModel))
-        rows.append(npvRow(viewModel: viewModel))
-        rows.append(lifetimeRow(viewModel: viewModel))
-        if hasHomeValue {
-            rows.append(Row(
-                label: "LTV",
-                values: [String(format: "%.1f%%", inputs.currentLTV * 100)]
-                    + opts.map { String(format: "%.1f%%", inputs.ltv(for: $0) * 100) },
-                winnerIndex: nil
-            ))
-        }
-        if anyMI {
-            rows.append(Row(
-                label: "MI / mo",
-                values: [miDisplay(inputs.currentMonthlyMI)]
-                    + opts.map { miDisplay($0.monthlyMI) },
-                winnerIndex: nil
-            ))
-        }
-        return rows
-    }
-
-    private static func paymentRow(viewModel: RefinanceViewModel) -> Row {
-        guard let result = viewModel.result else {
-            return Row(label: "Payment",
-                       values: Array(repeating: "—", count: 1 + viewModel.inputs.options.count),
-                       winnerIndex: nil)
-        }
-        var values: [String] = []
-        var bestIdx = 0
-        var bestVal = Decimal.greatestFiniteMagnitude
-        for (i, m) in result.scenarioMetrics.enumerated() {
-            values.append(MoneyFormat.shared.currency(m.payment))
-            if i > 0, m.payment < bestVal { bestVal = m.payment; bestIdx = i }
-        }
-        return Row(label: "Payment", values: values, winnerIndex: bestIdx)
-    }
-
-    private static func breakEvenRow(viewModel: RefinanceViewModel) -> Row {
-        guard let result = viewModel.result else {
-            return Row(label: "Break-even",
-                       values: Array(repeating: "—", count: 1 + viewModel.inputs.options.count),
-                       winnerIndex: nil)
-        }
-        var values: [String] = ["—"]
-        var bestIdx: Int?
-        var bestVal = Int.max
-        for (i, m) in result.scenarioMetrics.enumerated() where i > 0 {
-            if let be = m.breakEvenMonth {
-                values.append("\(be) mo")
-                if be < bestVal { bestVal = be; bestIdx = i }
-            } else {
-                values.append("—")
+        let paragraphs = trimmed.components(separatedBy: "\n\n")
+        return paragraphs.enumerated().map { idx, para in
+            let escaped = PDFHTMLComposition.escape(para)
+            if idx == 0 {
+                return "<p class=\"lead\" style=\"margin:0 0 8pt;\">\(escaped)</p>"
             }
-        }
-        return Row(label: "Break-even", values: values, winnerIndex: bestIdx)
+            return "<p style=\"margin:0 0 8pt;\">\(escaped)</p>"
+        }.joined(separator: "\n")
     }
 
-    private static func npvRow(viewModel: RefinanceViewModel) -> Row {
-        guard let result = viewModel.result else {
-            return Row(label: "NPV @ 5%",
-                       values: Array(repeating: "—", count: 1 + viewModel.inputs.options.count),
-                       winnerIndex: nil)
-        }
-        var values: [String] = []
-        var bestIdx = 0
-        var bestVal = Decimal(-.greatestFiniteMagnitude)
-        for (i, m) in result.scenarioMetrics.enumerated() {
-            values.append(MoneyFormat.shared.dollarsShort(m.npvAt5pct))
-            if i > 0, m.npvAt5pct > bestVal { bestVal = m.npvAt5pct; bestIdx = i }
-        }
-        return Row(label: "NPV @ 5%", values: values, winnerIndex: bestIdx)
+    // MARK: - Helpers
+
+    private static func recommendedOptionName(option: RefiOption?) -> String {
+        guard let option else { return "the highlighted option" }
+        return "\(option.termYears)-yr fixed at "
+            + String(format: "%.3f%%", option.rate)
     }
 
-    private static func lifetimeRow(viewModel: RefinanceViewModel) -> Row {
-        guard let result = viewModel.result,
-              let lastH = result.horizons.last,
-              let hIdx = result.horizons.firstIndex(of: lastH) else {
-            return Row(label: "Lifetime Δ",
-                       values: Array(repeating: "—", count: 1 + viewModel.inputs.options.count),
-                       winnerIndex: nil)
-        }
-        let current = result.scenarioTotalCosts[0][hIdx]
-        var values: [String] = ["—"]
-        var bestIdx: Int?
-        var bestVal = Decimal(0)
-        for i in 1..<result.scenarioTotalCosts.count {
-            let diff = current - result.scenarioTotalCosts[i][hIdx]
-            let short = MoneyFormat.shared.dollarsShort(abs(diff))
-            values.append((diff >= 0 ? "+" : "-") + short)
-            if diff > bestVal { bestVal = diff; bestIdx = i }
-        }
-        return Row(label: "Lifetime Δ", values: values, winnerIndex: bestIdx)
+    private static func breakEvenDisplayLong(months: Int?) -> String {
+        guard let m = months else { return "n/a" }
+        return "\(m) months"
     }
 
-    private static func formatAPR(_ apr: Decimal?) -> String {
-        guard let apr else { return "—" }
-        return String(format: "%.3f%%", apr.asDouble)
+    private static func breakEvenDisplayShort(months: Int?) -> String {
+        guard let m = months else { return "—" }
+        return String(m)
     }
 
-    private static func miDisplay(_ mi: Decimal) -> String {
-        mi > 0 ? MoneyFormat.shared.currency(mi) : "—"
+    private static func signedDollars(_ value: Decimal) -> String {
+        if value == 0 { return "$0" }
+        let prefix = value < 0 ? "−" : "+"
+        return prefix + MoneyFormat.shared.currency(abs(value))
     }
 
-    // MARK: - Break-even SVG charts per option
+    private static func signedPercent(_ pct: Decimal) -> String {
+        if pct == 0 { return "0.0%" }
+        let prefix = pct < 0 ? "−" : "+"
+        let d = abs(pct.asDouble)
+        return prefix + String(format: "%.1f%%", d)
+    }
 
-    private static func breakEvenSection(viewModel: RefinanceViewModel) -> String {
-        guard let result = viewModel.result else { return "" }
-        let inputs = viewModel.inputs
-        let currentPayment = result.scenarioMetrics.first?.payment ?? 0
-
-        let chartParts = inputs.options.enumerated().compactMap { idx, opt -> String? in
-            let scenarioIndex = idx + 1
-            guard scenarioIndex < result.scenarioMetrics.count else { return nil }
-            let optionPayment = result.scenarioMetrics[scenarioIndex].payment
-            let monthlySavings = currentPayment - optionPayment
-            let termMonths = opt.termYears * 12
-            let closing = opt.closingCosts.asDouble
-
-            if monthlySavings <= 0 || closing <= 0 {
-                let title = "<h3>Break-even — \(PDFHTMLComposition.escape(opt.label.uppercased()))</h3>"
-                let reason: String
-                if monthlySavings <= 0 {
-                    reason = "This option does not produce monthly savings vs the current loan; "
-                        + "break-even analysis does not apply."
-                } else {
-                    reason = "No closing costs on this option — break-even analysis does not apply."
-                }
-                return title + "<p class=\"summary-text\">\(PDFHTMLComposition.escape(reason))</p>"
-            }
-
-            let savingsDouble = monthlySavings.asDouble
-            let series: [(month: Int, cumulative: Double)] = (0...termMonths).map {
-                (month: $0, cumulative: savingsDouble * Double($0))
-            }
-            let crossover = BreakEvenChartSVG.firstCrossover(
-                series: series,
-                closingCosts: closing,
-                termMonths: termMonths
-            )
-            let title = "<h3>\(PDFHTMLComposition.escape("Break-even — \(opt.label.uppercased())"))</h3>"
-            if crossover == nil {
-                let reason = "This option does not break even within the \(opt.termYears)-year term. "
-                    + "Consider a larger rate drop or lower closing costs."
-                return title + "<p class=\"summary-text\">\(PDFHTMLComposition.escape(reason))</p>"
-            }
-            let caption: String = {
-                guard let cx = crossover else { return "" }
-                let years = Double(cx.month) / 12.0
-                return "Crossover at month \(cx.month) (~\(String(format: "%.1f", years)) yr)."
-            }()
-            let svg = BreakEvenChartSVG.build(
-                series: series,
-                closingCosts: closing,
-                termMonths: termMonths,
-                caption: caption
-            )
-            return title + svg
-        }
-
-        guard !chartParts.isEmpty else { return "" }
-        return """
-        <section class="break-before">
-          <p class="eyebrow">Break-even analysis</p>
-          <h2>When savings pay back closing costs</h2>
-          \(chartParts.joined())
-        </section>
-        """
+    private static func generateDocNum(prefix: String) -> String {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let stamp = df.string(from: Date())
+        let seq = String(format: "%04d", Int.random(in: 0..<10_000))
+        return "NIQ-\(prefix)-\(stamp)-\(seq)"
     }
 }

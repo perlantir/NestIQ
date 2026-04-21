@@ -16,8 +16,7 @@ extension TCAScreen {
                 let url = try await PDFBuilder.buildTCAPDF(
                     profile: profile,
                     borrower: viewModel.borrower,
-                    viewModel: viewModel,
-                    narrative: narrativeText
+                    viewModel: viewModel
                 )
                 shareBundle = ShareBundle(
                     url: url,

@@ -42,6 +42,21 @@ extension TCAPDFHTML {
         String(format: "%.2f%%", viewModel.inputs.reinvestmentRate.asDouble * 100)
     }
 
+    // MARK: - Interest-split helper
+
+    /// Formatted "%int / %prin" for one schedule at one horizon. Used by
+    /// both the page-4 interest-split table cells and related emitters.
+    static func splitFor(schedule: AmortizationSchedule, years: Int) -> String {
+        let month = years * 12
+        let interest = schedule.cumulativeInterest(throughMonth: month)
+        let principal = schedule.cumulativePrincipal(throughMonth: month)
+        let total = interest + principal
+        guard total > 0 else { return "—" }
+        let intPct = (interest.asDouble / total.asDouble) * 100
+        let prinPct = 100 - intPct
+        return String(format: "%.0f%% int / %.0f%% prin", intPct, prinPct)
+    }
+
     // MARK: - Interest-split table
 
     /// Inner content of the `<thead>` element — a single `<tr>` row.

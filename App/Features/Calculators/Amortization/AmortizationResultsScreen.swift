@@ -413,7 +413,6 @@ struct AmortizationResultsScreen: View {
                     profile: profile,
                     borrower: viewModel.borrower,
                     viewModel: viewModel,
-                    narrative: viewModel.schedule?.payments.first.map { _ in "" } ?? "",
                     scheduleGranularity: scheduleGranularity
                 )
                 sharePDFURL = url

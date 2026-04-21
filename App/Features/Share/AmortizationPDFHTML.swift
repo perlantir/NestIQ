@@ -1,8 +1,10 @@
 // AmortizationPDFHTML.swift
-// Session 5O.2 — Amortization calculator PDF body composition.
-// Returns a full HTML document (base.html + content body) which
-// HTMLPDFRenderer paginates into a multi-page PDF with per-page header
-// + footer drawn by NestIQPrintRenderer.
+// Session 7.3f — Template-driven amortization PDF builder.
+//
+// Loads pdf-amortization-with-masthead.html, fills scalar tokens from
+// AmortizationViewModel + +PDFDerivations, and emits the schedule-grid
+// HTML at the two <!--{{schedule_page_N_rows}}--> sentinels. Template
+// owns chrome, chart SVG, hero, and assumptions box.
 
 import Foundation
 import QuotientFinance
@@ -10,212 +12,238 @@ import QuotientFinance
 @MainActor
 enum AmortizationPDFHTML {
 
+    /// `scheduleGranularity` is preserved in the signature for call-site
+    /// compatibility but is ignored — the v2.1.1 template is fixed to
+    /// the annual-summary schedule shape (years 1-15 on page 2, 16-30
+    /// on page 3). Monthly-granularity export moves to V0.1.2-BACKLOG.
     static func buildHTML(
         profile: LenderProfile,
         borrower: Borrower?,
         viewModel: AmortizationViewModel,
-        narrative: String,
-        scheduleGranularity: AmortScheduleGranularity
-    ) -> String {
-        let body = coverSection(
+        scheduleGranularity: AmortScheduleGranularity = .yearly
+    ) throws -> String {
+        let template = try PDFTemplateLoader.load("pdf-amortization-with-masthead")
+        let values = tokens(profile: profile, borrower: borrower, viewModel: viewModel)
+        var html = HTMLPDFRenderer.shared.interpolate(template: template, values: values)
+        html = html.replacingOccurrences(
+            of: "<!--{{schedule_page_1_rows}}-->",
+            with: schedulePage1HTML(viewModel: viewModel)
+        )
+        html = html.replacingOccurrences(
+            of: "<!--{{schedule_page_2_rows}}-->",
+            with: schedulePage2HTML(viewModel: viewModel)
+        )
+        let trailer = PDFTemplateLoader.complianceTrailerPage(
             profile: profile,
             borrower: borrower,
-            viewModel: viewModel,
-            narrative: narrative
+            scenarioType: .amortization
         )
-            + scheduleSection(
-                viewModel: viewModel,
-                granularity: scheduleGranularity
-            )
-            + PDFHTMLComposition.disclaimersHTML(
-                profile: profile,
-                borrower: borrower,
-                scenarioType: .amortization
-            )
-        return PDFHTMLComposition.wrap(body: body)
+        return html.replacingOccurrences(
+            of: "</body>",
+            with: "\(trailer)\n</body>"
+        )
     }
 
-    // MARK: - Cover
+    // MARK: - Tokens
 
-    private static func coverSection(
+    private static func tokens(
         profile: LenderProfile,
         borrower: Borrower?,
-        viewModel: AmortizationViewModel,
-        narrative: String
-    ) -> String {
-        let borrowerName = borrower?.fullName ?? "Client"
-        let rateDisplay = displayRateAndAPR(
-            rate: viewModel.inputs.annualRate,
-            decimalAPR: viewModel.inputs.aprRate
-        )
-        let loanMoney = MoneyFormat.shared.currency(viewModel.inputs.loanAmount)
-        let loanSummary = "\(loanMoney) · \(viewModel.inputs.termYears)-yr fixed · \(rateDisplay)"
-
-        let piti = MoneyFormat.shared.currency(viewModel.monthlyPITI)
-        let interest = MoneyFormat.shared.dollarsShort(viewModel.totalInterest)
-        let totalPaid = MoneyFormat.shared.dollarsShort(viewModel.totalPaid)
+        viewModel: AmortizationViewModel
+    ) -> [String: String] {
+        let inputs = viewModel.inputs
+        let money = MoneyFormat.shared
+        let first = borrower?.firstName ?? "Client"
+        let last = borrower?.lastName ?? ""
+        let addr = borrower?.propertyAddress ?? ""
+        let prepared = PDFHTMLComposition.formatDate(Date(), style: .short)
+        let firstPayDate = PDFHTMLComposition.formatDate(viewModel.firstPaymentDate, style: .short)
         let payoff = viewModel.payoffDate.map {
             PDFHTMLComposition.formatDate($0, style: .monthYear)
         } ?? "—"
-        let rateStr = String(format: "%.3f", viewModel.inputs.annualRate)
-        let narrativeCopy: String = {
-            if !narrative.isEmpty { return narrative }
-            return "At today's \(rateStr)% rate, the monthly PITI is \(piti). "
-                + "Over the life of the loan, interest totals about \(interest)."
+        let ltvPct = String(format: "%.0f", viewModel.ltv * 100)
+
+        let extraMonthly = inputs.extraPrincipalMonthly
+        let extraShortened: String = {
+            let m = viewModel.extraPaydownMonthsSaved
+            guard m > 0 else { return "—" }
+            let years = m / 12
+            let months = m % 12
+            if years > 0, months > 0 { return "\(years) yrs \(months) mos" }
+            if years > 0 { return "\(years) yrs" }
+            return "\(months) mos"
         }()
 
-        let eyebrow = "AMORTIZATION · \(PDFHTMLComposition.formatDate(Date()))"
-        let hero = PDFHTMLComposition.heroCardHTML(
-            label: "Monthly payment · PITI",
-            value: piti,
-            prefix: "",
-            suffix: ""
-        )
-        let kpis = PDFHTMLComposition.kpiGridHTML([
-            ("Total interest", interest),
-            ("Payoff", payoff),
-            ("Total paid", totalPaid)
-        ])
-        let signature = PDFHTMLComposition.signatureHTML(profile: profile)
-        let title = PDFHTMLComposition.titleBlockHTML(
-            eyebrow: eyebrow,
-            borrowerName: borrowerName,
-            loanSummary: loanSummary
-        )
+        let combinedIncome: String = inputs.combinedMonthlyIncome > 0
+            ? money.currency(inputs.combinedMonthlyIncome)
+            : "—"
+        let rateLock: String = inputs.rateLock.isEmpty ? "—" : inputs.rateLock
 
+        return [
+            // common
+            "borrower_first": PDFHTMLComposition.escape(first),
+            "borrower_last": PDFHTMLComposition.escape(last.isEmpty ? first : last),
+            "property_address": PDFHTMLComposition.escape(addr),
+            "doc_num": generateDocNum(prefix: "AM"),
+            "prepared_by_name": PDFHTMLComposition.escape(profile.fullName),
+            "prepared_by_nmls": PDFHTMLComposition.escape(profile.nmlsId),
+            "prepared_date": prepared,
+            "loan_amount_formatted": money.currency(inputs.loanAmount),
+
+            // Cover hero + KPI
+            "rate_lock": rateLock,
+            "product_badge": viewModel.productBadge,
+            "piti_dollars": viewModel.pitiDollarsPart,
+            "piti_cents": viewModel.pitiCentsPart,
+            "first_payment_date": firstPayDate,
+            "total_interest_formatted": money.dollarsShort(viewModel.totalInterest),
+            "payoff_date": payoff,
+            "total_paid_formatted": money.dollarsShort(viewModel.totalPaid),
+            "ltv_pct": ltvPct,
+            "pmi_note": viewModel.pmiNote,
+            "yr10_balance_formatted": money.currency(viewModel.year10Balance),
+            "rate_pct": String(format: "%.3f%%", inputs.annualRate),
+
+            // Narrative column
+            "extra_principal_formatted": money.decimalString(extraMonthly),
+            "extra_paydown_shortened": extraShortened,
+            "extra_paydown_interest_saved": money.dollarsShort(viewModel.extraPaydownInterestSaved),
+            "quarterpt_savings_monthly": money.decimalString(viewModel.quarterPointSavingsMonthly),
+            "quarterpt_savings_lifetime": money.dollarsShort(viewModel.quarterPointSavingsLifetime),
+            "combined_monthly_income": combinedIncome
+        ]
+    }
+
+    // MARK: - Schedule grid emitters
+
+    /// Years 1–15 split 8/7 into two side-by-side tables.
+    private static func schedulePage1HTML(viewModel: AmortizationViewModel) -> String {
+        let annuals = yearlySummaries(viewModel: viewModel)
+        let leftYears = Array(annuals.prefix(8))
+        let rightYears = Array(annuals.dropFirst(8).prefix(7))
         return """
-        <section>
-          \(signature)
-          \(title)
-          \(hero)
-          \(kpis)
-          <h2>Summary</h2>
-          <p class="summary-text">\(PDFHTMLComposition.escape(narrativeCopy))</p>
-          \(paymentBreakdownHTML(viewModel: viewModel))
-        </section>
+        <div class="schedule-split">
+          \(scheduleTableHTML(rows: leftYears, footer: nil))
+          \(scheduleTableHTML(rows: rightYears, footer: nil))
+        </div>
         """
     }
 
-    private static func paymentBreakdownHTML(viewModel: AmortizationViewModel) -> String {
-        let rows: [(label: String, value: Decimal)] = [
-            ("Principal & interest", viewModel.monthlyPI),
-            ("Property tax", viewModel.monthlyTax),
-            ("Insurance", viewModel.monthlyInsurance),
-            ("HOA", viewModel.monthlyHOA),
-            ("Mortgage insurance", viewModel.monthlyPMI)
-        ]
-        let bodyRows = rows
-            .filter { $0.value > 0 || $0.label == "Principal & interest" }
-            .map { row in
-                let amount = MoneyFormat.shared.currency(row.value)
-                return "<tr><td>\(PDFHTMLComposition.escape(row.label))</td><td class=\"num\">\(amount)</td></tr>"
-            }
-            .joined()
+    /// Years 16–30 split 8/7 plus a 30-year totals `<tfoot>` at the end
+    /// of the right table.
+    private static func schedulePage2HTML(viewModel: AmortizationViewModel) -> String {
+        let annuals = yearlySummaries(viewModel: viewModel)
+        let page2 = Array(annuals.dropFirst(15))
+        let leftYears = Array(page2.prefix(8))
+        let rightYears = Array(page2.dropFirst(8).prefix(7))
+        let totals = totalsFooter(viewModel: viewModel)
         return """
-        <h2>Payment breakdown</h2>
-        <table class="data">
-          <thead><tr><th>Component</th><th class="num">Monthly</th></tr></thead>
-          <tbody>\(bodyRows)</tbody>
+        <div class="schedule-split">
+          \(scheduleTableHTML(rows: leftYears, footer: nil))
+          \(scheduleTableHTML(rows: rightYears, footer: totals))
+        </div>
+        """
+    }
+
+    private static func scheduleTableHTML(rows: [YearRow], footer: String?) -> String {
+        let body = rows.map { row in
+            """
+            <tr class="year-end">
+              <td>\(row.yearLabel)</td>
+              <td>\(row.principal)</td>
+              <td>\(row.interest)</td>
+              <td>\(row.balance)</td>
+            </tr>
+            """
+        }.joined()
+        let footHTML = footer.map { "<tfoot>\($0)</tfoot>" } ?? ""
+        return """
+        <table class="schedule">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>\(body)</tbody>
+          \(footHTML)
         </table>
         """
     }
 
-    // MARK: - Schedule
+    private static func totalsFooter(viewModel: AmortizationViewModel) -> String {
+        let money = MoneyFormat.shared
+        let annuals = yearlySummaries(viewModel: viewModel)
+        let totalPrincipal = annuals.reduce(Decimal(0)) { $0 + $1.rawPrincipal }
+        let totalInterest = viewModel.totalInterest
+        return """
+        <tr>
+          <td>30-yr total</td>
+          <td>\(money.currency(totalPrincipal))</td>
+          <td>\(money.currency(totalInterest))</td>
+          <td>$0</td>
+        </tr>
+        """
+    }
 
-    private static func scheduleSection(
-        viewModel: AmortizationViewModel,
-        granularity: AmortScheduleGranularity
-    ) -> String {
-        guard let schedule = viewModel.schedule else { return "" }
-        switch granularity {
-        case .yearly:
-            return yearlyScheduleHTML(schedule: schedule)
-        case .monthly:
-            return monthlyScheduleHTML(schedule: schedule, viewModel: viewModel)
+    // MARK: - Per-year aggregation
+
+    private struct YearRow {
+        let yearLabel: String
+        let principal: String
+        let interest: String
+        let balance: String
+        let rawPrincipal: Decimal
+    }
+
+    private static func yearlySummaries(viewModel: AmortizationViewModel) -> [YearRow] {
+        guard let schedule = viewModel.schedule else { return [] }
+        let payments = schedule.payments
+        let perYear = max(1, viewModel.inputs.biweekly ? 26 : 12)
+        let termYears = viewModel.inputs.termYears
+        let money = MoneyFormat.shared
+        let cal = Calendar(identifier: .gregorian)
+        var rows: [YearRow] = []
+        for year in 1...termYears {
+            let start = (year - 1) * perYear
+            let end = min(year * perYear, payments.count)
+            guard start < end else { break }
+            let slice = payments[start..<end]
+            let principal = slice.reduce(Decimal(0)) { $0 + $1.principal + $1.extraPrincipal }
+            let interest = slice.reduce(Decimal(0)) { $0 + $1.interest }
+            let endingBalance = slice.last?.balance ?? 0
+            let calendarYear = cal.component(.year, from: slice.last?.date ?? Date())
+            rows.append(YearRow(
+                yearLabel: String(calendarYear),
+                principal: money.currency(principal),
+                interest: money.currency(interest),
+                balance: money.currency(endingBalance),
+                rawPrincipal: principal
+            ))
         }
+        // Pad to 30 years with paid-off rows so the template grid always
+        // fills out; a loan retired early by extra principal still needs
+        // a terminal row in each page's table.
+        while rows.count < termYears {
+            let lastLabel = rows.last.map { (Int($0.yearLabel) ?? 0) + 1 } ?? 0
+            rows.append(YearRow(
+                yearLabel: String(lastLabel),
+                principal: "—",
+                interest: "—",
+                balance: money.currency(0),
+                rawPrincipal: 0
+            ))
+        }
+        return rows
     }
 
-    private static func yearlyScheduleHTML(schedule: AmortizationSchedule) -> String {
-        let rows = yearlyAggregate(schedule: schedule)
-        let yearFmt = DateFormatter()
-        yearFmt.dateFormat = "MMM yyyy"
-        let bodyRows = rows.map { row in
-            let first = yearFmt.string(from: row.firstPaymentDate)
-            let last = yearFmt.string(from: row.lastPaymentDate)
-            let range = first == last ? first : "\(first) – \(last)"
-            return """
-            <tr>
-              <td class="num">\(row.year)</td>
-              <td>\(PDFHTMLComposition.escape(range))</td>
-              <td class="num">\(MoneyFormat.shared.currency(row.totalPayment))</td>
-              <td class="num">\(MoneyFormat.shared.currency(row.totalPrincipal))</td>
-              <td class="num">\(MoneyFormat.shared.currency(row.totalInterest))</td>
-              <td class="num">\(MoneyFormat.shared.currency(row.endingBalance))</td>
-            </tr>
-            """
-        }.joined()
-        return """
-        <section class="break-before">
-          <p class="eyebrow">Amortization schedule · yearly</p>
-          <h2>Year-by-year breakdown</h2>
-          <table class="data">
-            <thead>
-              <tr>
-                <th class="num">Year</th>
-                <th>Calendar</th>
-                <th class="num">Total paid</th>
-                <th class="num">Principal</th>
-                <th class="num">Interest</th>
-                <th class="num">Year-end balance</th>
-              </tr>
-            </thead>
-            <tbody>\(bodyRows)</tbody>
-          </table>
-        </section>
-        """
-    }
-
-    private static func monthlyScheduleHTML(
-        schedule: AmortizationSchedule,
-        viewModel: AmortizationViewModel
-    ) -> String {
-        let dateFmt = DateFormatter()
-        dateFmt.dateFormat = "MMM d, yyyy"
-        let miDropoff = viewModel.miDropoffPeriod
-        let bodyRows = schedule.payments.map { p in
-            let isDropoff = miDropoff.map { p.number == $0 } ?? false
-            let rowClass = isDropoff ? " class=\"winner\"" : ""
-            let actualPayment = p.payment + p.extraPrincipal
-            let actualPrincipal = p.principal + p.extraPrincipal
-            return """
-            <tr\(rowClass)>
-              <td class="num">\(p.number)</td>
-              <td>\(PDFHTMLComposition.escape(dateFmt.string(from: p.date)))</td>
-              <td class="num">\(MoneyFormat.shared.currency(actualPayment))</td>
-              <td class="num">\(MoneyFormat.shared.currency(actualPrincipal))</td>
-              <td class="num">\(MoneyFormat.shared.currency(p.interest))</td>
-              <td class="num">\(MoneyFormat.shared.currency(p.balance))</td>
-            </tr>
-            """
-        }.joined()
-        return """
-        <section class="break-before">
-          <p class="eyebrow">Amortization schedule · monthly</p>
-          <h2>Payment-by-payment breakdown</h2>
-          <table class="data">
-            <thead>
-              <tr>
-                <th class="num">#</th>
-                <th>Date</th>
-                <th class="num">Payment</th>
-                <th class="num">Principal</th>
-                <th class="num">Interest</th>
-                <th class="num">Balance</th>
-              </tr>
-            </thead>
-            <tbody>\(bodyRows)</tbody>
-          </table>
-        </section>
-        """
+    private static func generateDocNum(prefix: String) -> String {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let stamp = df.string(from: Date())
+        let seq = String(format: "%04d", Int.random(in: 0..<10_000))
+        return "NIQ-\(prefix)-\(stamp)-\(seq)"
     }
 }

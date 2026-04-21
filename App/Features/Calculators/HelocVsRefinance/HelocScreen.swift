@@ -502,8 +502,7 @@ struct HelocScreen: View {
                 let url = try await PDFBuilder.buildHelocPDF(
                     profile: profile,
                     borrower: viewModel.borrower,
-                    viewModel: viewModel,
-                    narrative: verdictCopy
+                    viewModel: viewModel
                 )
                 shareBundle = ShareBundle(
                     url: url,
