@@ -47,9 +47,9 @@
 		<key>UIColorName</key>
 		<string>Surface</string>
 		<key>UIImageName</key>
-		<string>Wordmark-A</string>
+		<string>Wordmark-A-Launch</string>
 		<key>UIImageRespectsSafeAreaInsets</key>
-		<false/>
+		<true/>
 	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>

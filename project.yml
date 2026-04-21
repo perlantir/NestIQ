@@ -85,8 +85,8 @@ targets:
         LSRequiresIPhoneOS: YES
         UILaunchScreen:
           UIColorName: Surface
-          UIImageName: Wordmark-A
-          UIImageRespectsSafeAreaInsets: false
+          UIImageName: Wordmark-A-Launch
+          UIImageRespectsSafeAreaInsets: true
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIRequiredDeviceCapabilities:
