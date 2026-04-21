@@ -60,3 +60,6 @@ fastlane/test_output
 
 # Simulator screenshots
 Simulator Screenshot*.png
+
+# Backup files from sed / manual edits
+*.bak
