@@ -20,14 +20,14 @@
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
 	<string>2</string>
+	<key>FREDAPIKey</key>
+	<string>Y39a989743f6306a352739a06d78088f1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Capture your company logo or professional photo.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Quickly add borrowers from your contacts.</string>
-	<key>FREDAPIKey</key>
-	<string>&lt;&lt;&lt;PASTE_FRED_KEY&gt;&gt;&gt;</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>NestIQ uses Face ID to securely open the app with your borrower data.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

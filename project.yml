@@ -107,7 +107,7 @@ targets:
         NSFaceIDUsageDescription: NestIQ uses Face ID to securely open the app with your borrower data.
         NSCameraUsageDescription: Capture your company logo or professional photo.
         NSPhotoLibraryUsageDescription: NestIQ uses your photo library to set a profile photo that appears on borrower-facing PDFs.
-        FREDAPIKey: <<<PASTE_FRED_KEY>>>
+        FREDAPIKey: Y39a989743f6306a352739a06d78088f1
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: mortgage.nestiq
