@@ -81,42 +81,10 @@ struct AuthGate<Content: View>: View {
                     .textStyle(Typography.bodySm)
                     .foregroundStyle(Palette.inkTertiary)
                     .padding(.bottom, Spacing.s32)
-                #if DEBUG
-                // TODO: Remove before TestFlight — DEBUG bypass for simulator QA only
-                SecondaryButton("Skip (DEBUG only)") {
-                    handleDebugBypass()
-                }
-                .padding(.horizontal, Spacing.s24)
-                .padding(.bottom, Spacing.s32)
-                #endif
             }
             .padding(Spacing.s24)
         }
     }
-
-    #if DEBUG
-    private func handleDebugBypass() {
-        print("[AuthGate] DEBUG bypass used — this path must not run in Release builds")
-        let profile = LenderProfile(
-            appleUserID: "debug-user-001",
-            firstName: "Nick",
-            lastName: "Debug",
-            nmlsId: "0000000",
-            licensedStates: ["IA"],
-            companyName: "Debug Testing",
-            brandColorHex: "#1F4D3F",
-            phone: "555-555-0100",
-            email: "debug@quotient.local",
-            preferredLanguage: "en",
-            faceIDEnabled: false,
-            hapticsEnabled: true,
-            densityPreference: .comfortable,
-            appearance: .system
-        )
-        modelContext.insert(profile)
-        try? modelContext.save()
-    }
-    #endif
 
     private func handleSignIn(result: Result<ASAuthorization, any Error>) {
         guard case let .success(authz) = result,
