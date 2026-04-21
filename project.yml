@@ -28,11 +28,10 @@ settings:
     # SwiftLint build phase needs to read files outside the build directory
     # (the source tree + .swiftlint.yml). Disable per-script sandboxing for it.
     ENABLE_USER_SCRIPT_SANDBOXING: NO
-    # TODO: set DEVELOPMENT_TEAM once Apple Developer enrollment (Perlantir
-    # AI Studio) completes. Simulator-only builds run without signing.
-    CODE_SIGNING_ALLOWED: NO
-    CODE_SIGN_IDENTITY: ""
-    DEVELOPMENT_TEAM: ""
+    # Signing: Uber Kiwi LLC (7JL22TDB44). Automatic signing; Xcode
+    # manages profiles. Enrollment completed 2026-04-19.
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 7JL22TDB44
   configs:
     Debug:
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG"
@@ -107,10 +106,11 @@ targets:
         NSFaceIDUsageDescription: NestIQ uses Face ID to securely open the app with your borrower data.
         NSCameraUsageDescription: Capture your company logo or professional photo.
         NSPhotoLibraryUsageDescription: NestIQ uses your photo library to set a profile photo that appears on borrower-facing PDFs.
-        FREDAPIKey: Y39a989743f6306a352739a06d78088f1
+        FREDAPIKey: 39a989743f6306a352739a06d78088f1
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: mortgage.nestiq
+        CODE_SIGN_ENTITLEMENTS: Quotient.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
