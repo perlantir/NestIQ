@@ -37,6 +37,20 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
     /// collapses to the note rate alone per D2.
     var aprRate: Decimal?
 
+    // MARK: - Session 7.3d additions (v2.1.1 amortization PDF template)
+    //
+    // Both decodeIfPresent with defaults so pre-7.3d Saved Scenarios JSON
+    // continues to decode unchanged.
+
+    /// Rate-lock duration free-text ("30-day", "45-day", "60-day"). Shown
+    /// in the v2.1.1 amort template's cover hero via `{{rate_lock}}`.
+    /// Empty string is rendered as a dash — LO opt-in.
+    var rateLock: String
+    /// Combined monthly household income for the borrower. Shown on the
+    /// PDF cover via `{{combined_monthly_income}}` to provide affordability
+    /// context next to the PITI hero. 0 renders as em-dash.
+    var combinedMonthlyIncome: Decimal
+
     // Legacy decodes won't carry newer keys. Defaults below.
     enum CodingKeys: String, CodingKey {
         case mode
@@ -45,6 +59,8 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         case includePMI, manualMonthlyPMI
         case extraPrincipalMonthly, biweekly, propertyDP
         case aprRate
+        // 7.3d additions
+        case rateLock, combinedMonthlyIncome
     }
 
     init(
@@ -61,7 +77,9 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         extraPrincipalMonthly: Decimal,
         biweekly: Bool,
         propertyDP: PropertyDownPaymentConfig = .empty,
-        aprRate: Decimal? = nil
+        aprRate: Decimal? = nil,
+        rateLock: String = "",
+        combinedMonthlyIncome: Decimal = 0
     ) {
         self.mode = mode
         self.loanAmount = loanAmount
@@ -77,6 +95,8 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         self.biweekly = biweekly
         self.propertyDP = propertyDP
         self.aprRate = aprRate
+        self.rateLock = rateLock
+        self.combinedMonthlyIncome = combinedMonthlyIncome
     }
 
     init(from decoder: any Decoder) throws {
@@ -97,6 +117,8 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
             PropertyDownPaymentConfig.self, forKey: .propertyDP
         ) ?? .empty
         self.aprRate = try c.decodeIfPresent(Decimal.self, forKey: .aprRate)
+        self.rateLock = try c.decodeIfPresent(String.self, forKey: .rateLock) ?? ""
+        self.combinedMonthlyIncome = try c.decodeIfPresent(Decimal.self, forKey: .combinedMonthlyIncome) ?? 0
     }
 
     static let sampleDefault = AmortizationFormInputs(
@@ -110,7 +132,9 @@ struct AmortizationFormInputs: Codable, Hashable, Sendable {
         includePMI: false,
         manualMonthlyPMI: 0,
         extraPrincipalMonthly: 0,
-        biweekly: false
+        biweekly: false,
+        rateLock: "45-day",
+        combinedMonthlyIncome: 20_400
     )
 
     var monthlyPITI: Decimal {
