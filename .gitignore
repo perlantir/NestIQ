@@ -57,3 +57,6 @@ fastlane/test_output
 *.o
 *.a
 *.dylib
+
+# Simulator screenshots
+Simulator Screenshot*.png
