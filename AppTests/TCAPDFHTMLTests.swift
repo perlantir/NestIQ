@@ -60,11 +60,17 @@ final class TCAPDFHTMLTests: XCTestCase {
         XCTAssertTrue(full.contains("The fine print"),
                       "Disclaimers page missing its H1")
 
-        // Per-page counter from NestIQPrintRenderer footer
-        XCTAssertTrue(full.contains("Page 1 of "),
-                      "Cover page counter missing")
-        XCTAssertTrue(full.contains("nestiq.mortgage"),
-                      "Footer URL missing")
+        // D12 (Session 7 / 2026-04-21): the Core Graphics per-page chrome
+        // (NestIQPrintRenderer wordmark header + "Page N of M ·
+        // nestiq.mortgage" footer) was retired — PDF chrome is now
+        // HTML-template-driven. TCA stays on base.html + PDFHTMLComposition
+        // until its v2.1.1 migration in Session 7.3e/f, so the interim
+        // TCA PDF renders without a masthead band or live page counter.
+        // The disclaimers appendix "Equal Housing Opportunity" footer
+        // strip (still emitted by PDFHTMLComposition.disclaimersHTML) is
+        // the remaining compliance anchor we can assert on.
+        XCTAssertTrue(full.contains("Equal Housing Opportunity"),
+                      "Disclaimers footer EHO statement missing")
     }
 
     func testBreakEvenSVGDomainMatchesTerm() {
