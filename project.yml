@@ -79,8 +79,8 @@ targets:
       properties:
         CFBundleDisplayName: NestIQ
         CFBundleName: NestIQ
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "2"
+        CFBundleShortVersionString: "0.1.1"
+        CFBundleVersion: "3"
         LSRequiresIPhoneOS: YES
         UILaunchScreen:
           UIColorName: Surface
