@@ -1,10 +1,13 @@
 // HomeScreen.swift
-// Per design/screens/Home.jsx. Greeting + rate ribbon + calculators
-// list (01-05) + recent scenarios. Tab bar is provided by the host
-// TabView in RootTabBar.
+// Per design/screens/Home.jsx. Greeting + PMMS rate card + calculators
+// list + recent scenarios. Tab bar is provided by the host TabView in
+// RootTabBar.
 //
-// Rate snapshot is stubbed via MockRateService until Session 5 wires the
-// real Vercel-edge proxy.
+// Rate card (Session 6.4) shows Freddie Mac PMMS 30-yr + 15-yr fixed
+// pulled live from FRED, with a 24 h UserDefaults cache and a hardcoded
+// fallback for offline launch. Compliance footer (PMMS® attribution +
+// "Market average. Not an offer of credit.") is required — do not edit
+// without reviewing the Freddie Mac attribution terms.
 
 import SwiftUI
 import SwiftData
@@ -31,7 +34,7 @@ struct HomeScreen: View {
     @State private var activeCalculator: CalculatorType?
     @State private var openScenario: Scenario?
 
-    private let rateService: any RateService = MockRateService()
+    private let rateService: any RateService = FREDRateService()
 
     var body: some View {
         NavigationStack {
@@ -127,70 +130,80 @@ struct HomeScreen: View {
         return f.string(from: Date())
     }
 
-    // MARK: Rate ribbon
+    // MARK: Rate card (PMMS)
 
     private var rateRibbon: some View {
-        VStack(alignment: .leading, spacing: Spacing.s8) {
-            HStack {
-                Eyebrow("Today · national average")
-                Spacer()
-                Text(asOfText)
-                    .textStyle(Typography.num)
-                    .foregroundStyle(Palette.inkTertiary)
-            }
-            .padding(.horizontal, Spacing.s20)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(Array(currentRates.enumerated()), id: \.offset) { idx, r in
-                        rateCell(snapshot: r)
-                            .frame(minWidth: 130, alignment: .leading)
-                            .overlay(alignment: .trailing) {
-                                if idx < currentRates.count - 1 {
-                                    Rectangle()
-                                        .fill(Palette.borderSubtle)
-                                        .frame(width: 1)
-                                }
-                            }
+        VStack(alignment: .leading, spacing: Spacing.s12) {
+            VStack(spacing: 0) {
+                ForEach(Array(currentRates.enumerated()), id: \.offset) { idx, r in
+                    rateRow(snapshot: r)
+                    if idx < currentRates.count - 1 {
+                        Rectangle().fill(Palette.borderSubtle).frame(height: 1)
                     }
                 }
             }
             .background(Palette.surfaceRaised)
             .overlay(
-                VStack(spacing: 0) {
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                    Spacer()
-                    Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                }
+                RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous)
+                    .stroke(Palette.borderSubtle, lineWidth: 1)
             )
+            .clipShape(RoundedRectangle(cornerRadius: Radius.listCard, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(pmmsAttributionText)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(Palette.inkTertiary)
+                Text(HomeScreen.marketAverageDisclaimer)
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
         }
+        .padding(.horizontal, Spacing.s20)
     }
+
+    /// Compliance disclaimer required by the TILA / Reg Z informational
+    /// safe harbor — a national market average is not an offer of credit.
+    /// Exposed statically so RateWidgetComplianceTests can assert its
+    /// presence.
+    static let marketAverageDisclaimer = "Market average. Not an offer of credit."
+
+    /// Registered-trademark PMMS® attribution required by Freddie Mac's
+    /// data terms. Likewise exposed for test assertion.
+    static let pmmsAttributionPrefix = "Source: Freddie Mac PMMS® via FRED"
 
     private var currentRates: [RateSnapshot] {
-        rateReport?.rates ?? MockRateService.placeholderRates
+        rateReport?.rates ?? HomeScreen.placeholderRates
     }
 
-    private var asOfText: String {
-        guard let d = rateReport?.asOf else { return "—" }
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return "\(f.string(from: d)) \(TimeZone.current.abbreviation() ?? "")"
+    private var pmmsAttributionText: String {
+        let dateString: String
+        if let asOf = rateReport?.asOf {
+            let f = DateFormatter()
+            f.dateFormat = "MMM d, yyyy"
+            dateString = f.string(from: asOf)
+        } else {
+            dateString = "—"
+        }
+        let base = "\(HomeScreen.pmmsAttributionPrefix) · as of \(dateString)"
+        return rateReport?.isFallback == true ? "\(base) · offline" : base
     }
 
-    private func rateCell(snapshot r: RateSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
+    private func rateRow(snapshot r: RateSnapshot) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: Spacing.s12) {
             Text(r.name)
-                .textStyle(Typography.body.withWeight(.medium))
-                .foregroundStyle(Palette.inkTertiary)
+                .textStyle(Typography.bodyLg.withSize(14, weight: .medium))
+                .foregroundStyle(Palette.ink)
+            Spacer()
             HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(String(format: "%.3f", r.rate))
-                    .textStyle(Typography.num.withSize(19, weight: .medium, design: .monospaced))
+                Text(String(format: "%.2f", r.rate))
+                    .font(.system(size: 19, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink)
                 Text("%")
-                    .textStyle(Typography.num.withSize(11))
+                    .font(.system(size: 11, design: .monospaced))
                     .foregroundStyle(Palette.inkTertiary)
             }
             deltaChip(r: r)
+                .frame(width: 64, alignment: .trailing)
         }
         .padding(.horizontal, Spacing.s16)
         .padding(.vertical, Spacing.s12)
@@ -198,13 +211,19 @@ struct HomeScreen: View {
 
     @ViewBuilder
     private func deltaChip(r: RateSnapshot) -> some View {
-        let color: Color = r.move == .down ? Palette.gain
-            : r.move == .up ? Palette.loss : Palette.inkTertiary
-        let arrow: String = r.move == .down ? "▼"
-            : r.move == .up ? "▲" : "—"
-        Text("\(arrow) \(r.delta == 0 ? "0.00" : String(format: "%.2f", abs(r.delta)))")
-            .textStyle(Typography.num.withSize(10.5))
-            .foregroundStyle(color)
+        if r.hasPriorObservation {
+            let color: Color = r.move == .down ? Palette.gain
+                : r.move == .up ? Palette.loss : Palette.inkTertiary
+            let arrow: String = r.move == .down ? "↓"
+                : r.move == .up ? "↑" : "—"
+            Text("\(arrow) \(String(format: "%.2f", abs(r.delta)))")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(color)
+        } else {
+            Text("—")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(Palette.inkTertiary)
+        }
     }
 
     // MARK: Calculator list
@@ -406,16 +425,28 @@ enum CalculatorCopy {
     }
 }
 
-// MARK: - Placeholder while MockRateService resolves
+// MARK: - Placeholder while FREDRateService resolves
 
-extension MockRateService {
+extension HomeScreen {
+    /// Shown during the brief window between launch and the first
+    /// FREDRateService resolution. Values intentionally match the
+    /// FREDRateService.fallback* constants so the widget doesn't
+    /// visibly flicker when the service swaps in.
     static let placeholderRates: [RateSnapshot] = [
-        .init(name: "30-yr fixed", rate: 6.850, delta: 0, move: .flat),
-        .init(name: "15-yr fixed", rate: 6.120, delta: 0, move: .flat),
-        .init(name: "5/6 ARM", rate: 6.450, delta: 0, move: .flat),
-        .init(name: "FHA 30", rate: 6.520, delta: 0, move: .flat),
-        .init(name: "VA 30", rate: 6.280, delta: 0, move: .flat),
-        .init(name: "Jumbo 30", rate: 7.050, delta: 0, move: .flat),
+        .init(
+            name: "30-yr fixed",
+            rate: FREDRateService.fallback30yr,
+            delta: 0,
+            move: .flat,
+            hasPriorObservation: false
+        ),
+        .init(
+            name: "15-yr fixed",
+            rate: FREDRateService.fallback15yr,
+            delta: 0,
+            move: .flat,
+            hasPriorObservation: false
+        )
     ]
 }
 

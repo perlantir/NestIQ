@@ -350,10 +350,28 @@ struct SettingsScreen: View {
             Text("v\(versionDisplay)")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(Palette.inkTertiary)
+            Text(Self.pmmsAttribution)
+                .font(.system(size: 10.5))
+                .foregroundStyle(Palette.inkTertiary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, Spacing.s16)
+                .padding(.top, Spacing.s8)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.s16)
     }
+
+    /// Freddie Mac PMMS® / FRED attribution required alongside the live
+    /// rate widget. Rendered here on the Settings About surface; matches
+    /// the tighter line shown in the home widget footer.
+    static let pmmsAttribution =
+        "Mortgage rate data: Freddie Mac Primary Mortgage Market Survey® "
+        + "(PMMS®) via Federal Reserve Economic Data (FRED), Federal "
+        + "Reserve Bank of St. Louis. PMMS is a registered trademark of "
+        + "Freddie Mac. Rates displayed in NestIQ are national market "
+        + "averages for informational purposes only and do not constitute "
+        + "an offer of credit."
 
     private var versionDisplay: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
