@@ -6,34 +6,14 @@
 //     carries the app version + build so Nick can triage by release.
 //     Falls back to `UIApplication.open(mailto:)` when Mail isn't set
 //     up on the device (simulator, or device with no Mail account).
-//   - HelpCenterView — WKWebView wrapper. Placeholder URL until Nick
-//     provisions the real help center; TODO flagged.
-//   - LicensesLegalView — static attributions page. Bundled-font
-//     licenses, privacy / terms URL placeholders.
-//
-// The email address and both URLs are Nick-blockers flagged in
-// SESSION-5A-SUMMARY; TODOs are inline below for grep discovery.
+//   - HelpCenterView — WKWebView wrapper over the production support URL.
+//   - LicensesLegalView — static attributions page; pulls privacy /
+//     terms URLs from App/Config/Links.swift.
 
 import SwiftUI
 import MessageUI
 import UIKit
 import WebKit
-
-// MARK: - Feedback mail sheet
-
-// TODO: real support email before TestFlight
-private let supportEmail = "support@quotient.app"
-
-// Placeholder URLs — string constants stay parseable so we can
-// reconstruct URL() safely. TODO: swap for real values before TestFlight.
-private let helpCenterURLString = "https://quotient.app/help-placeholder"
-private let privacyURLString = "https://quotient.app/privacy-placeholder"
-private let termsURLString = "https://quotient.app/terms-placeholder"
-
-private func placeholderURL(_ string: String) -> URL {
-    URL(string: string) ?? URL(string: "https://quotient.app")
-        ?? URL(fileURLWithPath: "/")
-}
 
 struct FeedbackMailSheet: View {
     @Environment(\.dismiss)
@@ -43,7 +23,7 @@ struct FeedbackMailSheet: View {
         Group {
             if MFMailComposeViewController.canSendMail() {
                 MailComposerRepresentable(
-                    recipient: supportEmail,
+                    recipient: Links.supportEmail,
                     subject: subject,
                     messageBody: prefilledBody
                 )
@@ -93,17 +73,17 @@ struct FeedbackMailSheet: View {
             Text("Send feedback directly to")
                 .textStyle(Typography.body)
                 .foregroundStyle(Palette.inkSecondary)
-            Text(supportEmail)
+            Text(Links.supportEmail)
                 .textStyle(Typography.num.withSize(13, weight: .medium))
                 .foregroundStyle(Palette.accent)
             HStack(spacing: Spacing.s12) {
                 Button("Copy address") {
-                    UIPasteboard.general.string = supportEmail
+                    UIPasteboard.general.string = Links.supportEmail
                 }
                 .textStyle(Typography.body.withWeight(.medium))
                 .foregroundStyle(Palette.accent)
                 Button("Open mailto") {
-                    if let url = URL(string: "mailto:\(supportEmail)?subject=\(subject.urlEncoded)") {
+                    if let url = URL(string: "mailto:\(Links.supportEmail)?subject=\(subject.urlEncoded)") {
                         UIApplication.shared.open(url)
                     }
                 }
@@ -170,7 +150,7 @@ struct HelpCenterView: View {
                 comingSoonPlaceholder
             } else {
                 WebView(
-                    url: placeholderURL(helpCenterURLString),
+                    url: Links.supportURLValue,
                     onLoadFailed: { loadFailed = true }
                 )
                 .ignoresSafeArea(edges: .bottom)
@@ -303,12 +283,12 @@ struct LicensesLegalView: View {
         VStack(alignment: .leading, spacing: Spacing.s8) {
             Eyebrow("Legal")
             VStack(spacing: 0) {
-                Link(destination: placeholderURL(privacyURLString)) {
-                    legalRow(label: "Privacy policy", subtitle: privacyURLString)
+                Link(destination: Links.privacyURLValue) {
+                    legalRow(label: "Privacy policy", subtitle: Links.privacyURL)
                 }
                 Rectangle().fill(Palette.borderSubtle).frame(height: 1)
-                Link(destination: placeholderURL(termsURLString)) {
-                    legalRow(label: "Terms of service", subtitle: termsURLString)
+                Link(destination: Links.termsURLValue) {
+                    legalRow(label: "Terms of service", subtitle: Links.termsURL)
                 }
             }
             .background(Palette.surfaceRaised)

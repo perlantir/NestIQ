@@ -92,6 +92,9 @@ struct OnboardingFlow: View {
                 title: "",
                 paragraph: OnboardingCopy.welcome
             ) { WelcomeMiniature() }
+            welcomeLegalFooter
+                .padding(.horizontal, Spacing.s20)
+                .padding(.top, Spacing.s24)
         case .amortization:
             stepContent(
                 eyebrow: "01 · Amortization",
@@ -154,6 +157,25 @@ struct OnboardingFlow: View {
         }
         .padding(.horizontal, Spacing.s20)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var welcomeLegalFooter: some View {
+        HStack(spacing: Spacing.s8) {
+            Link(destination: Links.privacyURLValue) {
+                Text("Privacy")
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+            Text("·")
+                .textStyle(Typography.body.withSize(12))
+                .foregroundStyle(Palette.inkTertiary)
+            Link(destination: Links.termsURLValue) {
+                Text("Terms")
+                    .textStyle(Typography.body.withSize(12))
+                    .foregroundStyle(Palette.inkTertiary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var bottomDock: some View {
