@@ -200,7 +200,7 @@ struct IncomeQualScreen: View {
                 )
                 kpiCell(
                     label: "Reserves",
-                    value: String(format: "%.1f mo", viewModel.reserveMonths),
+                    value: "\(viewModel.inputs.reservesMonths) mo",
                     valueColor: Palette.gain,
                     leadingDivider: true
                 )

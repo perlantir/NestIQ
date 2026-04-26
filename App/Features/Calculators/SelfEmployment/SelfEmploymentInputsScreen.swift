@@ -79,6 +79,7 @@ struct SelfEmploymentInputsScreen: View {
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
+        .keyboardDoneToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {

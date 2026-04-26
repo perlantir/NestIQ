@@ -23,7 +23,6 @@ struct BorrowerForm: View {
     @State private var phone: String
     @State private var mortgageDraft: CurrentMortgageDraft
     @State private var mortgageExpanded: Bool
-    @State private var showMortgageValidation: Bool = false
     @State private var confirmingDelete: Bool = false
 
     init(
@@ -86,8 +85,7 @@ struct BorrowerForm: View {
             Section {
                 CurrentMortgageSection(
                     draft: $mortgageDraft,
-                    isExpanded: $mortgageExpanded,
-                    showValidationHint: showMortgageValidation
+                    isExpanded: $mortgageExpanded
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -126,20 +124,21 @@ struct BorrowerForm: View {
         } message: {
             Text("Saved scenarios for this borrower remain intact, but the borrower record will be removed from your list.")
         }
+        .scrollDismissesKeyboard(.interactively)
+        .keyboardDoneToolbar()
     }
 
     private var isValid: Bool {
-        guard !firstName.isEmpty, !lastName.isEmpty else { return false }
-        return mortgageDraft.isBlank || mortgageDraft.isValid
+        !firstName.isEmpty && !lastName.isEmpty
     }
 
     private func submit() {
         guard !firstName.isEmpty, !lastName.isEmpty else { return }
-        if !mortgageDraft.isBlank, !mortgageDraft.isValid {
-            showMortgageValidation = true
-            mortgageExpanded = true
-            return
-        }
+        // Persist whatever the LO typed, valid or partial, so mid-entry
+        // work isn't lost on Save. Refi calculators gate on
+        // `CurrentMortgage.isValid` when they read this back, so partial
+        // data stays out of the math.
+        let mortgageToSave = mortgageDraft.toMortgageUnchecked()
         switch mode {
         case .create:
             let borrower = Borrower(
@@ -149,20 +148,14 @@ struct BorrowerForm: View {
                 phone: phone.isEmpty ? nil : phone,
                 source: .manual
             )
-            if let mortgage = mortgageDraft.toMortgage() {
-                borrower.currentMortgage = mortgage
-            }
+            borrower.currentMortgage = mortgageToSave
             onSubmit(borrower)
         case .edit(let borrower):
             borrower.firstName = firstName
             borrower.lastName = lastName
             borrower.email = email.isEmpty ? nil : email
             borrower.phone = phone.isEmpty ? nil : phone
-            if mortgageDraft.isBlank {
-                borrower.currentMortgage = nil
-            } else if let mortgage = mortgageDraft.toMortgage() {
-                borrower.currentMortgage = mortgage
-            }
+            borrower.currentMortgage = mortgageToSave
             borrower.updatedAt = Date()
             onSubmit(borrower)
         }

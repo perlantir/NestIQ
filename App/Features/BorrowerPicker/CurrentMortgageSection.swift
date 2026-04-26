@@ -94,7 +94,22 @@ struct CurrentMortgageDraft: Equatable {
 
     func toMortgage() -> CurrentMortgage? {
         guard isValid else { return nil }
-        return CurrentMortgage(
+        return buildMortgage()
+    }
+
+    /// Persist-only variant that returns whatever the LO has typed,
+    /// valid or partial, so mid-entry work survives a Save tap. The
+    /// refi calculators gate on `CurrentMortgage.isValid` when they
+    /// read from `Borrower.currentMortgage`, so partial stored data
+    /// stays out of the math — it just round-trips back into the form.
+    /// Returns nil for a fully-blank draft.
+    func toMortgageUnchecked() -> CurrentMortgage? {
+        guard !isBlank else { return nil }
+        return buildMortgage()
+    }
+
+    private func buildMortgage() -> CurrentMortgage {
+        CurrentMortgage(
             currentBalance: currentBalance,
             currentRatePercent: currentRatePercent,
             currentMonthlyPaymentPI: currentMonthlyPaymentPI,

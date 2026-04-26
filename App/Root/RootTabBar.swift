@@ -1,12 +1,11 @@
 // RootTabBar.swift
-// Three-tab bar per design/screens/Home.jsx — Calculators / Scenarios /
-// Settings. Hosts the feature stacks. Session 3.2 wires the Home stack;
-// Session 3.3 wires Settings; Scenarios opens the Saved list.
+// Four-tab bar — Calculators / Scenarios / Leads / Settings. Hosts the
+// feature stacks.
 
 import SwiftUI
 
 enum RootTab: Hashable, CaseIterable {
-    case calculators, scenarios, settings
+    case calculators, scenarios, leads, settings
 }
 
 struct RootTabBar: View {
@@ -25,6 +24,10 @@ struct RootTabBar: View {
             SavedScenariosScreen()
                 .tabItem { Label("Scenarios", systemImage: "text.alignleft") }
                 .tag(RootTab.scenarios)
+
+            LeadsScreen()
+                .tabItem { Label("Leads", systemImage: "person.2") }
+                .tag(RootTab.leads)
 
             SettingsScreen(profile: profile)
                 .tabItem { Label("Settings", systemImage: "gearshape") }

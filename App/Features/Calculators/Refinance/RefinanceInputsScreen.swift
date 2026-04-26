@@ -96,6 +96,7 @@ struct RefinanceInputsScreen: View {
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
+        .keyboardDoneToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -114,7 +115,7 @@ struct RefinanceInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
-                    applyBorrowerCurrentMortgage(selected)
+                    applyBorrowerCurrentMortgage(selected, force: true)
                 }
             )
             .presentationDetents([.large])
@@ -134,18 +135,31 @@ struct RefinanceInputsScreen: View {
     /// the borrower model already stores. Only overwrites when the
     /// form-level currentBalance is 0 — respects any edits the LO has
     /// already made.
-    private func applyBorrowerCurrentMortgage(_ borrower: Borrower?) {
-        guard let mortgage = borrower?.currentMortgage,
-              viewModel.inputs.currentBalance == 0 else { return }
-        viewModel.inputs.currentBalance = mortgage.currentBalance
-        viewModel.inputs.currentRate = Double(truncating: mortgage.currentRatePercent as NSNumber)
-        let remainingMonths = CurrentMortgageCalculations.monthsRemaining(
-            originalTermYears: mortgage.originalTermYears,
-            loanStartDate: mortgage.loanStartDate
-        )
-        viewModel.inputs.currentRemainingYears = max(1, remainingMonths / 12)
-        if viewModel.inputs.homeValue == 0 {
+    private func applyBorrowerCurrentMortgage(_ borrower: Borrower?, force: Bool = false) {
+        guard let mortgage = borrower?.currentMortgage else { return }
+        // `force` fires on an explicit picker-driven selection — that's
+        // a clear user intent to use this borrower's data, so we
+        // overwrite sampleDefault seed values. Without force (onAppear
+        // quiet hydration), the `== 0` guard preserves existing input.
+        if mortgage.currentBalance > 0,
+           force || viewModel.inputs.currentBalance == 0 {
+            viewModel.inputs.currentBalance = mortgage.currentBalance
+        }
+        if mortgage.currentRatePercent > 0,
+           force || viewModel.inputs.currentRate == 0 {
+            viewModel.inputs.currentRate =
+                Double(truncating: mortgage.currentRatePercent as NSNumber)
+        }
+        if mortgage.propertyValueToday > 0,
+           force || viewModel.inputs.homeValue == 0 {
             viewModel.inputs.homeValue = mortgage.propertyValueToday
+        }
+        if mortgage.isValid {
+            let remainingMonths = CurrentMortgageCalculations.monthsRemaining(
+                originalTermYears: mortgage.originalTermYears,
+                loanStartDate: mortgage.loanStartDate
+            )
+            viewModel.inputs.currentRemainingYears = max(1, remainingMonths / 12)
         }
     }
 

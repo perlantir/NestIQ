@@ -14,7 +14,7 @@ struct AmortizationInputsScreen: View {
     var initialInputs: AmortizationFormInputs?
     var existingScenario: Scenario?
 
-    @State private var viewModel = AmortizationViewModel()
+    @State var viewModel = AmortizationViewModel()
     @State private var navigationActive: Bool = false
     @State private var showingAdvanced: Bool = false
     @State private var showingBorrowerPicker: Bool = false
@@ -48,17 +48,6 @@ struct AmortizationInputsScreen: View {
 
                 loanSection
                     .padding(.top, Spacing.s16)
-                if viewModel.inputs.mode == .purchase {
-                    PropertyDownPaymentSection(
-                        config: Binding(
-                            get: { viewModel.inputs.propertyDP },
-                            set: { viewModel.inputs.propertyDP = $0 }
-                        ),
-                        externalLoanAmount: viewModel.inputs.loanAmount
-                    )
-                    .padding(.top, Spacing.s24)
-                    .transition(modeReveal)
-                }
                 propertySection
                     .padding(.top, Spacing.s24)
                 advancedSection
@@ -76,6 +65,7 @@ struct AmortizationInputsScreen: View {
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
+        .keyboardDoneToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -94,6 +84,7 @@ struct AmortizationInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
+                    applyBorrowerCurrentMortgage(selected, force: true)
                 }
             )
             .presentationDetents([.large])
@@ -106,6 +97,23 @@ struct AmortizationInputsScreen: View {
                 selectedBorrower = borrower
                 viewModel.borrower = borrower
             }
+            seedPurchasePriceIfNeeded()
+            // Skip borrower currentMortgage prefill when editing a saved
+            // scenario — the persisted inputs are the source of truth.
+            // Without this guard the `mortgage.isValid` branch silently
+            // overwrites termYears + startDate with the borrower's values
+            // on every reopen.
+            if initialInputs == nil {
+                applyBorrowerCurrentMortgage(selectedBorrower)
+            }
+        }
+        .onChange(of: viewModel.inputs.mode) { _, _ in
+            // Mode flip (purchase ↔ existingLoan) is an explicit user
+            // gesture: switching into existingLoan should pull in the
+            // borrower's mortgage even over sampleDefault seed values
+            // (which are non-zero, so the helper's `== 0` guard would
+            // otherwise reject them). Force=true mirrors the picker path.
+            applyBorrowerCurrentMortgage(selectedBorrower, force: true)
         }
     }
 
@@ -138,10 +146,6 @@ struct AmortizationInputsScreen: View {
         .accessibilityIdentifier("amort.modeToggle")
     }
 
-    private var modeReveal: AnyTransition {
-        reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top))
-    }
-
     @ViewBuilder private var borrowerChip: some View {
         Button { showingBorrowerPicker = true } label: {
             HStack(spacing: Spacing.s8) {
@@ -171,38 +175,15 @@ struct AmortizationInputsScreen: View {
 
     // MARK: Loan section
 
-    private var loanSection: some View {
-        fieldGroup(header: "Loan") {
-            FieldRow(
-                label: "Loan amount",
-                prefix: "$",
-                decimal: Binding(
-                    get: { viewModel.inputs.loanAmount },
-                    set: { viewModel.inputs.loanAmount = $0 }
-                )
-            )
-            divider
-            FieldRow(
-                label: "Interest rate",
-                suffix: "%",
-                decimal: Binding(
-                    get: { Decimal(viewModel.inputs.annualRate) },
-                    set: { viewModel.inputs.annualRate = Double(truncating: $0 as NSNumber) }
-                ),
-                fractionDigits: 3
-            )
-            divider
-            APRFieldRow(aprRate: $viewModel.inputs.aprRate)
-            divider
-            termRow
-            divider
-            biweeklyRow
-            divider
-            startDateRow
+    @ViewBuilder var loanSection: some View {
+        if viewModel.inputs.mode == .purchase {
+            purchaseLoanSection
+        } else {
+            existingLoanSection
         }
     }
 
-    private var biweeklyRow: some View {
+    var biweeklyRow: some View {
         HStack(spacing: Spacing.s12) {
             VStack(alignment: .leading, spacing: 1) {
                 Text("Biweekly payments")
@@ -225,7 +206,7 @@ struct AmortizationInputsScreen: View {
         .padding(.vertical, Spacing.s12)
     }
 
-    private var termRow: some View {
+    var termRow: some View {
         VStack(alignment: .leading, spacing: Spacing.s12) {
             HStack {
                 Text("Term")
@@ -263,7 +244,7 @@ struct AmortizationInputsScreen: View {
         .padding(.vertical, Spacing.s12)
     }
 
-    private var startDateRow: some View {
+    var startDateRow: some View {
         DatePicker(
             selection: Binding(
                 get: { viewModel.inputs.startDate },

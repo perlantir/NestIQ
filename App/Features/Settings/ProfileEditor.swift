@@ -100,6 +100,7 @@ struct ProfileEditor: View {
             }
             .navigationTitle("Edit profile")
             .navigationBarTitleDisplayMode(.inline)
+            .keyboardDoneToolbar()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {

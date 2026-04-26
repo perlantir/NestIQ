@@ -41,4 +41,22 @@ public struct CurrentMortgage: Codable, Hashable, Sendable {
         self.loanStartDate = loanStartDate
         self.propertyValueToday = propertyValueToday
     }
+
+    /// True when every field carries a plausible value. Partial drafts
+    /// are now persisted on Borrower so LOs don't lose mid-entry work,
+    /// so refi calculators must gate on this — invalid stored mortgages
+    /// mustn't pre-fill calculator inputs or flip refi mode on.
+    public var isValid: Bool {
+        guard currentBalance > 0,
+              currentRatePercent > 0,
+              currentMonthlyPaymentPI > 0,
+              originalLoanAmount > 0,
+              originalTermYears > 0,
+              propertyValueToday > 0 else {
+            return false
+        }
+        guard loanStartDate < Date() else { return false }
+        guard currentBalance <= originalLoanAmount else { return false }
+        return true
+    }
 }

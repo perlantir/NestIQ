@@ -95,18 +95,34 @@ extension TCAInputsScreen {
     /// the mortgage so the LO doesn't re-type the balance / value
     /// they already entered above. Only fires when the form field is
     /// still 0 — respects any customization the LO has already made.
-    func hydrateCurrentMortgageDraft() {
+    func hydrateCurrentMortgageDraft(force: Bool = false) {
+        // On explicit picker selection (force=true), drop any prior
+        // snapshot before checking it — otherwise the early-return below
+        // fires with the previously-selected borrower's data, the new
+        // borrower's mortgage is never loaded, and the default-on
+        // save-back can write the old borrower's data onto the new one.
+        if force {
+            viewModel.inputs.currentMortgage = nil
+        }
         if let snapshot = viewModel.inputs.currentMortgage {
             currentMortgageDraft = CurrentMortgageDraft(from: snapshot)
             currentMortgageExpanded = true
-            prefillFormFieldsFromCurrentMortgage(snapshot)
+            prefillFormFieldsFromCurrentMortgage(snapshot, force: force)
             return
         }
         if let borrowerMortgage = selectedBorrower?.currentMortgage {
+            // Hydrate the draft from any stored data (including partial),
+            // so the LO can resume editing. Prefill form fields (loan
+            // amount / home value) from non-zero values regardless of
+            // overall validity. Only commit the atomic refi snapshot
+            // when the mortgage is fully valid — partial data must not
+            // flip refi mode on or feed break-even math.
             currentMortgageDraft = CurrentMortgageDraft(from: borrowerMortgage)
-            viewModel.inputs.currentMortgage = borrowerMortgage
             currentMortgageExpanded = true
-            prefillFormFieldsFromCurrentMortgage(borrowerMortgage)
+            prefillFormFieldsFromCurrentMortgage(borrowerMortgage, force: force)
+            if borrowerMortgage.isValid {
+                viewModel.inputs.currentMortgage = borrowerMortgage
+            }
         }
     }
 
@@ -125,19 +141,29 @@ extension TCAInputsScreen {
         } else if let mortgage = draft.toMortgage() {
             viewModel.inputs.currentMortgage = mortgage
             prefillFormFieldsFromCurrentMortgage(mortgage)
+        } else {
+            // Partial draft: clear the snapshot so the default-on
+            // save-back doesn't persist a stale hydrated mortgage over
+            // the LO's edit, and break-even math falls back to the
+            // legacy baseline. The partial fields stay in the local
+            // draft and re-commit once the mortgage is fully valid.
+            viewModel.inputs.currentMortgage = nil
         }
     }
 
     /// Copy `currentBalance` into `form.loanAmount` and
-    /// `propertyValueToday` into `form.homeValue` — but only when the
-    /// form field is still 0. LOs who have already typed a different
-    /// value (cash-out refis setting a custom default, non-standard
-    /// appraised value) keep their override.
-    private func prefillFormFieldsFromCurrentMortgage(_ mortgage: CurrentMortgage) {
-        if viewModel.inputs.loanAmount == 0, mortgage.currentBalance > 0 {
+    /// `propertyValueToday` into `form.homeValue`. `force` fires on an
+    /// explicit picker-driven selection — that's a clear user intent to
+    /// use this borrower's data, so we overwrite sampleDefault seed
+    /// values. Without force (quiet hydration), the `== 0` guard
+    /// preserves existing input.
+    func prefillFormFieldsFromCurrentMortgage(_ mortgage: CurrentMortgage, force: Bool = false) {
+        if mortgage.currentBalance > 0,
+           force || viewModel.inputs.loanAmount == 0 {
             viewModel.inputs.loanAmount = mortgage.currentBalance
         }
-        if viewModel.inputs.homeValue == 0, mortgage.propertyValueToday > 0 {
+        if mortgage.propertyValueToday > 0,
+           force || viewModel.inputs.homeValue == 0 {
             viewModel.inputs.homeValue = mortgage.propertyValueToday
         }
     }

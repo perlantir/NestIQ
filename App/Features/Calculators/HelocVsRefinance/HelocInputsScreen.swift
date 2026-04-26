@@ -81,6 +81,7 @@ struct HelocInputsScreen: View {
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
+        .keyboardDoneToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -99,34 +100,20 @@ struct HelocInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
-                    applyBorrowerCurrentMortgage(selected)
+                    applyBorrowerCurrentMortgage(selected, force: true)
                 }
             )
             .presentationDetents([.large])
         }
         .onAppear {
-            applyBorrowerCurrentMortgage(selectedBorrower)
-        }
-    }
-
-    /// 5P.13: when a borrower with a persisted currentMortgage is
-    /// attached, prefill the first-lien fields (balance / rate /
-    /// remaining years / home value) so the LO doesn't re-type what
-    /// the borrower model already stores. Only overwrites when the
-    /// form-level firstLienBalance is 0 — respects any edits the LO
-    /// has already made.
-    private func applyBorrowerCurrentMortgage(_ borrower: Borrower?) {
-        guard let mortgage = borrower?.currentMortgage,
-              viewModel.inputs.firstLienBalance == 0 else { return }
-        viewModel.inputs.firstLienBalance = mortgage.currentBalance
-        viewModel.inputs.firstLienRate = Double(truncating: mortgage.currentRatePercent as NSNumber)
-        let remainingMonths = CurrentMortgageCalculations.monthsRemaining(
-            originalTermYears: mortgage.originalTermYears,
-            loanStartDate: mortgage.loanStartDate
-        )
-        viewModel.inputs.firstLienRemainingYears = max(1, remainingMonths / 12)
-        if viewModel.inputs.homeValue == 0 {
-            viewModel.inputs.homeValue = mortgage.propertyValueToday
+            // Skip borrower currentMortgage prefill when editing a saved
+            // scenario — the persisted inputs are the source of truth.
+            // Without this guard the `mortgage.isValid` branch silently
+            // overwrites firstLienRemainingYears with the borrower's
+            // computed value on every reopen.
+            if initialInputs == nil {
+                applyBorrowerCurrentMortgage(selectedBorrower)
+            }
         }
     }
 
@@ -468,5 +455,45 @@ struct HelocInputsScreen: View {
 
     private var divider: some View {
         Rectangle().fill(Palette.borderSubtle).frame(height: 1)
+    }
+}
+
+// MARK: - Borrower currentMortgage prefill
+//
+// In an extension (same file) to keep the main struct body under
+// SwiftLint's type_body_length cap. Same-file extensions can still see
+// the struct's private state.
+extension HelocInputsScreen {
+    /// Prefill the first-lien fields from the selected borrower's
+    /// currentMortgage. Per-field zero-check so partial leads still
+    /// populate what they have; remaining years stays locked until
+    /// the whole mortgage is valid (term / start date carry non-zero
+    /// defaults in a partial draft so we can't trust them solo).
+    func applyBorrowerCurrentMortgage(_ borrower: Borrower?, force: Bool = false) {
+        guard let mortgage = borrower?.currentMortgage else { return }
+        // `force` fires on an explicit picker-driven selection — that's
+        // a clear user intent to use this borrower's data, so we
+        // overwrite sampleDefault seed values. Without force (onAppear
+        // quiet hydration), the `== 0` guard preserves existing input.
+        if mortgage.currentBalance > 0,
+           force || viewModel.inputs.firstLienBalance == 0 {
+            viewModel.inputs.firstLienBalance = mortgage.currentBalance
+        }
+        if mortgage.currentRatePercent > 0,
+           force || viewModel.inputs.firstLienRate == 0 {
+            viewModel.inputs.firstLienRate =
+                Double(truncating: mortgage.currentRatePercent as NSNumber)
+        }
+        if mortgage.propertyValueToday > 0,
+           force || viewModel.inputs.homeValue == 0 {
+            viewModel.inputs.homeValue = mortgage.propertyValueToday
+        }
+        if mortgage.isValid {
+            let remainingMonths = CurrentMortgageCalculations.monthsRemaining(
+                originalTermYears: mortgage.originalTermYears,
+                loanStartDate: mortgage.loanStartDate
+            )
+            viewModel.inputs.firstLienRemainingYears = max(1, remainingMonths / 12)
+        }
     }
 }

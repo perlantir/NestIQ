@@ -121,6 +121,7 @@ struct TCAInputsScreen: View {
         }
         .background(Palette.surface)
         .scrollIndicators(.hidden)
+        .keyboardDoneToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -139,7 +140,7 @@ struct TCAInputsScreen: View {
                 onSelect: { selected in
                     selectedBorrower = selected
                     viewModel.borrower = selected
-                    hydrateCurrentMortgageDraft()
+                    hydrateCurrentMortgageDraft(force: true)
                 }
             )
             .presentationDetents([.large])

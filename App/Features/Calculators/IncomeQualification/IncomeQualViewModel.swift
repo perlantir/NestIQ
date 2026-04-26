@@ -22,17 +22,7 @@ final class IncomeQualViewModel {
     var qualifyingIncome: Decimal { inputs.qualifyingIncome }
     var totalDebt: Decimal { inputs.totalMonthlyDebt }
 
-    /// Approximate reserve months = (qualifying income - current debt
-    /// service) / max PITI. Displayed on the hero card as an at-a-glance
-    /// cushion measure.
-    var reserveMonths: Double {
-        let piti = maxPITI
-        guard piti > 0 else { return 0 }
-        let cushion = qualifyingIncome - totalDebt
-        return Double(truncating: (cushion / piti) as NSNumber)
-    }
-
-    /// Front-end DTI at max qualification — share of qualifying income
+/// Front-end DTI at max qualification — share of qualifying income
     /// that goes to housing only (PITI). Session 5R.2: comment is the
     /// source of truth; no "netting" happens — `maxPITI` is housing
     /// only (qualifyingIncome × backEndCap − debts = room for housing).
